@@ -1,0 +1,1570 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<Queries>
+  <SearchProcedure>
+    SELECT * FROM "SYS"."PROCEDURES"
+    WHERE "SCHEMA_NAME" = '%sNameDB%'
+    AND "PROCEDURE_NAME"= '%sNameProcedure%'
+  </SearchProcedure>
+
+  <Eliminar_BO_FacturaXML>
+    DROP PROCEDURE "%sNameDB%"."%sNameProcedure%"
+  </Eliminar_BO_FacturaXML>
+
+  <BO_FacturaXML_HBT>
+
+    CREATE PROCEDURE "%sNameDB%"."BO_FacturaXML"
+      (
+        DocEntry INT,
+        Object NVARCHAR(10),
+        Tipo NVARCHAR(100)
+      )
+
+    LANGUAGE SQLSCRIPT AS
+
+    BEGIN
+    
+    ------------------------- Facturas de clientes -----------------------------------------
+
+    IF ( :Object = '13' AND :Tipo = 'Encabezado')
+
+      THEN
+      
+        SELECT (SELECT CASE B."Decimals" WHEN '-1' THEN (SELECT TOP 1 "QueryDec" FROM "%sNameDB%"."OADM") ELSE B."Decimals" END FROM "%sNameDB%"."OINV" A LEFT JOIN "%sNameDB%"."OCRN" B ON A."DocCur"=B."CurrCode" WHERE A."DocEntry" = :DocEntry) AS "CantidadDecimales",
+
+                CASE T0."DocCur" WHEN '$' THEN 'COP' 
+                                 ELSE T0."DocCur" END AS "Moneda",
+
+				(T8."U_BO_PREF" || '-' || T6."InitialNum") AS "RangoNmeracion",
+
+                CASE WHEN (SELECT CASE B."Decimals" WHEN '-1' THEN (SELECT TOP 1 "QueryDec" FROM "%sNameDB%"."OADM") ELSE B."Decimals" END FROM "%sNameDB%"."OINV" A LEFT JOIN "%sNameDB%"."OCRN" B ON A."DocCur"=B."CurrCode" WHERE A."DocEntry" = :DocEntry)= '0' THEN REPLACE(TO_DECIMAL((T0."RoundDif"),19,0),',','.')
+					 WHEN (SELECT CASE B."Decimals" WHEN '-1' THEN (SELECT TOP 1 "QueryDec" FROM "%sNameDB%"."OADM") ELSE B."Decimals" END FROM "%sNameDB%"."OINV" A LEFT JOIN "%sNameDB%"."OCRN" B ON A."DocCur"=B."CurrCode" WHERE A."DocEntry" = :DocEntry)= '1' THEN REPLACE(TO_DECIMAL((T0."RoundDif"),19,1),',','.')
+					 WHEN (SELECT CASE B."Decimals" WHEN '-1' THEN (SELECT TOP 1 "QueryDec" FROM "%sNameDB%"."OADM") ELSE B."Decimals" END FROM "%sNameDB%"."OINV" A LEFT JOIN "%sNameDB%"."OCRN" B ON A."DocCur"=B."CurrCode" WHERE A."DocEntry" = :DocEntry)= '2' THEN REPLACE(TO_DECIMAL((T0."RoundDif"),19,2),',','.')
+					 WHEN (SELECT CASE B."Decimals" WHEN '-1' THEN (SELECT TOP 1 "QueryDec" FROM "%sNameDB%"."OADM") ELSE B."Decimals" END FROM "%sNameDB%"."OINV" A LEFT JOIN "%sNameDB%"."OCRN" B ON A."DocCur"=B."CurrCode" WHERE A."DocEntry" = :DocEntry)= '3' THEN REPLACE(TO_DECIMAL((T0."RoundDif"),19,3),',','.')
+					 WHEN (SELECT CASE B."Decimals" WHEN '-1' THEN (SELECT TOP 1 "QueryDec" FROM "%sNameDB%"."OADM") ELSE B."Decimals" END FROM "%sNameDB%"."OINV" A LEFT JOIN "%sNameDB%"."OCRN" B ON A."DocCur"=B."CurrCode" WHERE A."DocEntry" = :DocEntry)= '4' THEN REPLACE(TO_DECIMAL((T0."RoundDif"),19,4),',','.')
+					 WHEN (SELECT CASE B."Decimals" WHEN '-1' THEN (SELECT TOP 1 "QueryDec" FROM "%sNameDB%"."OADM") ELSE B."Decimals" END FROM "%sNameDB%"."OINV" A LEFT JOIN "%sNameDB%"."OCRN" B ON A."DocCur"=B."CurrCode" WHERE A."DocEntry" = :DocEntry)= '5' THEN REPLACE(TO_DECIMAL((T0."RoundDif"),19,5),',','.')
+					 WHEN (SELECT CASE B."Decimals" WHEN '-1' THEN (SELECT TOP 1 "QueryDec" FROM "%sNameDB%"."OADM") ELSE B."Decimals" END FROM "%sNameDB%"."OINV" A LEFT JOIN "%sNameDB%"."OCRN" B ON A."DocCur"=B."CurrCode" WHERE A."DocEntry" = :DocEntry)= '6' THEN REPLACE(TO_DECIMAL((T0."RoundDif"),19,6),',','.')
+                     ELSE '0'  END AS "RedondeoAplicado",
+
+                CASE WHEN (SELECT A."Code" FROM "%sNameDB%"."@BOSERNUM" A WHERE A."Code" = T0."Series") = T0."Series" AND T0."DocSubType" != 'DN' AND T0."ObjType" = '13' THEN '01'
+					 WHEN (SELECT A."Code" FROM "%sNameDB%"."@BOSERNUM" A WHERE A."Code" = T0."Series") = T0."Series" AND T0."DocSubType" != 'DN' AND T0."ObjType" = '13' THEN '03'
+                     WHEN (SELECT A."Code" FROM "%sNameDB%"."@BOSERNUM" A WHERE A."Code" = T0."Series") = T0."Series" AND T0."DocSubType" != 'DN' AND T0."ObjType" = '14' THEN '91'
+					 WHEN (SELECT A."Code" FROM "%sNameDB%"."@BOSERNUM" A WHERE A."Code" = T0."Series") = T0."Series" AND T0."DocSubType" = 'DN' AND T0."ObjType" = '13' THEN '92'
+					 ELSE '0' END AS "tipoDocumento",
+
+                (SELECT TOP 1 A."U_BO_TO" FROM "%sNameDB%"."@BOEBILLINGP" A WHERE A."U_BO_Status" = 'Y') AS "tipoOperacion",
+                             
+                CASE WHEN T0."DiscPrcnt" = '0' AND T0."DocCur"='$' THEN REPLACE(TO_DECIMAL(((SELECT TOP 1 SUM(A."BaseSum") FROM "%sNameDB%"."INV4" A WHERE A."DocEntry" = :DocEntry AND A."RelateType" = 1 )),19,%Decimal%),',','.')
+                     WHEN T0."DiscPrcnt" != '0' AND T0."DocCur"='$' THEN REPLACE(TO_DECIMAL(((SELECT TOP 1 SUM(A."BaseSum") FROM "%sNameDB%"."INV4" A WHERE A."DocEntry" = :DocEntry AND A."RelateType" = 1 )+T0."DiscSum"),19,%Decimal%),',','.')
+                     WHEN T0."DiscPrcnt" = '0' AND T0."DocCur"='USD' THEN REPLACE(TO_DECIMAL(((SELECT TOP 1 SUM(A."BaseSumSys") FROM "%sNameDB%"."INV4" A WHERE A."DocEntry" = :DocEntry AND A."RelateType" = 1 )+T0."DiscSum"),19,%Decimal%),',','.')
+                     WHEN T0."DiscPrcnt" != '0' AND T0."DocCur"='USD' THEN REPLACE(TO_DECIMAL(((SELECT TOP 1 SUM(A."BaseSumSys") FROM "%sNameDB%"."INV4" A WHERE A."DocEntry" = :DocEntry AND A."RelateType" = 1 )+T0."DiscSum"),19,%Decimal%),',','.')
+                     ELSE REPLACE(TO_DECIMAL(((SELECT TOP 1 SUM(A."BaseSum") FROM "%sNameDB%"."INV4" A WHERE A."DocEntry" = :DocEntry  AND A."RelateType" = 1 )),19,%Decimal%),',','.')
+					 END AS "totalBaseImponible",
+
+                CASE WHEN T0."DocCur"='USD' THEN REPLACE(TO_DECIMAL(((SELECT TOP 1 SUM(A."BaseSum") FROM "%sNameDB%"."INV4" A WHERE A."DocEntry" = :DocEntry AND A."RelateType" = 1)+T0."VatSumFC"),19,%Decimal%),',','.')
+					 WHEN T0."DocCur"='$' THEN REPLACE(TO_DECIMAL(((SELECT TOP 1 SUM(A."BaseSum") FROM "%sNameDB%"."INV4" A WHERE A."DocEntry" = :DocEntry AND A."RelateType" = 1)+T0."VatSum"+(SELECT IFNULL(SUM(A."WTAmnt"),0) FROM "%sNameDB%"."INV5" A INNER JOIN "%sNameDB%"."OWHT" B ON A."WTCode"=B."WTCode" WHERE A."AbsEntry" = :DocEntry AND B."U_HBT_TipRet" = '1')+T0."DiscSum"),19,%Decimal%),',','.')
+					 ELSE REPLACE(TO_DECIMAL((T0."BaseAmntFC"+T0."VatSumFC"),19,%Decimal%),',','.')
+					 END AS "totalBrutoConImpuesto",
+					 
+				CASE WHEN T0."DiscPrcnt" = '0' AND T0."DocCur"='$' THEN REPLACE(TO_DECIMAL(((SELECT TOP 1 SUM(A."BaseSum") FROM "%sNameDB%"."INV4" A WHERE A."DocEntry" = :DocEntry AND A."RelateType" = 1)+T0."VatSum"+T0."RoundDif"+(SELECT IFNULL(SUM(A."WTAmnt"),0) FROM "%sNameDB%"."INV5" A INNER JOIN "%sNameDB%"."OWHT" B ON A."WTCode"=B."WTCode" WHERE A."AbsEntry" = :DocEntry AND B."U_HBT_TipRet" = '1')),19,%Decimal%),',','.')
+					 WHEN T0."DiscPrcnt" != '0' AND T0."DocCur"='$' THEN REPLACE(TO_DECIMAL(((SELECT TOP 1 SUM(A."BaseSum") FROM "%sNameDB%"."INV4" A WHERE A."DocEntry" = :DocEntry AND A."RelateType" = 1)+T0."VatSum"+T0."RoundDif"+(SELECT IFNULL(SUM(A."WTAmnt"),0) FROM "%sNameDB%"."INV5" A INNER JOIN "%sNameDB%"."OWHT" B ON A."WTCode"=B."WTCode" WHERE A."AbsEntry" = :DocEntry AND B."U_HBT_TipRet" = '1')),19,%Decimal%),',','.')
+					 WHEN T0."DiscPrcnt" = '0' AND T0."DocCur"='USD' THEN REPLACE(TO_DECIMAL((T0."BaseAmntFC"+T0."VatSumFC"+T0."RoundDifFC"),19,%Decimal%),',','.')
+					 WHEN T0."DiscPrcnt" != '0' AND T0."DocCur"='USD' THEN REPLACE(TO_DECIMAL((T0."BaseAmntFC"+T0."VatSumFC"+T0."RoundDifFC"+T0."DiscSum"),19,%Decimal%),',','.')
+					 ELSE REPLACE(TO_DECIMAL((T0."BaseAmntFC"+T0."VatSumFC"+T0."RoundDifFC"),19,%Decimal%),',','.')
+					 END AS "totalMonto",
+
+                (SELECT COUNT("ItemCode") FROM "%sNameDB%"."INV1" WHERE "DocEntry" = :DocEntry) AS "totalProductos",
+                
+                CASE WHEN T0."DiscPrcnt" = '0' AND T0."DocCur"='$' THEN REPLACE(TO_DECIMAL((SELECT TOP 1 SUM(A."BaseSum") FROM "%sNameDB%"."INV4" A WHERE A."DocEntry" = :DocEntry AND A."RelateType" = 1 ),19,%Decimal%),',','.')
+                	 WHEN T0."DiscPrcnt" != '0' AND T0."DocCur"='$' THEN REPLACE(TO_DECIMAL(((SELECT TOP 1 SUM(A."BaseSum") FROM "%sNameDB%"."INV4" A WHERE A."DocEntry" = :DocEntry AND A."RelateType" = 1 )+T0."DiscSum"),19,%Decimal%),',','.')
+					 WHEN T0."DiscPrcnt" = '0' AND T0."DocCur"='$' THEN REPLACE(TO_DECIMAL((T0."BaseAmntFC"),19,%Decimal%),',','.')
+					 WHEN T0."DiscPrcnt" != '0' AND T0."DocCur"='$' THEN REPLACE(TO_DECIMAL((T0."BaseAmntFC"),19,%Decimal%),',','.')
+					 ELSE REPLACE(TO_DECIMAL((T0."BaseAmntFC"),19,%Decimal%),',','.') 
+					 END AS "totalSinImpuestos",
+				
+				T0."U_BO_DESC" AS "Desc_Codigo",
+				
+				'Descuento Comercial' AS "Desc_descripcion",
+				
+				'0' AS "Desc_indicador",
+				
+				REPLACE(TO_DECIMAL((T0."DiscSum"),19,%Decimal%),',','.') AS "Desc_monto",
+				
+				((SELECT TOP 1 SUM(A."BaseSum") FROM "%sNameDB%"."INV4" A WHERE A."DocEntry" = :DocEntry)+T0."DiscSum") AS "Desc_montoBase",
+				
+				T0."DiscPrcnt" AS "Desc_porcentaje",
+				
+				'0' AS "Desc_secuencia",		
+
+                CASE WHEN (SELECT "U_BO_Pref" FROM "%sNameDB%"."@BOEBILLINGP" WHERE "U_BO_Status"='Y') = 'Y' THEN (T6."BeginStr"||T0."DocNum") 
+                	 ELSE CAST(T0."DocNum" AS NVARCHAR(20)) END
+                	 AS "consecutivoDocumento",
+				
+                T8."U_BO_PREF" AS "Prefijo",
+
+                TO_VARCHAR(T0."DocDate", 'YYYY-MM-DD') || ' 00:00:00' AS "fechaEmision",
+				
+				TO_VARCHAR(T0."DocDueDate", 'YYYY-MM-DD') AS "fechaDeVencimiento",
+
+                T5."U_HBT_ActEco" AS "actividadEconomicaCIIU",
+
+                '0' AS "canalDeEntrega",
+
+                CASE WHEN T5."U_BO_E_mail_1" IS NULL THEN (SELECT TOP 1 A."U_BO_EmailGen" FROM "%sNameDB%"."@BOEBILLINGP" A WHERE A."U_BO_Status" = 'Y') ELSE T5."U_BO_E_mail_1" END  AS "correoEntrega1",
+				
+				T5."U_BO_E_mail_2" AS "correoEntrega2",
+
+				T5."U_BO_E_mail_3" AS "correoEntrega3",
+
+				T5."U_BO_E_mail_4" AS "correoEntrega4",
+
+				T5."U_BO_E_mail_5" AS "correoEntrega5",
+
+                TO_VARCHAR(T0."DocDate", 'YYYY-MM-DD') || ' 00:00:00' AS "fechaProgramada",
+
+                '1' AS "nitProveedorReceptor",
+
+                T5."Phone1" AS "telefono",
+
+                '01' AS "codigoImpuesto",
+
+                T4."CityB" AS "ciudad",
+
+                T13."U_BO_CD" AS "codigoDepartamento",
+
+                T13."Name" AS "departamento",
+
+                T4."StreetB" AS "direccion",
+
+                'es' AS "lenguaje",
+
+                T5."U_HBT_MunMed" AS "municipio",
+
+                'CO' AS "pais",
+
+                T4."ZipCodeB" AS "zonaPostal",
+
+                CASE WHEN T5."U_BO_E_mail_1" IS NULL THEN (SELECT TOP 1 A."U_BO_EmailGen" FROM "%sNameDB%"."@BOEBILLINGP" A WHERE A."U_BO_Status" = 'Y') ELSE T5."U_BO_E_mail_1" END AS "email",
+
+                '' AS "codigoEstablecimiento",
+
+                T5."CardName" AS "nombreRegistroRUT",
+
+                CASE T5."U_HBT_TipDoc" WHEN '31' THEN SUBSTRING(T5."LicTradNum",1,LOCATE(T5."LicTradNum",'-')-1)
+  				ELSE T5."LicTradNum" END AS "numeroIdentificacion",
+
+                CASE T5."U_HBT_TipDoc" WHEN '31' THEN RIGHT(T5."LicTradNum",1)
+                ELSE '' END AS "numeroIdentificacionDV",
+
+                T5."U_HBT_TipDoc" AS "tipoIdentificacion",
+
+                T5."CardName" AS "nombreRazonSocial",
+
+                CASE WHEN T0."U_BO_EE" = 'Y' THEN 'SI'
+                ELSE 'NO' END AS "notificar",
+
+                CASE T5."U_HBT_TipDoc" WHEN '31' THEN SUBSTRING(T5."LicTradNum",1,LOCATE(T5."LicTradNum",'-')-1)
+  				ELSE T5."LicTradNum" END AS "numeroDocumento",
+
+                T5."U_BO_RF" AS "obligaciones",
+
+                T5."U_BO_TR" AS "regimen",
+
+                T5."U_HBT_TipDoc" AS "tipoIdentificacion",
+
+                CASE T5."U_HBT_TipEnt" WHEN '1' THEN '1'
+									   WHEN '2' THEN '2'
+									   ELSE T5."U_HBT_TipEnt" 
+									   END AS "tipoPersona",
+
+                T0."U_BO_MP" AS "medioPago",
+
+                CASE WHEN T11."ExtraDays" > '0' THEN '2'
+                	 ELSE '1' END AS "FormaPago",
+
+                '01' AS "numeroDeReferencia"
+
+        FROM "%sNameDB%"."OINV" T0 LEFT JOIN "%sNameDB%"."INV12" T4 ON T0."DocEntry"=T4."DocEntry"
+                                 LEFT JOIN "%sNameDB%"."OCRD" T5 ON T0."CardCode" = T5."CardCode"
+                                 LEFT JOIN "%sNameDB%"."NNM1" T6 ON T0."Series"=T6."Series" AND T6."ObjectCode" = '13'
+                                 LEFT OUTER JOIN "%sNameDB%"."OSLP" T7 ON T0."SlpCode" = T7."SlpCode"
+                                 LEFT JOIN "%sNameDB%"."@BOSERNUM" T8 ON T0."Series"=T8."Code"
+                                 LEFT JOIN "%sNameDB%"."OCTG" T11 ON T0."GroupNum"=T11."GroupNum"
+                                 LEFT JOIN "%sNameDB%"."OSHP" T12 ON T0."TrnspCode" = T12."TrnspCode"
+                                 LEFT JOIN "%sNameDB%"."OCST" T13 ON T4."StateB" = T13."Code" AND T13."Country" ='CO'
+
+        WHERE T0."DocEntry" = :DocEntry AND T0."DocSubType" != 'DN'; 
+
+        ELSEIF ( :Object = '13' AND :Tipo = 'Lineas')
+
+          THEN
+
+            SELECT '1' AS "cantidadPorEmpaque",
+
+                   REPLACE(TO_DECIMAL((T0."Quantity"),19,%Decimal%),',','.') AS "cantidadReal",
+                   
+                   CASE WHEN T2."U_BO_UMDIAN" IS NULL THEN T1."SalUnitMsr"
+                   		ELSE T2."U_BO_UMDIAN" END AS "cantidadRealUnidadMedida",
+
+                   REPLACE(TO_DECIMAL((T0."Quantity"),19,%Decimal%),',','.') AS "cantidadUnidades",
+				  
+                   T0."ItemCode" AS "codigoProducto",
+                   T0."Dscription" AS "descripcion",
+                   '999' AS "estandarCodigo",
+                   T0."ItemCode" AS "estandarCodigoProducto",
+				   
+				   REPLACE(TO_DECIMAL((T0."LineTotal"),19,%Decimal%),',','.') AS "baseImponibleTOTALImp",
+				           
+                  '01' AS "codigoTOTALImp",
+                  '' AS "controlInterno",
+                  
+				  REPLACE(TO_DECIMAL((T0."VatPrcnt"),19,%Decimal%),',','.') AS "porcentajeTOTALImp",
+				  
+                  '' AS "unidadMedida",
+                  '' AS "unidadMedidaTributo",
+                 
+                 CASE WHEN T0."DiscPrcnt" = '0' THEN REPLACE(TO_DECIMAL((T0."VatSum"),19,%Decimal%),',','.') 
+                 	  WHEN T0."DiscPrcnt" != '0' THEN REPLACE(TO_DECIMAL(((T0."LineTotal"*T0."VatPrcnt")/100),19,%Decimal%),',','.') 
+                 	  ELSE '0'
+                 END AS "valorTOTALImp",
+				  
+                  '' AS "valorTributoUnidad",
+				  
+                 CASE WHEN T0."DiscPrcnt" = '0' THEN REPLACE(TO_DECIMAL((T0."VatSum"),19,%Decimal%),',','.') 
+                 	  WHEN T0."DiscPrcnt" != '0' THEN REPLACE(TO_DECIMAL(((T0."LineTotal"*T0."VatPrcnt")/100),19,%Decimal%),',','.') 
+                 	  ELSE '0'
+				  END AS "montoTotal",
+				                   
+				  '' AS "marca",
+                  '0' AS "muestraGratis",
+                  
+                  CASE WHEN T0."DiscPrcnt" = '0' THEN REPLACE(TO_DECIMAL((T0."LineTotal" + T0."VatSum"),19,%Decimal%),',','.')
+                       ELSE REPLACE(TO_DECIMAL((T0."LineTotal" + T0."VatSum"),19,%Decimal%),',','.') 
+                       END AS "precioTotal",
+				  
+				  REPLACE(TO_DECIMAL((T0."LineTotal"),19,%Decimal%),',','.') AS "precioTotalSinImpuestos",
+				  
+				  CASE WHEN T0."DiscPrcnt" = '0' THEN REPLACE(TO_DECIMAL((T0."Price"),19,%Decimal%),',','.') 
+				       ELSE REPLACE(TO_DECIMAL((T0."PriceBefDi"),19,%Decimal%),',','.') END
+				  AS "precioVentaUnitario",
+				  
+				  T0."VisOrder"+1 AS "secuencia",
+                  CASE WHEN T2."U_BO_UMDIAN" IS NULL THEN T1."SalUnitMsr"
+                 	   ELSE T2."U_BO_UMDIAN" END AS "unidadMedida",
+                 	   
+                  REPLACE(TO_DECIMAL((T0."DiscPrcnt"),19,%Decimal%),',','.') AS "Desc_porcentaje",
+                  'Descuento Comercial' AS "Desc_descripcion",
+                  '0' AS "Desc_indicador",
+                   
+                   CASE WHEN T0."DiscPrcnt" = '0' THEN REPLACE(TO_DECIMAL((T0."LineTotal"),19,%Decimal%),',','.')
+                        ELSE REPLACE(TO_DECIMAL((((T0."PriceBefDi"*T0."Quantity")*T0."DiscPrcnt")/100),19,%Decimal%),',','.') END 
+                   AS "Desc_monto",
+
+                   CASE WHEN T0."DiscPrcnt" = '0' THEN REPLACE(TO_DECIMAL((T0."LineTotal"),19,%Decimal%),',','.')
+                        ELSE REPLACE(TO_DECIMAL((T0."PriceBefDi"*T0."Quantity"),19,%Decimal%),',','.') END 
+                   AS "Desc_montoBase",
+
+                  '1' AS "Desc_secuencia" 
+
+            FROM "%sNameDB%"."INV1" T0 LEFT JOIN "%sNameDB%"."OITM" T1 ON T0."ItemCode"=T1."ItemCode"
+            					         LEFT JOIN "%sNameDB%"."@BOUNDMED" T2 ON T1."SalUnitMsr"=T2."Code"
+            					         LEFT JOIN "%sNameDB%"."OINV" T3 ON T0."DocEntry"=T3."DocEntry" 
+            
+            WHERE T0."DocEntry" = :DocEntry AND T3."DocSubType" != 'DN'
+
+            ORDER BY T0."VisOrder" ;
+
+        ELSEIF ( :Object = '13' AND :Tipo = 'Impuestos')
+        
+          THEN
+            --------------------------- Consulta Impuestos IVA ---------------------------------------
+              
+              SELECT REPLACE(TO_DECIMAL((SUM(T0."BaseSum")),19,%Decimal%),',','.') AS "baseImponibleTOTALImp",
+                     
+					 '01' AS "codigoTOTALImp",
+                     
+					 REPLACE(TO_DECIMAL((T0."TaxRate"),19,%Decimal%),',','.') AS "porcentajeTOTALImp",
+					                      
+					 'WSD' AS "unidadMedida",
+                     
+					 REPLACE(TO_DECIMAL((SUM(T0."TaxSum")),19,%Decimal%),',','.') AS "valorTOTALImp"
+					 
+					 
+              FROM "%sNameDB%"."INV4" T0 LEFT JOIN "%sNameDB%"."OINV" T1 ON T0."DocEntry"=T1."DocEntry"
+
+              WHERE T0."DocEntry" = :DocEntry AND T1."DocSubType" != 'DN' AND T0."RelateType" = 1
+              
+              GROUP BY T0."TaxRate"
+
+              --------------------------- Consulta Impuestos ICA ---------------------------------------------------
+
+              UNION ALL
+
+				SELECT REPLACE(TO_DECIMAL((SUM(T0."U_HBT_BaseRet")),19,%Decimal%),',','.')  AS "baseImponibleTOTALImp",
+	                   
+					   '03' AS "codigoTOTALImp",
+	                   
+					  REPLACE(TO_DECIMAL((SUM(T1."PrctBsAmnt")),19,3),',','.')  AS "porcentajeTOTALImp",
+	                   
+					   'WSD' AS "unidadMedida",
+ 	                   
+					   REPLACE(TO_DECIMAL((SUM(T0."WTAmnt")),19,%Decimal%),',','.')  AS "valorTOTALImp"
+                
+				FROM "%sNameDB%"."INV5" T0 INNER JOIN "%sNameDB%"."OWHT" T1 ON T0."WTCode"=T1."WTCode"
+							 				 LEFT JOIN "%sNameDB%"."OINV" T2 ON T0."AbsEntry"=T2."DocEntry"
+                
+				WHERE T0."AbsEntry" = :DocEntry AND T1."U_HBT_TipRet" = '1' AND T2."DocSubType" != 'ND'
+
+                GROUP BY T1."PrctBsAmnt", T1."U_HBT_TipRet"
+
+              --------------------------- Consulta Impuestos RETEIVA ---------------------------------------------------
+
+              UNION ALL
+
+				SELECT REPLACE(TO_DECIMAL((SUM(T0."U_HBT_BaseRet")),19,%Decimal%),',','.')  AS "baseImponibleTOTALImp",
+	                   
+					   '05' AS "codigoTOTALImp",
+	                   
+					  REPLACE(TO_DECIMAL((SUM(T1."PrctBsAmnt")),19,%Decimal%),',','.')  AS "porcentajeTOTALImp",
+	                   
+					   'WSD' AS "unidadMedida",
+ 	                   
+					   REPLACE(TO_DECIMAL((SUM(T0."WTAmnt")),19,%Decimal%),',','.')  AS "valorTOTALImp"
+                
+				FROM "%sNameDB%"."INV5" T0 INNER JOIN "%sNameDB%"."OWHT" T1 ON T0."WTCode"=T1."WTCode"
+							 				 LEFT JOIN "%sNameDB%"."OINV" T2 ON T0."AbsEntry"=T2."DocEntry"
+                
+				WHERE T0."AbsEntry" = :DocEntry AND T1."U_HBT_TipRet" = '2' AND T2."DocSubType" != 'ND'
+
+                GROUP BY T1."PrctBsAmnt", T1."U_HBT_TipRet"   
+                                           
+              --------------------------- Consulta Impuestos Retefuente ---------------------------------------------------
+
+              UNION ALL
+
+				SELECT REPLACE(TO_DECIMAL((SUM(T0."U_HBT_BaseRet")),19,%Decimal%),',','.')  AS "baseImponibleTOTALImp",
+	                   
+					   '06' AS "codigoTOTALImp",
+	                   
+					  REPLACE(TO_DECIMAL((SUM(T1."PrctBsAmnt")),19,%Decimal%),',','.')  AS "porcentajeTOTALImp",
+	                   
+					   'WSD' AS "unidadMedida",
+ 	                   
+					   REPLACE(TO_DECIMAL((SUM(T0."WTAmnt")),19,%Decimal%),',','.')  AS "valorTOTALImp"
+                
+				FROM "%sNameDB%"."INV5" T0 INNER JOIN "%sNameDB%"."OWHT" T1 ON T0."WTCode"=T1."WTCode"
+							 				 LEFT JOIN "%sNameDB%"."OINV" T2 ON T0."AbsEntry"=T2."DocEntry"
+                
+				WHERE T0."AbsEntry" = :DocEntry AND T1."U_HBT_TipRet" = '4' AND T2."DocSubType" != 'ND'
+
+                GROUP BY T1."PrctBsAmnt", T1."U_HBT_TipRet";
+
+		ELSEIF ( :Object = '13' AND :Tipo = 'ImpuestosTotales')
+        
+          THEN
+            --------------------------- Consulta Impuestos IVA ---------------------------------------
+              
+              SELECT REPLACE(TO_DECIMAL((SUM(T0."BaseSum")),19,%Decimal%),',','.') AS "baseImponibleTOTALImp",
+                     
+					 '01' AS "codigoTOTALImp",
+                     
+					 REPLACE(TO_DECIMAL((T0."TaxRate"),19,%Decimal%),',','.') AS "porcentajeTOTALImp",
+					                      
+					 'WSD' AS "unidadMedida",
+                     
+					 REPLACE(TO_DECIMAL((SUM(T0."TaxSum")),19,%Decimal%),',','.') AS "valorTOTALImp"
+					 
+					 
+              FROM "%sNameDB%"."INV4" T0 LEFT JOIN "%sNameDB%"."OINV" T1 ON T0."DocEntry"=T1."DocEntry"
+
+              WHERE T0."DocEntry" = :DocEntry AND T1."DocSubType" != 'DN' AND T0."RelateType" = 1 AND T0."TaxRate" != 0
+              
+              GROUP BY T0."TaxRate"
+
+              --------------------------- Consulta Impuestos ICA ---------------------------------------------------
+
+              UNION ALL
+
+				SELECT REPLACE(TO_DECIMAL((SUM(T0."U_HBT_BaseRet")),19,%Decimal%),',','.')  AS "baseImponibleTOTALImp",
+	                   
+					   '03' AS "codigoTOTALImp",
+	                   
+					  REPLACE(TO_DECIMAL((SUM(T1."PrctBsAmnt")),19,3),',','.')  AS "porcentajeTOTALImp",
+	                   
+					   'WSD' AS "unidadMedida",
+ 	                   
+					   REPLACE(TO_DECIMAL((SUM(T0."WTAmnt")),19,%Decimal%),',','.')  AS "valorTOTALImp"
+                
+				FROM "%sNameDB%"."INV5" T0 INNER JOIN "%sNameDB%"."OWHT" T1 ON T0."WTCode"=T1."WTCode"
+							 				 LEFT JOIN "%sNameDB%"."OINV" T2 ON T0."AbsEntry"=T2."DocEntry"
+                
+				WHERE T0."AbsEntry" = :DocEntry AND T1."U_HBT_TipRet" = '1' AND T2."DocSubType" != 'ND'
+
+                GROUP BY T1."PrctBsAmnt", T1."U_HBT_TipRet"
+
+              --------------------------- Consulta Impuestos RETEIVA ---------------------------------------------------
+
+              UNION ALL
+
+				SELECT REPLACE(TO_DECIMAL((SUM(T0."U_HBT_BaseRet")),19,%Decimal%),',','.')  AS "baseImponibleTOTALImp",
+	                   
+					   '05' AS "codigoTOTALImp",
+	                   
+					  REPLACE(TO_DECIMAL((SUM(T1."PrctBsAmnt")),19,%Decimal%),',','.')  AS "porcentajeTOTALImp",
+	                   
+					   'WSD' AS "unidadMedida",
+ 	                   
+					   REPLACE(TO_DECIMAL((SUM(T0."WTAmnt")),19,%Decimal%),',','.')  AS "valorTOTALImp"
+                
+				FROM "%sNameDB%"."INV5" T0 INNER JOIN "%sNameDB%"."OWHT" T1 ON T0."WTCode"=T1."WTCode"
+							 				 LEFT JOIN "%sNameDB%"."OINV" T2 ON T0."AbsEntry"=T2."DocEntry"
+                
+				WHERE T0."AbsEntry" = :DocEntry AND T1."U_HBT_TipRet" = '2' AND T2."DocSubType" != 'ND'
+
+                GROUP BY T1."PrctBsAmnt", T1."U_HBT_TipRet"   
+                                           
+              --------------------------- Consulta Impuestos Retefuente ---------------------------------------------------
+
+              UNION ALL
+
+				SELECT REPLACE(TO_DECIMAL((SUM(T0."U_HBT_BaseRet")),19,%Decimal%),',','.')  AS "baseImponibleTOTALImp",
+	                   
+					   '06' AS "codigoTOTALImp",
+	                   
+					  REPLACE(TO_DECIMAL((SUM(T1."PrctBsAmnt")),19,%Decimal%),',','.')  AS "porcentajeTOTALImp",
+	                   
+					   'WSD' AS "unidadMedida",
+ 	                   
+					   REPLACE(TO_DECIMAL((SUM(T0."WTAmnt")),19,%Decimal%),',','.')  AS "valorTOTALImp"
+                
+				FROM "%sNameDB%"."INV5" T0 INNER JOIN "%sNameDB%"."OWHT" T1 ON T0."WTCode"=T1."WTCode"
+							 				 LEFT JOIN "%sNameDB%"."OINV" T2 ON T0."AbsEntry"=T2."DocEntry"
+                
+				WHERE T0."AbsEntry" = :DocEntry AND T1."U_HBT_TipRet" = '4' AND T2."DocSubType" != 'ND'
+
+                GROUP BY T1."PrctBsAmnt", T1."U_HBT_TipRet";
+
+
+
+------------------------- NOTAS CREDITO -----------------------------------------
+        ELSEIF ( :Object = '14' AND :Tipo = 'Encabezado')
+         
+	      THEN
+		
+		        SELECT (SELECT CASE B."Decimals" WHEN '-1' THEN (SELECT TOP 1 "QueryDec" FROM "%sNameDB%"."OADM") ELSE B."Decimals" END FROM "%sNameDB%"."ORIN" A LEFT JOIN "%sNameDB%"."OCRN" B ON A."DocCur"=B."CurrCode" WHERE A."DocEntry" = :DocEntry) AS "CantidadDecimales",
+		
+		                CASE T0."DocCur" WHEN '$' THEN 'COP' 
+		                                 ELSE T0."DocCur" END AS "Moneda",
+		
+		                
+		                (T8."U_BO_PREF" || '-' || T6."InitialNum") AS "RangoNmeracion",
+		
+		                CASE WHEN (SELECT CASE B."Decimals" WHEN '-1' THEN (SELECT TOP 1 "QueryDec" FROM "%sNameDB%"."OADM") ELSE B."Decimals" END FROM "%sNameDB%"."ORIN" A LEFT JOIN "%sNameDB%"."OCRN" B ON A."DocCur"=B."CurrCode" WHERE A."DocEntry" = :DocEntry)= '0' THEN REPLACE(TO_DECIMAL((T0."RoundDif"),19,0),',','.')
+							 WHEN (SELECT CASE B."Decimals" WHEN '-1' THEN (SELECT TOP 1 "QueryDec" FROM "%sNameDB%"."OADM") ELSE B."Decimals" END FROM "%sNameDB%"."ORIN" A LEFT JOIN "%sNameDB%"."OCRN" B ON A."DocCur"=B."CurrCode" WHERE A."DocEntry" = :DocEntry)= '1' THEN REPLACE(TO_DECIMAL((T0."RoundDif"),19,1),',','.')
+							 WHEN (SELECT CASE B."Decimals" WHEN '-1' THEN (SELECT TOP 1 "QueryDec" FROM "%sNameDB%"."OADM") ELSE B."Decimals" END FROM "%sNameDB%"."ORIN" A LEFT JOIN "%sNameDB%"."OCRN" B ON A."DocCur"=B."CurrCode" WHERE A."DocEntry" = :DocEntry)= '2' THEN REPLACE(TO_DECIMAL((T0."RoundDif"),19,2),',','.')
+							 WHEN (SELECT CASE B."Decimals" WHEN '-1' THEN (SELECT TOP 1 "QueryDec" FROM "%sNameDB%"."OADM") ELSE B."Decimals" END FROM "%sNameDB%"."ORIN" A LEFT JOIN "%sNameDB%"."OCRN" B ON A."DocCur"=B."CurrCode" WHERE A."DocEntry" = :DocEntry)= '3' THEN REPLACE(TO_DECIMAL((T0."RoundDif"),19,3),',','.')
+							 WHEN (SELECT CASE B."Decimals" WHEN '-1' THEN (SELECT TOP 1 "QueryDec" FROM "%sNameDB%"."OADM") ELSE B."Decimals" END FROM "%sNameDB%"."ORIN" A LEFT JOIN "%sNameDB%"."OCRN" B ON A."DocCur"=B."CurrCode" WHERE A."DocEntry" = :DocEntry)= '4' THEN REPLACE(TO_DECIMAL((T0."RoundDif"),19,4),',','.')
+							 WHEN (SELECT CASE B."Decimals" WHEN '-1' THEN (SELECT TOP 1 "QueryDec" FROM "%sNameDB%"."OADM") ELSE B."Decimals" END FROM "%sNameDB%"."ORIN" A LEFT JOIN "%sNameDB%"."OCRN" B ON A."DocCur"=B."CurrCode" WHERE A."DocEntry" = :DocEntry)= '5' THEN REPLACE(TO_DECIMAL((T0."RoundDif"),19,5),',','.')
+							 WHEN (SELECT CASE B."Decimals" WHEN '-1' THEN (SELECT TOP 1 "QueryDec" FROM "%sNameDB%"."OADM") ELSE B."Decimals" END FROM "%sNameDB%"."ORIN" A LEFT JOIN "%sNameDB%"."OCRN" B ON A."DocCur"=B."CurrCode" WHERE A."DocEntry" = :DocEntry)= '6' THEN REPLACE(TO_DECIMAL((T0."RoundDif"),19,6),',','.')
+		                     ELSE '0'  END AS "RedondeoAplicado",
+		
+                		CASE WHEN (SELECT A."Code" FROM "%sNameDB%"."@BOSERNUM" A WHERE A."Code" = T0."Series") = T0."Series" AND T0."DocSubType" != 'DN' AND T0."ObjType" = '13' THEN '01'
+							 WHEN (SELECT A."Code" FROM "%sNameDB%"."@BOSERNUM" A WHERE A."Code" = T0."Series") = T0."Series" AND T0."DocSubType" != 'DN' AND T0."ObjType" = '13' THEN '03'
+		                     WHEN (SELECT A."Code" FROM "%sNameDB%"."@BOSERNUM" A WHERE A."Code" = T0."Series") = T0."Series" AND T0."DocSubType" != 'DN' AND T0."ObjType" = '14' THEN '91'
+							 WHEN (SELECT A."Code" FROM "%sNameDB%"."@BOSERNUM" A WHERE A."Code" = T0."Series") = T0."Series" AND T0."DocSubType" = 'DN' AND T0."ObjType" = '13' THEN '92'
+						 ELSE '0' END AS "tipoDocumento",
+		
+		                						CASE WHEN T0."ObjType" = '13' THEN (SELECT TOP 1 A."U_BO_TO" FROM "ESFERA_COLOR"."@BOEBILLINGP" A WHERE A."U_BO_Status" = 'Y')
+							 WHEN T0."ObjType" = '14' AND (IFNULL(T0."U_BO_AFV",0))= 0 THEN '22'
+							 ELSE (SELECT TOP 1 A."U_BO_TO" FROM "ESFERA_COLOR"."@BOEBILLINGP" A WHERE A."U_BO_Status" = 'Y') 
+							 END AS "tipoOperacion",
+		
+                        CASE WHEN T0."DiscPrcnt" = '0' AND T0."DocCur"='$' THEN REPLACE(TO_DECIMAL(((SELECT TOP 1 SUM(A."BaseSum") FROM "%sNameDB%"."RIN4" A WHERE A."DocEntry" = :DocEntry AND A."RelateType" = 1 )),19,%Decimal%),',','.')
+                            WHEN T0."DiscPrcnt" != '0' AND T0."DocCur"='$' THEN REPLACE(TO_DECIMAL(((SELECT TOP 1 SUM(A."BaseSum") FROM "%sNameDB%"."RIN4" A WHERE A."DocEntry" = :DocEntry AND A."RelateType" = 1 )+T0."DiscSum"),19,%Decimal%),',','.')
+                            WHEN T0."DiscPrcnt" = '0' AND T0."DocCur"='USD' THEN REPLACE(TO_DECIMAL(((SELECT TOP 1 SUM(A."BaseSumSys") FROM "%sNameDB%"."RIN4" A WHERE A."DocEntry" = :DocEntry AND A."RelateType" = 1 )+T0."DiscSum"),19,%Decimal%),',','.')
+                            WHEN T0."DiscPrcnt" != '0' AND T0."DocCur"='USD' THEN REPLACE(TO_DECIMAL(((SELECT TOP 1 SUM(A."BaseSumSys") FROM "%sNameDB%"."RIN4" A WHERE A."DocEntry" = :DocEntry AND A."RelateType" = 1 )+T0."DiscSum"),19,%Decimal%),',','.')
+                            ELSE REPLACE(TO_DECIMAL(((SELECT TOP 1 SUM(A."BaseSum") FROM "%sNameDB%"."RIN4" A WHERE A."DocEntry" = :DocEntry  AND A."RelateType" = 1 )),19,2),',','.')
+                            END AS "totalBaseImponible",
+		
+                        CASE WHEN T0."DocCur"='USD' THEN REPLACE(TO_DECIMAL(((SELECT TOP 1 SUM(A."BaseSum") FROM "%sNameDB%"."RIN4" A WHERE A."DocEntry" = :DocEntry AND A."RelateType" = 1)+T0."VatSumFC"),19,%Decimal%),',','.')
+                            WHEN T0."DocCur"='$' THEN REPLACE(TO_DECIMAL(((SELECT TOP 1 SUM(A."BaseSum") FROM "%sNameDB%"."RIN4" A WHERE A."DocEntry" = :DocEntry AND A."RelateType" = 1)+T0."VatSum"+(SELECT IFNULL(SUM(A."WTAmnt"),0) FROM "%sNameDB%"."RIN5" A INNER JOIN "%sNameDB%"."OWHT" B ON A."WTCode"=B."WTCode" WHERE A."AbsEntry" = :DocEntry AND B."U_HBT_TipRet" = '1')+T0."DiscSum"),19,%Decimal%),',','.')
+                            ELSE REPLACE(TO_DECIMAL((T0."BaseAmntFC"+T0."VatSumFC"),19,%Decimal%),',','.')
+                            END AS "totalBrutoConImpuesto",
+		
+		                CASE WHEN T0."DocCur"='USD' THEN REPLACE(TO_DECIMAL((T0."BaseAmntFC"+T0."VatSumFC"+T0."RoundDifFC"),19,%Decimal%),',','.')
+							 WHEN T0."DocCur"='$' THEN REPLACE(TO_DECIMAL((T0."BaseAmnt"+T0."VatSum"+T0."RoundDif"+(SELECT IFNULL(SUM(A."WTAmnt"),0) FROM "%sNameDB%"."RIN5" A INNER JOIN "%sNameDB%"."OWHT" B ON A."WTCode"=B."WTCode" WHERE A."AbsEntry" = :DocEntry AND B."U_HBT_TipRet" = '1')),19,%Decimal%),',','.')
+							 ELSE REPLACE(TO_DECIMAL((T0."BaseAmntFC"+T0."VatSumFC"+T0."RoundDifFC"),19,%Decimal%),',','.')
+							 END AS "totalMonto",
+		
+		                (SELECT COUNT("ItemCode") FROM "%sNameDB%"."RIN1" WHERE "DocEntry" = :DocEntry) AS "totalProductos",
+		
+		                CASE WHEN T0."DocCur"='$' THEN REPLACE(TO_DECIMAL((T0."BaseAmnt"),19,%Decimal%),',','.')
+							 WHEN T0."DocCur"='USD' THEN REPLACE(TO_DECIMAL((T0."BaseAmntFC"),19,%Decimal%),',','.')
+							 ELSE REPLACE(TO_DECIMAL((T0."BaseAmntFC"),19,%Decimal%),',','.') 
+							 END AS "totalSinImpuestos",
+               
+               			T0."U_BO_DESC" AS "Desc_Codigo",
+				
+						'Descuento Comercial' AS "Desc_descripcion",
+				
+						'0' AS "Desc_indicador",
+				
+						REPLACE(TO_DECIMAL((T0."DiscSum"),19,0),',','.') AS "Desc_monto",
+				
+						((SELECT TOP 1 SUM(A."BaseSum") FROM "%sNameDB%"."INV4" A WHERE A."DocEntry" = :DocEntry)+T0."DiscSum") AS "Desc_montoBase",
+				
+						T0."DiscPrcnt" AS "Desc_porcentaje",
+				
+						'0' AS "Desc_secuencia",
+
+		                CASE WHEN (SELECT "U_BO_Pref" FROM "%sNameDB%"."@BOEBILLINGP" WHERE "U_BO_Status"='Y')= 'Y' THEN (T8."U_BO_PREF"||T0."DocNum") 
+		                	 ELSE CAST(T0."DocNum" AS NVARCHAR(20)) END
+		                	 AS "consecutivoDocumento",
+						
+						T8."U_BO_PREF" AS "Prefijo",
+		
+		                TO_VARCHAR(T0."DocDate", 'YYYY-MM-DD') || ' 00:00:00' AS "fechaEmision",
+						
+						TO_VARCHAR(T0."DocDueDate", 'YYYY-MM-DD') AS "fechaDeVencimiento",
+		
+		                T5."U_HBT_ActEco" AS "actividadEconomicaCIIU",
+		
+		                '0' AS "canalDeEntrega",
+		
+		                CASE WHEN T5."U_BO_E_mail_1" IS NULL THEN (SELECT TOP 1 A."U_BO_EmailGen" FROM "%sNameDB%"."@BOEBILLINGP" A WHERE A."U_BO_Status" = 'Y') ELSE T5."U_BO_E_mail_1" END  AS "correoEntrega1",
+						
+						T5."U_BO_E_mail_2" AS "correoEntrega2",
+		
+						T5."U_BO_E_mail_3" AS "correoEntrega3",
+		
+						T5."U_BO_E_mail_4" AS "correoEntrega4",
+		
+						T5."U_BO_E_mail_5" AS "correoEntrega5",
+		
+		                TO_VARCHAR(T0."DocDate", 'YYYY-MM-DD') || ' 00:00:00' AS "fechaProgramada",
+		
+		                '1' AS "nitProveedorReceptor",
+		
+		                T5."Phone1" AS "telefono",
+		
+		                '01' AS "codigoImpuesto",
+		
+		                T4."CityB" AS "ciudad",
+		
+		                T13."U_BO_CD" AS "codigoDepartamento",
+		
+		                T13."Name" AS "departamento",
+		
+		                T4."StreetB" AS "direccion",
+		
+		                'es' AS "lenguaje",
+		
+		                T5."U_HBT_MunMed" AS "municipio",
+		
+		                'CO' AS "pais",
+		
+		                T4."ZipCodeB" AS "zonaPostal",
+		
+		                CASE WHEN T5."U_BO_E_mail_1" IS NULL THEN (SELECT TOP 1 A."U_BO_EmailGen" FROM "%sNameDB%"."@BOEBILLINGP" A WHERE A."U_BO_Status" = 'Y') ELSE T5."U_BO_E_mail_1" END AS "email",
+		
+		                '' AS "codigoEstablecimiento",
+		
+		                T5."CardName" AS "nombreRegistroRUT",
+		
+                		CASE T5."U_HBT_TipDoc" WHEN '31' THEN SUBSTRING(T5."LicTradNum",1,LOCATE(T5."LicTradNum",'-')-1)
+  						ELSE T5."LicTradNum" END AS "numeroIdentificacion",
+		
+                		CASE T5."U_HBT_TipDoc" WHEN '31' THEN RIGHT(T5."LicTradNum",1)
+                		ELSE '' END AS "numeroIdentificacionDV",
+		
+		                T5."U_HBT_TipDoc" AS "tipoIdentificacion",
+		
+		                T5."CardName" AS "nombreRazonSocial",
+		
+                CASE WHEN T0."U_BO_EE" = 'Y' THEN 'SI'
+                ELSE 'NO' END AS "notificar",
+		
+  		                CASE T5."U_HBT_TipDoc" WHEN '31'THEN SUBSTRING(T5."LicTradNum",1,LOCATE(T5."LicTradNum",'-')-1)
+  				   		ELSE T5."LicTradNum" END AS "numeroDocumento",
+		
+		                T5."U_BO_RF" AS "obligaciones",
+		
+		                T5."U_BO_TR" AS "regimen",
+		
+		                T5."U_HBT_TipDoc" AS "tipoIdentificacion",
+		
+		                CASE T5."U_HBT_TipEnt" WHEN '1' THEN '1'
+											   WHEN '2' THEN '2'
+											   ELSE T5."U_HBT_TipEnt" 
+											   END AS "tipoPersona",
+		
+		                T0."U_BO_MP" AS "medioPago",
+		
+		                CASE WHEN T11."ExtraDays" > '0' THEN '2'
+		                	 ELSE '1' END AS "FormaPago",
+		
+		                '01' AS "numeroDeReferencia",
+		                
+		                T0."U_BO_TN" AS "codigoEstatusDocumento",
+		
+						'4' AS "codigoInterno",
+		
+						IFNULL(T0."U_BO_AFV",0) AS "No_FV",
+		
+						T0."U_BO_EBC" AS "Comentarios_NC"
+		
+		        FROM "%sNameDB%"."ORIN" T0 LEFT JOIN "%sNameDB%"."RIN12" T4 ON T0."DocEntry"=T4."DocEntry"
+		                                 LEFT JOIN "%sNameDB%"."OCRD" T5 ON T0."CardCode" = T5."CardCode"
+		                                 LEFT JOIN "%sNameDB%"."NNM1" T6 ON T0."Series"=T6."Series" AND T6."ObjectCode" = '14'
+		                                 LEFT OUTER JOIN "%sNameDB%"."OSLP" T7 ON T0."SlpCode" = T7."SlpCode"
+		                                 LEFT JOIN "%sNameDB%"."@BOSERNUM" T8 ON T0."Series"=T8."Code"
+		                                 LEFT JOIN "%sNameDB%"."OCTG" T11 ON T0."GroupNum"=T11."GroupNum"
+		                                 LEFT JOIN "%sNameDB%"."OSHP" T12 ON T0."TrnspCode" = T12."TrnspCode"
+		                                 LEFT JOIN "%sNameDB%"."OCST" T13 ON T4."StateB" = T13."Code" AND T13."Country" ='CO'
+		
+		        WHERE T0."DocEntry" = :DocEntry AND T0."DocSubType" != 'ND'; 
+
+        ELSEIF ( :Object = '14' AND :Tipo = 'Lineas')
+
+          THEN
+
+            SELECT '1' AS "cantidadPorEmpaque",
+
+                   REPLACE(TO_DECIMAL((T0."Quantity"),19,%Decimal%),',','.') AS "cantidadReal",
+                   
+                   CASE WHEN T2."U_BO_UMDIAN" IS NULL THEN T1."SalUnitMsr"
+                   		ELSE T2."U_BO_UMDIAN" END AS "cantidadRealUnidadMedida",
+
+                   REPLACE(TO_DECIMAL((T0."Quantity"),19,%Decimal%),',','.') AS "cantidadUnidades",
+				  
+                   T0."ItemCode" AS "codigoProducto",
+                   T0."Dscription" AS "descripcion",
+                   '999' AS "estandarCodigo",
+                   T0."ItemCode" AS "estandarCodigoProducto",
+				   
+				   REPLACE(TO_DECIMAL((T0."LineTotal"),19,%Decimal%),',','.') AS "baseImponibleTOTALImp",
+				  
+                  
+                  '01' AS "codigoTOTALImp",
+                  '' AS "controlInterno",
+                  
+				  REPLACE(TO_DECIMAL((T0."VatPrcnt"),19,%Decimal%),',','.') AS "porcentajeTOTALImp",
+				  
+                  '' AS "unidadMedida",
+                  '' AS "unidadMedidaTributo",
+                  
+				  REPLACE(TO_DECIMAL((T0."VatSum"),19,%Decimal%),',','.') AS "valorTOTALImp",
+				  
+                  '' AS "valorTributoUnidad",
+				  
+				  REPLACE(TO_DECIMAL((T0."VatSum"),19,%Decimal%),',','.') AS "montoTotal",
+				                   
+				  '' AS "marca",
+          '0' AS "muestraGratis",
+          
+                  
+				  REPLACE(TO_DECIMAL((T0."LineTotal" + T0."VatSum"),19,%Decimal%),',','.') AS "precioTotal",
+				  REPLACE(TO_DECIMAL((T0."LineTotal"),19,%Decimal%),',','.') AS "precioTotalSinImpuestos",
+				  REPLACE(TO_DECIMAL((T0."Price"),19,%Decimal%),',','.') AS "precioVentaUnitario",
+				  
+				  T0."VisOrder"+1 AS "secuencia",
+				  
+          CASE WHEN T2."U_BO_UMDIAN" IS NULL THEN T1."SalUnitMsr"
+           	   ELSE T2."U_BO_UMDIAN" END AS "unidadMedida",
+                     
+          REPLACE(TO_DECIMAL((T0."DiscPrcnt"),19,%Decimal%),',','.') AS "Desc_porcentaje",
+                  'Descuento Comercial' AS "Desc_descripcion",
+                  '0' AS "Desc_indicador",
+                   
+          CASE WHEN T0."DiscPrcnt" = '0' THEN REPLACE(TO_DECIMAL((T0."LineTotal"),19,%Decimal%),',','.')
+                    ELSE REPLACE(TO_DECIMAL((((T0."PriceBefDi"*T0."Quantity")*T0."DiscPrcnt")/100),19,%Decimal%),',','.') END 
+                   AS "Desc_monto",
+
+          CASE WHEN T0."DiscPrcnt" = '0' THEN REPLACE(TO_DECIMAL((T0."LineTotal"),19,%Decimal%),',','.')
+                    ELSE REPLACE(TO_DECIMAL((T0."PriceBefDi"*T0."Quantity"),19,%Decimal%),',','.') END 
+                   AS "Desc_montoBase",
+
+          '1' AS "Desc_secuencia" 
+
+
+            FROM "%sNameDB%"."RIN1" T0 LEFT JOIN "%sNameDB%"."OITM" T1 ON T0."ItemCode"=T1."ItemCode"
+            					         LEFT JOIN "%sNameDB%"."@BOUNDMED" T2 ON T1."SalUnitMsr"=T2."Code"
+            					         LEFT JOIN "%sNameDB%"."ORIN" T3 ON T0."DocEntry"=T3."DocEntry" 
+            
+            WHERE T0."DocEntry" = :DocEntry AND T3."DocSubType" != 'ND'
+
+            ORDER BY T0."VisOrder" ;
+
+        ELSEIF ( :Object = '14' AND :Tipo = 'Impuestos')
+        
+          THEN
+            --------------------------- Consulta Impuestos IVA ---------------------------------------
+              
+              SELECT REPLACE(TO_DECIMAL((SUM(T0."BaseSum")),19,%Decimal%),',','.') AS "baseImponibleTOTALImp",
+                     
+					 '01' AS "codigoTOTALImp",
+                     
+					 REPLACE(TO_DECIMAL((T0."TaxRate"),19,%Decimal%),',','.') AS "porcentajeTOTALImp",
+					                      
+					 'WSD' AS "unidadMedida",
+                     
+					 REPLACE(TO_DECIMAL((SUM(T0."TaxSum")),19,%Decimal%),',','.') AS "valorTOTALImp"
+					 
+					 
+              FROM "%sNameDB%"."RIN4" T0 LEFT JOIN "%sNameDB%"."ORIN" T1 ON T0."DocEntry"=T1."DocEntry"
+
+              WHERE T0."DocEntry" = :DocEntry AND T1."DocSubType" != 'ND' AND T0."RelateType" = 1
+              
+              GROUP BY T0."TaxRate"
+ 
+               --------------------------- Consulta Impuestos ICA ---------------------------------------------------
+
+              UNION ALL
+
+				SELECT REPLACE(TO_DECIMAL((SUM(T0."U_HBT_BaseRet")),19,%Decimal%),',','.')  AS "baseImponibleTOTALImp",
+	                   
+					   '03' AS "codigoTOTALImp",
+	                   
+					  REPLACE(TO_DECIMAL((SUM(T1."PrctBsAmnt")),19,3),',','.')  AS "porcentajeTOTALImp",
+	                   
+					   'WSD' AS "unidadMedida",
+ 	                   
+					   REPLACE(TO_DECIMAL((SUM(T0."WTAmnt")),19,%Decimal%),',','.')  AS "valorTOTALImp"
+                
+				FROM "%sNameDB%"."RIN5" T0 INNER JOIN "%sNameDB%"."OWHT" T1 ON T0."WTCode"=T1."WTCode"
+							 				 LEFT JOIN "%sNameDB%"."ORIN" T2 ON T0."AbsEntry"=T2."DocEntry"
+                
+				WHERE T0."AbsEntry" = :DocEntry AND T1."U_HBT_TipRet" = '1' AND T2."DocSubType" != 'ND'
+
+                GROUP BY T1."PrctBsAmnt", T1."U_HBT_TipRet"
+
+               --------------------------- Consulta Impuestos RETEIVA ---------------------------------------------------
+
+              UNION ALL
+
+				SELECT REPLACE(TO_DECIMAL((SUM(T0."U_HBT_BaseRet")),19,%Decimal%),',','.')  AS "baseImponibleTOTALImp",
+	                   
+					   '05' AS "codigoTOTALImp",
+	                   
+					  REPLACE(TO_DECIMAL((SUM(T1."PrctBsAmnt")),19,%Decimal%),',','.')  AS "porcentajeTOTALImp",
+	                   
+					   'WSD' AS "unidadMedida",
+ 	                   
+					   REPLACE(TO_DECIMAL((SUM(T0."WTAmnt")),19,%Decimal%),',','.')  AS "valorTOTALImp"
+                
+				FROM "%sNameDB%"."RIN5" T0 INNER JOIN "%sNameDB%"."OWHT" T1 ON T0."WTCode"=T1."WTCode"
+							 				 LEFT JOIN "%sNameDB%"."ORIN" T2 ON T0."AbsEntry"=T2."DocEntry"
+                
+				WHERE T0."AbsEntry" = :DocEntry AND T1."U_HBT_TipRet" = '2' AND T2."DocSubType" != 'ND'
+
+                GROUP BY T1."PrctBsAmnt", T1."U_HBT_TipRet"
+                             
+              --------------------------- Consulta Impuestos Retefuente ---------------------------------------------------
+
+             UNION ALL
+
+				SELECT REPLACE(TO_DECIMAL((SUM(T0."U_HBT_BaseRet")),19,%Decimal%),',','.')  AS "baseImponibleTOTALImp",
+	                   
+					   '06' AS "codigoTOTALImp",
+	                   
+					  REPLACE(TO_DECIMAL((SUM(T1."PrctBsAmnt")),19,%Decimal%),',','.')  AS "porcentajeTOTALImp",
+	                   
+					   'WSD' AS "unidadMedida",
+ 	                   
+					   REPLACE(TO_DECIMAL((SUM(T0."WTAmnt")),19,%Decimal%),',','.')  AS "valorTOTALImp"
+                
+				FROM "%sNameDB%"."RIN5" T0 INNER JOIN "%sNameDB%"."OWHT" T1 ON T0."WTCode"=T1."WTCode"
+							 				 LEFT JOIN "%sNameDB%"."ORIN" T2 ON T0."AbsEntry"=T2."DocEntry"
+                
+				WHERE T0."AbsEntry" = :DocEntry AND T1."U_HBT_TipRet" = '4' AND T2."DocSubType" != 'ND'
+
+                GROUP BY T1."PrctBsAmnt", T1."U_HBT_TipRet";
+
+		ELSEIF ( :Object = '14' AND :Tipo = 'ImpuestosTotales')
+        
+          THEN
+            --------------------------- Consulta Impuestos IVA ---------------------------------------
+              
+              SELECT REPLACE(TO_DECIMAL((SUM(T0."BaseSum")),19,%Decimal%),',','.') AS "baseImponibleTOTALImp",
+                     
+					 '01' AS "codigoTOTALImp",
+                     
+					 REPLACE(TO_DECIMAL((T0."TaxRate"),19,%Decimal%),',','.') AS "porcentajeTOTALImp",
+					                      
+					 'WSD' AS "unidadMedida",
+                     
+					 REPLACE(TO_DECIMAL((SUM(T0."TaxSum")),19,%Decimal%),',','.') AS "valorTOTALImp"
+					 
+					 
+              FROM "%sNameDB%"."RIN4" T0 LEFT JOIN "%sNameDB%"."ORIN" T1 ON T0."DocEntry"=T1."DocEntry"
+
+              WHERE T0."DocEntry" = :DocEntry AND T1."DocSubType" != 'ND' AND T0."RelateType" = 1
+              
+              GROUP BY T0."TaxRate"
+ 
+               --------------------------- Consulta Impuestos ICA ---------------------------------------------------
+
+              UNION ALL
+
+				SELECT REPLACE(TO_DECIMAL((SUM(T0."U_HBT_BaseRet")),19,%Decimal%),',','.')  AS "baseImponibleTOTALImp",
+	                   
+					   '03' AS "codigoTOTALImp",
+	                   
+					  REPLACE(TO_DECIMAL((SUM(T1."PrctBsAmnt")),19,%Decimal%),',','.')  AS "porcentajeTOTALImp",
+	                   
+					   'WSD' AS "unidadMedida",
+ 	                   
+					   REPLACE(TO_DECIMAL((SUM(T0."WTAmnt")),19,%Decimal%),',','.')  AS "valorTOTALImp"
+                
+				FROM "%sNameDB%"."RIN5" T0 INNER JOIN "%sNameDB%"."OWHT" T1 ON T0."WTCode"=T1."WTCode"
+							 				 LEFT JOIN "%sNameDB%"."ORIN" T2 ON T0."AbsEntry"=T2."DocEntry"
+                
+				WHERE T0."AbsEntry" = :DocEntry AND T1."U_HBT_TipRet" = '1' AND T2."DocSubType" != 'ND'
+
+                GROUP BY T1."PrctBsAmnt", T1."U_HBT_TipRet"
+
+               --------------------------- Consulta Impuestos RETEIVA ---------------------------------------------------
+
+              UNION ALL
+
+				SELECT REPLACE(TO_DECIMAL((SUM(T0."U_HBT_BaseRet")),19,%Decimal%),',','.')  AS "baseImponibleTOTALImp",
+	                   
+					   '05' AS "codigoTOTALImp",
+	                   
+					  REPLACE(TO_DECIMAL((SUM(T1."PrctBsAmnt")),19,%Decimal%),',','.')  AS "porcentajeTOTALImp",
+	                   
+					   'WSD' AS "unidadMedida",
+ 	                   
+					   REPLACE(TO_DECIMAL((SUM(T0."WTAmnt")),19,%Decimal%),',','.')  AS "valorTOTALImp"
+                
+				FROM "%sNameDB%"."RIN5" T0 INNER JOIN "%sNameDB%"."OWHT" T1 ON T0."WTCode"=T1."WTCode"
+							 				 LEFT JOIN "%sNameDB%"."ORIN" T2 ON T0."AbsEntry"=T2."DocEntry"
+                
+				WHERE T0."AbsEntry" = :DocEntry AND T1."U_HBT_TipRet" = '2' AND T2."DocSubType" != 'ND'
+
+                GROUP BY T1."PrctBsAmnt", T1."U_HBT_TipRet"
+                             
+              --------------------------- Consulta Impuestos Retefuente ---------------------------------------------------
+
+             UNION ALL
+
+				SELECT REPLACE(TO_DECIMAL((SUM(T0."U_HBT_BaseRet")),19,%Decimal%),',','.')  AS "baseImponibleTOTALImp",
+	                   
+					   '06' AS "codigoTOTALImp",
+	                   
+					  REPLACE(TO_DECIMAL((SUM(T1."PrctBsAmnt")),19,%Decimal%),',','.')  AS "porcentajeTOTALImp",
+	                   
+					   'WSD' AS "unidadMedida",
+ 	                   
+					   REPLACE(TO_DECIMAL((SUM(T0."WTAmnt")),19,%Decimal%),',','.')  AS "valorTOTALImp"
+                
+				FROM "%sNameDB%"."RIN5" T0 INNER JOIN "%sNameDB%"."OWHT" T1 ON T0."WTCode"=T1."WTCode"
+							 				 LEFT JOIN "%sNameDB%"."ORIN" T2 ON T0."AbsEntry"=T2."DocEntry"
+                
+				WHERE T0."AbsEntry" = :DocEntry AND T1."U_HBT_TipRet" = '4' AND T2."DocSubType" != 'ND'
+
+                GROUP BY T1."PrctBsAmnt", T1."U_HBT_TipRet";
+
+------------------------- NOTAS DEBITO -----------------------------------------
+
+    ELSEIF ( :Object = '13_ND' AND :Tipo = 'Encabezado')
+
+      THEN
+
+        SELECT (SELECT CASE B."Decimals" WHEN '-1' THEN (SELECT TOP 1 "QueryDec" FROM "%sNameDB%"."OADM") ELSE B."Decimals" END FROM "%sNameDB%"."OINV" A LEFT JOIN "%sNameDB%"."OCRN" B ON A."DocCur"=B."CurrCode" WHERE A."DocEntry" = :DocEntry) AS "CantidadDecimales",
+
+                CASE T0."DocCur" WHEN '$' THEN 'COP' 
+                                 ELSE T0."DocCur" END AS "Moneda",
+
+                (T8."U_BO_PREF" || '-' || T6."InitialNum") AS "RangoNmeracion",
+
+
+                CASE WHEN (SELECT CASE B."Decimals" WHEN '-1' THEN (SELECT TOP 1 "QueryDec" FROM "%sNameDB%"."OADM") ELSE B."Decimals" END FROM "%sNameDB%"."OINV" A LEFT JOIN "%sNameDB%"."OCRN" B ON A."DocCur"=B."CurrCode" WHERE A."DocEntry" = :DocEntry)= '0' THEN REPLACE(TO_DECIMAL((T0."RoundDif"),19,0),',','.')
+					 WHEN (SELECT CASE B."Decimals" WHEN '-1' THEN (SELECT TOP 1 "QueryDec" FROM "%sNameDB%"."OADM") ELSE B."Decimals" END FROM "%sNameDB%"."OINV" A LEFT JOIN "%sNameDB%"."OCRN" B ON A."DocCur"=B."CurrCode" WHERE A."DocEntry" = :DocEntry)= '1' THEN REPLACE(TO_DECIMAL((T0."RoundDif"),19,1),',','.')
+					 WHEN (SELECT CASE B."Decimals" WHEN '-1' THEN (SELECT TOP 1 "QueryDec" FROM "%sNameDB%"."OADM") ELSE B."Decimals" END FROM "%sNameDB%"."OINV" A LEFT JOIN "%sNameDB%"."OCRN" B ON A."DocCur"=B."CurrCode" WHERE A."DocEntry" = :DocEntry)= '2' THEN REPLACE(TO_DECIMAL((T0."RoundDif"),19,2),',','.')
+					 WHEN (SELECT CASE B."Decimals" WHEN '-1' THEN (SELECT TOP 1 "QueryDec" FROM "%sNameDB%"."OADM") ELSE B."Decimals" END FROM "%sNameDB%"."OINV" A LEFT JOIN "%sNameDB%"."OCRN" B ON A."DocCur"=B."CurrCode" WHERE A."DocEntry" = :DocEntry)= '3' THEN REPLACE(TO_DECIMAL((T0."RoundDif"),19,3),',','.')
+					 WHEN (SELECT CASE B."Decimals" WHEN '-1' THEN (SELECT TOP 1 "QueryDec" FROM "%sNameDB%"."OADM") ELSE B."Decimals" END FROM "%sNameDB%"."OINV" A LEFT JOIN "%sNameDB%"."OCRN" B ON A."DocCur"=B."CurrCode" WHERE A."DocEntry" = :DocEntry)= '4' THEN REPLACE(TO_DECIMAL((T0."RoundDif"),19,4),',','.')
+					 WHEN (SELECT CASE B."Decimals" WHEN '-1' THEN (SELECT TOP 1 "QueryDec" FROM "%sNameDB%"."OADM") ELSE B."Decimals" END FROM "%sNameDB%"."OINV" A LEFT JOIN "%sNameDB%"."OCRN" B ON A."DocCur"=B."CurrCode" WHERE A."DocEntry" = :DocEntry)= '5' THEN REPLACE(TO_DECIMAL((T0."RoundDif"),19,5),',','.')
+					 WHEN (SELECT CASE B."Decimals" WHEN '-1' THEN (SELECT TOP 1 "QueryDec" FROM "%sNameDB%"."OADM") ELSE B."Decimals" END FROM "%sNameDB%"."OINV" A LEFT JOIN "%sNameDB%"."OCRN" B ON A."DocCur"=B."CurrCode" WHERE A."DocEntry" = :DocEntry)= '6' THEN REPLACE(TO_DECIMAL((T0."RoundDif"),19,6),',','.')
+                     ELSE '0'  END AS "RedondeoAplicado",
+
+                CASE WHEN (SELECT A."Code" FROM "%sNameDB%"."@BOSERNUM" A WHERE A."Code" = T0."Series") = T0."Series" AND T0."DocSubType" != 'DN' AND T0."ObjType" = '13' THEN '01'
+					 WHEN (SELECT A."Code" FROM "%sNameDB%"."@BOSERNUM" A WHERE A."Code" = T0."Series") = T0."Series" AND T0."DocSubType" != 'DN' AND T0."ObjType" = '13' THEN '03'
+                     WHEN (SELECT A."Code" FROM "%sNameDB%"."@BOSERNUM" A WHERE A."Code" = T0."Series") = T0."Series" AND T0."DocSubType" != 'DN' AND T0."ObjType" = '14' THEN '91'
+					 WHEN (SELECT A."Code" FROM "%sNameDB%"."@BOSERNUM" A WHERE A."Code" = T0."Series") = T0."Series" AND T0."DocSubType" = 'DN' AND T0."ObjType" = '13' THEN '92'
+					 ELSE '0' END AS "tipoDocumento",
+
+                (SELECT TOP 1 A."U_BO_TO" FROM "%sNameDB%"."@BOEBILLINGP" A WHERE A."U_BO_Status" = 'Y') AS "tipoOperacion",
+
+                CASE WHEN T0."DocCur"='$' THEN REPLACE(TO_DECIMAL((T0."BaseAmnt"),19,%Decimal%),',','.')
+					 WHEN T0."DocCur"='USD' THEN REPLACE(TO_DECIMAL((T0."BaseAmntFC"),19,%Decimal%),',','.')
+					 ELSE REPLACE(TO_DECIMAL((T0."BaseAmntFC"),19,%Decimal%),',','.')
+					 END AS "totalBaseImponible",
+
+                CASE WHEN T0."DocCur"='USD' THEN REPLACE(TO_DECIMAL((T0."BaseAmntFC"+T0."VatSumFC"+T0."RoundDifFC"),19,%Decimal%),',','.')
+					 WHEN T0."DocCur"='$' THEN REPLACE(TO_DECIMAL((T0."BaseAmnt"+T0."VatSum"+T0."RoundDif"+(SELECT IFNULL(SUM(A."WTAmnt"),0) FROM "%sNameDB%"."INV5" A INNER JOIN "%sNameDB%"."OWHT" B ON A."WTCode"=B."WTCode" WHERE A."AbsEntry" = :DocEntry AND B."U_HBT_TipRet" = '1')),19,%Decimal%),',','.')
+					 ELSE REPLACE(TO_DECIMAL((T0."BaseAmntFC"+T0."VatSumFC"+T0."RoundDifFC"),19,%Decimal%),',','.')
+					 END AS "totalBrutoConImpuesto",
+
+                CASE WHEN T0."DocCur"='USD' THEN REPLACE(TO_DECIMAL((T0."BaseAmntFC"+T0."VatSumFC"+T0."RoundDifFC"),19,%Decimal%),',','.')
+					 WHEN T0."DocCur"='$' THEN REPLACE(TO_DECIMAL((T0."BaseAmnt"+T0."VatSum"+T0."RoundDif"+(SELECT IFNULL(SUM(A."WTAmnt"),0) FROM "%sNameDB%"."INV5" A INNER JOIN "%sNameDB%"."OWHT" B ON A."WTCode"=B."WTCode" WHERE A."AbsEntry" = :DocEntry AND B."U_HBT_TipRet" = '1')),19,%Decimal%),',','.')
+					 ELSE REPLACE(TO_DECIMAL((T0."BaseAmntFC"+T0."VatSumFC"+T0."RoundDifFC"),19,%Decimal%),',','.')
+					 END AS "totalMonto",
+
+                (SELECT COUNT(A."ItemCode") FROM "%sNameDB%"."INV1" A LEFT JOIN "%sNameDB%"."OINV" B ON A."DocEntry"=B."DocEntry"  WHERE A."DocEntry" = :DocEntry AND b."DocSubType" = 'DN' ) AS "totalProductos",
+
+                CASE WHEN T0."DocCur"='$' THEN REPLACE(TO_DECIMAL((T0."BaseAmnt"),19,%Decimal%),',','.')
+					 WHEN T0."DocCur"='USD' THEN REPLACE(TO_DECIMAL((T0."BaseAmntFC"),19,%Decimal%),',','.')
+					 ELSE REPLACE(TO_DECIMAL((T0."BaseAmntFC"),19,%Decimal%),',','.') 
+					 END AS "totalSinImpuestos",
+					 
+				 T0."U_BO_DESC" AS "Desc_Codigo",
+				
+				'Descuento Comercial' AS "Desc_descripcion",
+				
+				'0' AS "Desc_indicador",
+				
+				REPLACE(TO_DECIMAL((T0."DiscSum"),19,0),',','.') AS "Desc_monto",
+				
+				((SELECT TOP 1 SUM(A."BaseSum") FROM "%sNameDB%"."INV4" A WHERE A."DocEntry" = :DocEntry)+T0."DiscSum") AS "Desc_montoBase",
+				
+				T0."DiscPrcnt" AS "Desc_porcentaje",
+				
+				'0' AS "Desc_secuencia",		
+
+                CASE WHEN (SELECT "U_BO_Pref" FROM "%sNameDB%"."@BOEBILLINGP" WHERE "U_BO_Status"='Y') = 'Y' THEN (T8."U_BO_PREF"||T0."DocNum") 
+                	 ELSE CAST(T0."DocNum" AS NVARCHAR(20)) END
+                	 AS "consecutivoDocumento",
+				
+				T8."U_BO_PREF" AS "Prefijo",
+
+                TO_VARCHAR(T0."DocDate", 'YYYY-MM-DD') || ' 00:00:00' AS "fechaEmision",
+				
+				TO_VARCHAR(T0."DocDueDate", 'YYYY-MM-DD') AS "fechaDeVencimiento",
+
+                T5."U_HBT_ActEco" AS "actividadEconomicaCIIU",
+
+                '0' AS "canalDeEntrega",
+
+                CASE WHEN T5."U_BO_E_mail_1" IS NULL THEN (SELECT TOP 1 A."U_BO_EmailGen" FROM "%sNameDB%"."@BOEBILLINGP" A WHERE A."U_BO_Status" = 'Y') ELSE T5."U_BO_E_mail_1" END  AS "correoEntrega1",
+				
+				T5."U_BO_E_mail_2" AS "correoEntrega2",
+
+				T5."U_BO_E_mail_3" AS "correoEntrega3",
+
+				T5."U_BO_E_mail_4" AS "correoEntrega4",
+
+				T5."U_BO_E_mail_5" AS "correoEntrega5",
+
+                TO_VARCHAR(T0."DocDate", 'YYYY-MM-DD') || ' 00:00:00' AS "fechaProgramada",
+
+                '1' AS "nitProveedorReceptor",
+
+                T5."Phone1" AS "telefono",
+
+                '01' AS "codigoImpuesto",
+
+                T4."CityB" AS "ciudad",
+
+                T13."U_BO_CD" AS "codigoDepartamento",
+
+                T13."Name" AS "departamento",
+
+                T4."StreetB" AS "direccion",
+
+                'es' AS "lenguaje",
+
+                T5."U_HBT_MunMed" AS "municipio",
+
+                'CO' AS "pais",
+
+                T4."ZipCodeB" AS "zonaPostal",
+
+                CASE WHEN T5."U_BO_E_mail_1" IS NULL THEN (SELECT TOP 1 A."U_BO_EmailGen" FROM "%sNameDB%"."@BOEBILLINGP" A WHERE A."U_BO_Status" = 'Y') ELSE T5."U_BO_E_mail_1" END AS "email",
+
+                '' AS "codigoEstablecimiento",
+
+                T5."CardName" AS "nombreRegistroRUT",
+
+                CASE T5."U_HBT_TipDoc" WHEN '31' THEN SUBSTRING(T5."LicTradNum",1,LOCATE(T5."LicTradNum",'-')-1)
+  				ELSE T5."LicTradNum" END AS "numeroIdentificacion",
+
+                CASE T5."U_HBT_TipDoc" WHEN '31' THEN RIGHT(T5."LicTradNum",1)
+                ELSE '' END AS "numeroIdentificacionDV",
+
+                T5."U_HBT_TipDoc" AS "tipoIdentificacion",
+
+                T5."CardName" AS "nombreRazonSocial",
+
+                CASE WHEN T0."U_BO_EE" = 'Y' THEN 'SI'
+                ELSE 'NO' END AS "notificar",
+
+                CASE T5."U_HBT_TipDoc" WHEN '31' THEN SUBSTRING(T5."LicTradNum",1,LOCATE(T5."LicTradNum",'-')-1)
+  				ELSE T5."LicTradNum" END AS "numeroDocumento",
+
+                T5."U_BO_RF" AS "obligaciones",
+
+                T5."U_BO_TR" AS "regimen",
+
+                T5."U_HBT_TipDoc" AS "tipoIdentificacion",
+
+                CASE T5."U_HBT_TipEnt" WHEN '1' THEN '1'
+									   WHEN '2' THEN '2'
+									   ELSE T5."U_HBT_TipEnt" 
+									   END AS "tipoPersona",
+
+                T0."U_BO_MP" AS "medioPago",
+
+                CASE WHEN T11."ExtraDays" > '0' THEN '2'
+                	 ELSE '1' END AS "FormaPago",
+
+		
+		        '01' AS "numeroDeReferencia",
+		                
+		        T0."U_BO_TipND" AS "codigoEstatusDocumento",
+		
+				'4' AS "codigoInterno",
+		
+				T0."U_BO_AFV" AS "No_FV",
+		
+				T0."U_BO_EBC" AS "Comentarios_NC"
+
+        FROM "%sNameDB%"."OINV" T0 LEFT JOIN "%sNameDB%"."INV12" T4 ON T0."DocEntry"=T4."DocEntry"
+                                 LEFT JOIN "%sNameDB%"."OCRD" T5 ON T0."CardCode" = T5."CardCode"
+                                 LEFT JOIN "%sNameDB%"."NNM1" T6 ON T0."Series"=T6."Series" AND T6."ObjectCode" = '13'
+                                 LEFT OUTER JOIN "%sNameDB%"."OSLP" T7 ON T0."SlpCode" = T7."SlpCode"
+                                 LEFT JOIN "%sNameDB%"."@BOSERNUM" T8 ON T0."Series"=T8."Code"
+                                 LEFT JOIN "%sNameDB%"."OCTG" T11 ON T0."GroupNum"=T11."GroupNum"
+                                 LEFT JOIN "%sNameDB%"."OSHP" T12 ON T0."TrnspCode" = T12."TrnspCode"
+                                 LEFT JOIN "%sNameDB%"."OCST" T13 ON T4."StateB" = T13."Code" AND T13."Country" ='CO'
+
+        WHERE T0."DocEntry" = :DocEntry AND T0."DocSubType" = 'DN'; 
+
+        ELSEIF ( :Object = '13_ND' AND :Tipo = 'Lineas')
+
+          THEN
+
+            SELECT '1' AS "cantidadPorEmpaque",
+
+                   REPLACE(TO_DECIMAL((T0."Quantity"),19,%Decimal%),',','.') AS "cantidadReal",
+                   
+                   CASE WHEN T2."U_BO_UMDIAN" IS NULL THEN T1."SalUnitMsr"
+                   		ELSE T2."U_BO_UMDIAN" END AS "cantidadRealUnidadMedida",
+
+                   REPLACE(TO_DECIMAL((T0."Quantity"),19,%Decimal%),',','.') AS "cantidadUnidades",
+				  
+                   T0."ItemCode" AS "codigoProducto",
+                   T0."Dscription" AS "descripcion",
+                   '999' AS "estandarCodigo",
+                   T0."ItemCode" AS "estandarCodigoProducto",
+				   
+				   REPLACE(TO_DECIMAL((T0."LineTotal"),19,%Decimal%),',','.') AS "baseImponibleTOTALImp",
+				  
+                  
+                  '01' AS "codigoTOTALImp",
+                  '' AS "controlInterno",
+                  
+				  REPLACE(TO_DECIMAL((T0."VatPrcnt"),19,%Decimal%),',','.') AS "porcentajeTOTALImp",
+				  
+                  '' AS "unidadMedida",
+                  '' AS "unidadMedidaTributo",
+                  
+				  REPLACE(TO_DECIMAL((T0."VatSum"),19,%Decimal%),',','.') AS "valorTOTALImp",
+				  
+                  '' AS "valorTributoUnidad",
+				  
+				  REPLACE(TO_DECIMAL((T0."VatSum"),19,%Decimal%),',','.') AS "montoTotal",
+				                   
+				  '' AS "marca",
+                  '0' AS "muestraGratis",
+                  
+				  REPLACE(TO_DECIMAL((T0."LineTotal" + T0."VatSum"),19,%Decimal%),',','.') AS "precioTotal",
+				  REPLACE(TO_DECIMAL((T0."LineTotal"),19,%Decimal%),',','.') AS "precioTotalSinImpuestos",
+				  REPLACE(TO_DECIMAL((T0."Price"),19,%Decimal%),',','.') AS "precioVentaUnitario",
+				  
+				  T0."VisOrder"+1 AS "secuencia",
+                  CASE WHEN T2."U_BO_UMDIAN" IS NULL THEN T1."SalUnitMsr"
+                 	   ELSE T2."U_BO_UMDIAN" END AS "unidadMedida",
+                 	   
+                   REPLACE(TO_DECIMAL((T0."DiscPrcnt"),19,%Decimal%),',','.') AS "Desc_porcentaje",
+
+                  'Descuento Comercial' AS "Desc_descripcion",
+
+                  '0' AS "Desc_indicador",
+                   
+                   CASE WHEN T0."DiscPrcnt" = '0' THEN REPLACE(TO_DECIMAL((T0."LineTotal"),19,%Decimal%),',','.')
+                        ELSE REPLACE(TO_DECIMAL((((T0."PriceBefDi"*T0."Quantity")*T0."DiscPrcnt")/100),19,%Decimal%),',','.') END 
+                   AS "Desc_monto",
+
+                   CASE WHEN T0."DiscPrcnt" = '0' THEN REPLACE(TO_DECIMAL((T0."LineTotal"),19,%Decimal%),',','.')
+                        ELSE REPLACE(TO_DECIMAL((T0."PriceBefDi"*T0."Quantity"),19,%Decimal%),',','.') END 
+                   AS "Desc_montoBase",
+
+                  '1' AS "Desc_secuencia" 
+
+            FROM "%sNameDB%"."INV1" T0 LEFT JOIN "%sNameDB%"."OITM" T1 ON T0."ItemCode"=T1."ItemCode"
+            					         LEFT JOIN "%sNameDB%"."@BOUNDMED" T2 ON T1."SalUnitMsr"=T2."Code"
+            					         LEFT JOIN "%sNameDB%"."OINV" T3 ON T0."DocEntry"=T3."DocEntry" 
+            
+            WHERE T0."DocEntry" = :DocEntry AND T3."DocSubType" = 'DN'
+
+            ORDER BY T0."VisOrder" ;
+
+        ELSEIF ( :Object = '13_ND' AND :Tipo = 'Impuestos')
+        
+          THEN
+            --------------------------- Consulta Impuestos IVA ---------------------------------------
+              
+              SELECT REPLACE(TO_DECIMAL((SUM(T0."BaseSum")),19,%Decimal%),',','.') AS "baseImponibleTOTALImp",
+                     
+					 '01' AS "codigoTOTALImp",
+                     
+					 REPLACE(TO_DECIMAL((T0."TaxRate"),19,%Decimal%),',','.') AS "porcentajeTOTALImp",
+					                      
+					 'WSD' AS "unidadMedida",
+                     
+					 REPLACE(TO_DECIMAL((SUM(T0."TaxSum")),19,%Decimal%),',','.') AS "valorTOTALImp"
+					 
+					 
+              FROM "%sNameDB%"."INV4" T0 LEFT JOIN "%sNameDB%"."OINV" T1 ON T0."DocEntry"=T1."DocEntry"
+
+              WHERE T0."DocEntry" = :DocEntry AND T1."DocSubType" = 'DN' AND T0."RelateType" = 1
+              
+              GROUP BY T0."TaxRate"
+              
+              --------------------------- Consulta Impuestos ICA ---------------------------------------------------
+
+              UNION ALL
+
+				SELECT REPLACE(TO_DECIMAL((SUM(T0."U_HBT_BaseRet")),19,%Decimal%),',','.')  AS "baseImponibleTOTALImp",
+	                   
+					   '03' AS "codigoTOTALImp",
+	                   
+					  REPLACE(TO_DECIMAL((SUM(T1."PrctBsAmnt")),19,3),',','.')  AS "porcentajeTOTALImp",
+	                   
+					   'WSD' AS "unidadMedida",
+ 	                   
+					   REPLACE(TO_DECIMAL((SUM(T0."WTAmnt")),19,%Decimal%),',','.')  AS "valorTOTALImp"
+                
+				FROM "%sNameDB%"."INV5" T0 INNER JOIN "%sNameDB%"."OWHT" T1 ON T0."WTCode"=T1."WTCode"
+							 				 LEFT JOIN "%sNameDB%"."OINV" T2 ON T0."AbsEntry"=T2."DocEntry"
+                
+				WHERE T0."AbsEntry" = :DocEntry AND T1."U_HBT_TipRet" = '1' AND T2."DocSubType" = 'DN'
+
+                GROUP BY T1."PrctBsAmnt", T1."U_HBT_TipRet"
+
+
+              --------------------------- Consulta Impuestos RETEIVA ---------------------------------------------------
+
+              UNION ALL
+
+				SELECT REPLACE(TO_DECIMAL((SUM(T0."U_HBT_BaseRet")),19,%Decimal%),',','.')  AS "baseImponibleTOTALImp",
+	                   
+					   '05' AS "codigoTOTALImp",
+	                   
+					  REPLACE(TO_DECIMAL((SUM(T1."PrctBsAmnt")),19,%Decimal%),',','.')  AS "porcentajeTOTALImp",
+	                   
+					   'WSD' AS "unidadMedida",
+ 	                   
+					   REPLACE(TO_DECIMAL((SUM(T0."WTAmnt")),19,%Decimal%),',','.')  AS "valorTOTALImp"
+                
+				FROM "%sNameDB%"."INV5" T0 INNER JOIN "%sNameDB%"."OWHT" T1 ON T0."WTCode"=T1."WTCode"
+							 				 LEFT JOIN "%sNameDB%"."OINV" T2 ON T0."AbsEntry"=T2."DocEntry"
+                
+				WHERE T0."AbsEntry" = :DocEntry AND T1."U_HBT_TipRet" = '2' AND T2."DocSubType" = 'DN'
+
+                GROUP BY T1."PrctBsAmnt", T1."U_HBT_TipRet"
+                
+              --------------------------- Consulta Impuestos Retefuente ---------------------------------------------------
+
+              UNION ALL
+
+				SELECT REPLACE(TO_DECIMAL((SUM(T0."U_HBT_BaseRet")),19,%Decimal%),',','.')  AS "baseImponibleTOTALImp",
+	                   
+					   '06' AS "codigoTOTALImp",
+	                   
+					  REPLACE(TO_DECIMAL((SUM(T1."PrctBsAmnt")),19,%Decimal%),',','.')  AS "porcentajeTOTALImp",
+	                   
+					   'WSD' AS "unidadMedida",
+ 	                   
+					   REPLACE(TO_DECIMAL((SUM(T0."WTAmnt")),19,%Decimal%),',','.')  AS "valorTOTALImp"
+                
+				FROM "%sNameDB%"."INV5" T0 INNER JOIN "%sNameDB%"."OWHT" T1 ON T0."WTCode"=T1."WTCode"
+							 				 LEFT JOIN "%sNameDB%"."OINV" T2 ON T0."AbsEntry"=T2."DocEntry"
+                
+				WHERE T0."AbsEntry" = :DocEntry AND T1."U_HBT_TipRet" = '4' AND T2."DocSubType" = 'DN'
+
+                GROUP BY T1."PrctBsAmnt", T1."U_HBT_TipRet";
+
+
+
+         end if;
+   end
+    
+  </BO_FacturaXML_HBT>
+
+  <BO_FacturaXML_OK1>
+    CREATE PROCEDURE "EZ_COL"."BO_FacturaXML"
+    (
+    DocEntry INT,
+    Object NVARCHAR(10),
+    Tipo NVARCHAR(100)
+    )
+
+    LANGUAGE SQLSCRIPT AS
+
+    BEGIN
+    ------------------------- Facturas de clientes -----------------------------------------
+
+    IF ( :Object = '13' AND :Tipo = 'Encabezado')
+    THEN
+    DECLARE CantidadDecimales INT;
+
+    CantidadDecimales := 1;--(SELECT CASE B."Decimals" WHEN '-1' THEN (SELECT TOP 1 "QueryDec" FROM "OADM") ELSE B."Decimals" END AS 'CantidadDecimales' FROM OINV A LEFT JOIN OCRN B ON A."DocCur"=B."CurrCode" WHERE A."DocEntry" = :DocEntry);
+
+    SELECT  :CantidadDecimales AS "CantidadDecimales",
+
+    CASE T0."DocCur" WHEN '$' THEN 'COP' ELSE T0."DocCur" END AS "Moneda",
+
+    (T6."BeginStr" || '-' || T0."DocNum") AS "RangoNmeracion",
+
+    --CASE :CantidadDecimales WHEN '0' THEN CAST(0 AS decimal(19,0))
+    --					    WHEN '1' THEN CAST(0 AS decimal(19,1))
+    --					    WHEN '2' THEN CAST(0 AS decimal(19,2))
+    --					    WHEN '3' THEN CAST(0 AS decimal(19,3))
+    --					    WHEN '4' THEN CAST(0 AS decimal(19,4))
+    --					    WHEN '5' THEN CAST(0 AS decimal(19,5))
+    --					    WHEN '6' THEN CAST(0 AS decimal(19,6))
+    --					    ELSE 0  END AS "RedondeoAplicado",
+
+    --CASE WHEN (SELECT A."U_BO_SNFV" FROM "@BOEBILLINGP" A WHERE A."U_BO_Status" = 'Y' AND A."U_BO_SNFV" = T0."Series" ) = T0."Series" AND T0."DocSubType" != 'ND' AND T0."ObjType" = '13' THEN '01'
+    --	 WHEN (SELECT A."U_BO_SNFVC" FROM "@BOEBILLINGP" A WHERE A."U_BO_Status" = 'Y' AND A."U_BO_SNFVC" = T0."Series" ) = T0."Series" AND T0."DocSubType" != 'ND' AND T0."ObjType" = '13' THEN '03'
+    --     WHEN (SELECT A."U_BO_SNND" FROM "@BOEBILLINGP" A WHERE A."U_BO_Status" = 'Y' AND A."U_BO_SNND" = T0."Series" ) = T0."Series" AND T0."DocSubType" = 'ND' AND T0."ObjType" = '13' THEN '92'
+    --     ELSE '0' END AS "tipoDocumento",
+
+    --(SELECT TOP 1 A."U_BO_TO" FROM "@BOEBILLINGP" A WHERE A."U_BO_Status" = 'Y') AS "tipoOperacion",
+
+    CASE WHEN T0."DocCur"='$' THEN CAST(T0."DocTotal"-T0."VatSum" AS NUMERIC(19,2))
+    WHEN T0."DocCur"='USD' THEN CAST((T0."DocTotalSy"-T0."VatSumFC") AS NUMERIC(19,2))
+    ELSE CAST((T0."DocTotalSy"-T0."VatSumFC") AS NUMERIC(19,2)) END AS "totalBaseImponible",
+
+    CASE WHEN T0."DocCur"='USD' THEN CAST(T0."DocTotalFC" AS NUMERIC(19,2))
+    WHEN T0."DocCur"='$' THEN CAST(T0."DocTotal" AS NUMERIC(19,2))
+    ELSE CAST(T0."DocTotalFC" AS NUMERIC(19,2)) END AS "totalBrutoConImpuesto",
+
+    CASE WHEN T0."DocCur"='USD' THEN CAST(T0."DocTotalFC" AS NUMERIC(19,2))
+    WHEN T0."DocCur"='$' THEN CAST(T0."DocTotal" AS NUMERIC(19,2))
+    ELSE CAST(T0."DocTotalFC" AS NUMERIC(19,2)) END AS "totalMonto",
+
+    (SELECT COUNT("ItemCode") FROM "INV1" WHERE "DocEntry" = :DocEntry) AS "totalProductos",
+
+    CASE WHEN T0."DocCur"='$' THEN CAST(T0."DocTotal"-T0."VatSum" AS NUMERIC(19,2))
+    WHEN T0."DocCur"='USD' THEN CAST((T0."DocTotalSy"-T0."VatSumFC") AS NUMERIC(19,2))
+    ELSE CAST((T0."DocTotalSy"-T0."VatSumFC") AS NUMERIC(19,2))END AS "totalSinImpuestos",
+
+    T0."DocNum" AS "consecutivoDocumento",
+
+    T0."DocDate" AS "fechaEmision",
+
+    --T5."U_OK1_AC_ECO" AS "actividadEconomicaCIIU",
+
+    '0' AS "canalDeEntrega",
+
+    T5."U_BO_E_mail_1" AS "correoEntrega",
+
+    T0."DocDate"AS "fechaProgramada",
+
+    '1' AS "nitProveedorReceptor",
+
+    T5."Phone1" AS "telefono",
+
+    '01' AS "codigoImpuesto",
+
+    T4."CityB" AS "ciudad",
+
+    T13."U_BO_CD" AS "codigoDepartamento",
+
+    T13."Name" AS "departamento",
+
+    T4."StreetB" AS "direccion",
+
+    'es' AS "lenguaje",
+
+    --5."U_OK1_AC_ECO" AS "municipio",
+
+    'CO' AS "pais",
+
+    T4."ZipCodeB" AS "zonaPostal",
+
+    T5."U_BO_E_mail_1" AS "email",
+
+    '' AS "codigoEstablecimiento",
+
+    T5."CardName" AS "nombreRegistroRUT",
+
+    SUBSTRING(T5."LicTradNum",1,LOCATE('-',T5."LicTradNum")-1) AS "numeroIdentificacion",
+
+    CASE T5."U_BPCO_TDC" WHEN '31' THEN RIGHT(T5."LicTradNum",1)
+    ELSE T5."LicTradNum" END AS "numeroIdentificacionDV",
+
+    T5."U_BPCO_TDC" AS "tipoIdentificacion",
+
+    T5."CardName" AS "nombreRazonSocial",
+
+    'SI' AS "notificar",
+
+    SUBSTRING(T5."LicTradNum",1,LOCATE('-',T5."LicTradNum")-1) AS "numeroDocumento",
+
+    T5."U_BO_RF" AS "obligaciones",
+
+    T5."U_BO_TR" AS "regimen",
+
+    --T5."U_BPCO_TDC" AS "tipoIdentificacion",
+
+    --CASE T5."U_BPCO_TP" WHEN '01' THEN '1'
+    --	 				WHEN '02' THEN '2'
+    --END AS "tipoPersona",
+
+    T0."U_BO_MP" AS "medioPago",
+
+    T0."U_BO_FP" AS "FormaPago",
+
+    '01' AS "numeroDeReferencia"
+
+    FROM "EZ_COL"."OINV" T0 LEFT JOIN "EZ_COL"."INV12" T4 ON T0."DocEntry"=T4."DocEntry"
+    LEFT JOIN "EZ_COL"."OCRD" T5 ON T0."CardCode" = T5."CardCode"
+    LEFT JOIN "EZ_COL"."NNM1" T6 ON T0."Series"=T6."Series" AND T6."ObjectCode" = '13'
+    LEFT OUTER JOIN "EZ_COL"."OSLP" T7 ON T0."SlpCode" = T7."SlpCode"
+    LEFT JOIN "EZ_COL"."@BOEBILLINGP" T8 ON T0."Series"=T8."U_BO_SNFV"
+    LEFT JOIN "EZ_COL"."OCTG" T11 ON T0."GroupNum"=T11."GroupNum"
+    LEFT JOIN "EZ_COL"."OSHP" T12 ON T0."TrnspCode" = T12."TrnspCode"
+    LEFT JOIN "EZ_COL"."OCST" T13 ON T4."StateB" = T13."Code" AND T13."Country" ='CO'
+
+    WHERE T0."DocEntry" = :DocEntry;
+
+    END IF ;
+    END
+
+
+  </BO_FacturaXML_OK1>
+
+  <BO_FacturaXML_EXX>
+    CREATE PROCEDURE [dbo].[BO_FacturaXML]
+    @DocEntry AS INT,
+    @Object AS NVARCHAR(10),
+    @Tipo AS NVARCHAR(100),
+    @Localizacion AS NVARCHAR(4)
+
+    AS
+
+    DECLARE @DocEntryLayout INT
+    DECLARE @ObjectIdLayout NVARCHAR(20)
+    DECLARE @TipoXML NVARCHAR(100)
+    DECLARE @LocalizacionLayout NVARCHAR(4)
+
+    SET @DocEntryLayout = @DocEntry
+    SET @ObjectIdLayout = @Object
+    SET @TipoXML = @Tipo
+    SET @LocalizacionLayout = @Localizacion
+
+    ------------------------- Facturas de clientes -----------------------------------------
+
+    IF (@ObjectIdLayout = '13' AND @TipoXML = 'Encabezado')
+    BEGIN
+
+    IF (@Localizacion = 'OK1')
+    BEGIN
+
+    DECLARE @CantidadDecimales AS INT
+
+    SET @CantidadDecimales = (SELECT CASE B."Decimals" WHEN '-1' THEN (SELECT TOP 1 "QueryDec" FROM "OADM") ELSE B."Decimals" END AS 'CantidadDecimales' FROM OINV A LEFT JOIN OCRN B ON A."DocCur"=B."CurrCode" WHERE A."DocEntry" = @DocEntryLayout)
+
+    SELECT  @CantidadDecimales AS 'CantidadDecimales',
+
+    CASE T0."DocCur" WHEN '$' THEN 'COP'
+    ELSE T0."DocCur" END AS 'Moneda',
+
+    CONCAT(T6."BeginStr",'-',T0."DocNum") AS 'RangoNmeracion',
+
+    CASE @CantidadDecimales WHEN '0' THEN CAST(0 AS decimal(19,0))
+    WHEN '1' THEN CAST(0 AS decimal(19,1))
+    WHEN '2' THEN CAST(0 AS decimal(19,2))
+    WHEN '3' THEN CAST(0 AS decimal(19,3))
+    WHEN '4' THEN CAST(0 AS decimal(19,4))
+    WHEN '5' THEN CAST(0 AS decimal(19,5))
+    WHEN '6' THEN CAST(0 AS decimal(19,6))
+    ELSE 0  END AS 'RedondeoAplicado',
+
+    CASE WHEN (SELECT TOP 1 A."U_BO_SNFV" FROM [@BOEBILLINGP] A WHERE A."U_BO_Status" = 'Y' AND A."U_BO_SNFV" = T0."Series" ) = T0."Series" AND T0."DocSubType" = '--' AND T0."ObjType" = '13' THEN '01'
+    WHEN (SELECT TOP 1 A."U_BO_SNFVC" FROM [@BOEBILLINGP] A WHERE A."U_BO_Status" = 'Y' AND A."U_BO_SNFVC" = T0."Series" ) = T0."Series" AND T0."DocSubType" = '--' AND T0."ObjType" = '13' THEN '03'
+    WHEN (SELECT TOP 1 A."U_BO_SNND" FROM [@BOEBILLINGP] A WHERE A."U_BO_Status" = 'Y' AND A."U_BO_SNND" = T0."Series" ) = T0."Series" AND T0."DocSubType" = 'ND' AND T0."ObjType" = '13' THEN '92'
+    ELSE '0' END AS 'tipoDocumento',
+
+    (SELECT TOP 1 A."U_BO_TO" FROM [@BOEBILLINGP] A WHERE A."U_BO_Status" = 'Y') AS 'tipoOperacion',
+
+    CASE WHEN T0."DocCur"='$' THEN CAST(T0."DocTotal"-T0."VatSum" AS NUMERIC(19,2))
+    WHEN T0."DocCur"='USD' THEN CAST((T0."DocTotalSy"-T0."VatSumFC") AS NUMERIC(19,2))
+    ELSE CAST((T0."DocTotalSy"-T0."VatSumFC") AS NUMERIC(19,2))
+    END AS 'totalBaseImponible',
+
+    CASE WHEN T0."DocCur"='USD' THEN CAST(T0."DocTotalFC" AS NUMERIC(19,2))
+    WHEN T0."DocCur"='$' THEN CAST(T0."DocTotal" AS NUMERIC(19,2))
+    ELSE CAST(T0."DocTotalFC" AS NUMERIC(19,2))
+    END AS 'totalBrutoConImpuesto',
+
+    CASE WHEN T0."DocCur"='USD' THEN CAST(T0."DocTotalFC" AS NUMERIC(19,2))
+    WHEN T0."DocCur"='$' THEN CAST(T0."DocTotal" AS NUMERIC(19,2))
+    ELSE CAST(T0."DocTotalFC" AS NUMERIC(19,2))
+    END AS 'totalMonto',
+
+    (SELECT COUNT("ItemCode") FROM "INV1" WHERE DocEntry = @DocEntry) AS 'totalProductos',
+
+    CASE WHEN T0."DocCur"='$' THEN CAST(T0."DocTotal"-T0."VatSum" AS NUMERIC(19,2))
+    WHEN T0."DocCur"='USD' THEN CAST((T0."DocTotalSy"-T0."VatSumFC") AS NUMERIC(19,2))
+    ELSE CAST((T0."DocTotalSy"-T0."VatSumFC") AS NUMERIC(19,2))
+    END AS 'totalSinImpuestos',
+
+    T0."DocNum" AS "consecutivoDocumento",
+
+    FORMAT (T0."DocDate", 'yyyy-MM-dd 00:00:00 ') AS 'fechaEmision',
+
+    T5."U_OK1_AC_ECO" AS 'actividadEconomicaCIIU',
+
+    '0' AS 'canalDeEntrega',
+
+    T5."U_BO_E_mail_1" AS "correoEntrega",
+
+    FORMAT (T0."DocDate", 'yyyy-MM-dd 00:00:00 ') AS 'fechaProgramada',
+
+    '1' AS 'nitProveedorReceptor',
+
+    T5."Phone1" AS 'telefono',
+
+    '01' AS 'codigoImpuesto',
+
+    T4."CityB" AS 'ciudad',
+
+    T13."U_BO_CD" AS 'codigoDepartamento',
+
+    T13."Name" AS 'departamento',
+
+    T4."StreetB" AS 'direccion',
+
+    'es' AS 'lenguaje',
+
+    T5."U_OK1_AC_ECO" AS 'municipio',
+
+    'CO' AS 'pais',
+
+    T4."ZipCodeB" AS 'zonaPostal',
+
+    T5."U_BO_E_mail_1" AS "email",
+
+    '' AS 'codigoEstablecimiento',
+
+    T5."CardName" AS 'nombreRegistroRUT',
+
+    SUBSTRING(T5."LicTradNum",1,CHARINDEX('-',T5."LicTradNum")-1) AS 'numeroIdentificacion',
+
+    CASE T5."U_BPCO_TDC" WHEN '31' THEN RIGHT(T5."LicTradNum",1)
+    ELSE T5."LicTradNum" END AS 'numeroIdentificacionDV',
+
+    T5."U_BPCO_TDC" AS 'tipoIdentificacion',
+
+    T5."CardName" AS 'nombreRazonSocial',
+
+    'SI' AS 'notificar',
+
+    SUBSTRING(T5."LicTradNum",1,CHARINDEX('-',T5."LicTradNum")-1) AS 'numeroDocumento',
+
+    T5."U_BO_RF" AS 'obligaciones',
+
+    T5."U_BO_TR" AS 'regimen',
+
+    T5."U_BPCO_TDC" AS 'tipoIdentificacion',
+
+    CASE T5."U_BPCO_TP" WHEN '01' THEN '1'
+    WHEN '02' THEN '2'
+    END AS 'tipoPersona',
+
+    T0."U_BO_MP" AS 'medioPago',
+
+    T0."U_BO_FP" AS 'FormaPago',
+
+    '01' AS 'numeroDeReferencia'
+
+
+    FROM "OINV" T0 LEFT JOIN "INV12" T4 ON T0."DocEntry"=T4."DocEntry"
+    LEFT JOIN "OCRD" T5 ON T0."CardCode" = T5."CardCode"
+    LEFT JOIN "NNM1" T6 ON T0."Series"=T6."Series" AND T6."ObjectCode" = '13'
+    LEFT OUTER JOIN "OSLP" T7 ON T0."SlpCode" = T7."SlpCode"
+    LEFT JOIN [@BOEBILLINGP] T8 ON T0."Series"=T8."U_BO_SNFV"
+    LEFT JOIN "OCTG" T11 ON T0."GroupNum"=T11."GroupNum"
+    LEFT JOIN "OSHP" T12 ON T0."TrnspCode" = T12."TrnspCode"
+    LEFT JOIN "OCST" T13 ON T4."StateB" = T13."Code" AND T13."Country" ='CO'
+
+    WHERE T0."DocEntry" = @DocEntryLayout
+    END
+    END
+
+    ELSE IF (@ObjectIdLayout = '13' AND @TipoXML = 'Lineas')
+    BEGIN
+
+    IF (@Localizacion = 'OK1')
+    BEGIN
+
+    SELECT '1' AS 'cantidadPorEmpaque',
+    T0."Quantity" AS 'cantidadReal',
+
+    CASE T0."UnitMsr" WHEN 'UND' THEN '94'
+    ELSE T0."UnitMsr" END AS 'cantidadRealUnidadMedida',
+
+    T0."Quantity" AS 'cantidadUnidades',
+    T0."ItemCode" AS 'codigoProducto',
+    T0."Dscription" AS 'descripcion',
+    '999' AS 'estandarCodigo',
+    T0."ItemCode" AS 'estandarCodigoProducto',
+    T0."LineTotal" AS 'baseImponibleTOTALImp',
+    '01' AS 'codigoTOTALImp',
+    '' AS 'controlInterno',
+    T0."VatPrcnt" AS 'porcentajeTOTALImp',
+    '' AS 'unidadMedida',
+    '' AS 'unidadMedidaTributo',
+    T0."VatSum" AS 'valorTOTALImp',
+    '' AS 'valorTributoUnidad',
+    T0."LineTotal" AS 'montoTotal',
+    '' AS 'marca',
+    '0' AS 'muestraGratis',
+    T0."LineTotal" + T0."VatSum" AS 'precioTotal',
+    T0."LineTotal" AS 'precioTotalSinImpuestos',
+    T0."Price" AS 'precioVentaUnitario',
+    T0."VisOrder"+1 AS 'secuencia',
+    T0."UnitMsr" AS 'unidadMedida'
+
+    FROM "INV1" T0
+    WHERE DocEntry = @DocEntryLayout
+    ORDER BY T0."VisOrder"
+
+    END
+
+    END
+
+    ELSE IF (@ObjectIdLayout = '13' AND @TipoXML = 'Impuestos')
+    BEGIN
+    IF (@Localizacion = 'OK1')
+    BEGIN
+
+    SELECT SUM(T0."BaseSum") AS 'baseImponibleTOTALImp',
+    '01' AS 'codigoTOTALImp',
+    T0."TaxRate" AS 'porcentajeTOTALImp',
+    'WSD' AS 'unidadMedida',
+    SUM(T0."TaxSum") AS 'valorTOTALImp'
+    FROM INV4 T0
+    WHERE T0."DocEntry" = @DocEntryLayout
+    GROUP BY T0."TaxRate"
+
+    END
+    END
+
+  </BO_FacturaXML_EXX> 
+
+</Queries>

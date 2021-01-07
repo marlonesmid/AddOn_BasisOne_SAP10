@@ -1,0 +1,10 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<Application>
+  <Menus>
+    <action type="remove">
+      <Menu UniqueID="mnuBasisOne"></Menu>
+    </action>
+  </Menus>
+</Application>
+
+

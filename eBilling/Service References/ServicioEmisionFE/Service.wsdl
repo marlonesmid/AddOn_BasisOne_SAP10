@@ -1,0 +1,335 @@
+<?xml version="1.0" encoding="utf-8"?>
+<wsdl:definitions xmlns:wsap="http://schemas.xmlsoap.org/ws/2004/08/addressing/policy" xmlns:wsa10="http://www.w3.org/2005/08/addressing" xmlns:tns="http://tempuri.org/" xmlns:msc="http://schemas.microsoft.com/ws/2005/12/wsdl/contract" xmlns:soapenc="http://schemas.xmlsoap.org/soap/encoding/" xmlns:wsx="http://schemas.xmlsoap.org/ws/2004/09/mex" xmlns:wsp="http://schemas.xmlsoap.org/ws/2004/09/policy" xmlns:wsam="http://www.w3.org/2007/05/addressing/metadata" xmlns:wsa="http://schemas.xmlsoap.org/ws/2004/08/addressing" xmlns:wsaw="http://www.w3.org/2006/05/addressing/wsdl" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" xmlns:soap12="http://schemas.xmlsoap.org/wsdl/soap12/" xmlns:wsu="http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-utility-1.0.xsd" xmlns:xsd="http://www.w3.org/2001/XMLSchema" name="Service" targetNamespace="http://tempuri.org/" xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/">
+  <wsp:Policy wsu:Id="BasicHttpsBinding_IService_policy">
+    <wsp:ExactlyOne>
+      <wsp:All>
+        <sp:TransportBinding xmlns:sp="http://schemas.xmlsoap.org/ws/2005/07/securitypolicy">
+          <wsp:Policy>
+            <sp:TransportToken>
+              <wsp:Policy>
+                <sp:HttpsToken RequireClientCertificate="false" />
+              </wsp:Policy>
+            </sp:TransportToken>
+            <sp:AlgorithmSuite>
+              <wsp:Policy>
+                <sp:Basic256 />
+              </wsp:Policy>
+            </sp:AlgorithmSuite>
+            <sp:Layout>
+              <wsp:Policy>
+                <sp:Strict />
+              </wsp:Policy>
+            </sp:Layout>
+          </wsp:Policy>
+        </sp:TransportBinding>
+      </wsp:All>
+    </wsp:ExactlyOne>
+  </wsp:Policy>
+  <wsdl:types>
+    <xsd:schema targetNamespace="http://tempuri.org/Imports">
+      <xsd:import schemaLocation="http://emision21.thefactoryhka.com.co/ws/v1.0/Service.svc?xsd=xsd0" namespace="http://tempuri.org/" />
+      <xsd:import schemaLocation="http://emision21.thefactoryhka.com.co/ws/v1.0/Service.svc?xsd=xsd1" namespace="http://schemas.microsoft.com/2003/10/Serialization/" />
+      <xsd:import schemaLocation="http://emision21.thefactoryhka.com.co/ws/v1.0/Service.svc?xsd=xsd2" namespace="http://schemas.datacontract.org/2004/07/ServiceSoap.UBL2._0.Models.Object" />
+      <xsd:import schemaLocation="http://emision21.thefactoryhka.com.co/ws/v1.0/Service.svc?xsd=xsd3" namespace="http://schemas.microsoft.com/2003/10/Serialization/Arrays" />
+      <xsd:import schemaLocation="http://emision21.thefactoryhka.com.co/ws/v1.0/Service.svc?xsd=xsd4" namespace="http://schemas.datacontract.org/2004/07/ServiceSoap.UBL2._0.Response" />
+      <xsd:import schemaLocation="http://emision21.thefactoryhka.com.co/ws/v1.0/Service.svc?xsd=xsd5" namespace="http://schemas.datacontract.org/2004/07/ServiceSoap.Models.Response" />
+    </xsd:schema>
+  </wsdl:types>
+  <wsdl:message name="IService_Enviar_InputMessage">
+    <wsdl:part name="parameters" element="tns:Enviar" />
+  </wsdl:message>
+  <wsdl:message name="IService_Enviar_OutputMessage">
+    <wsdl:part name="parameters" element="tns:EnviarResponse" />
+  </wsdl:message>
+  <wsdl:message name="IService_EstadoDocumento_InputMessage">
+    <wsdl:part name="parameters" element="tns:EstadoDocumento" />
+  </wsdl:message>
+  <wsdl:message name="IService_EstadoDocumento_OutputMessage">
+    <wsdl:part name="parameters" element="tns:EstadoDocumentoResponse" />
+  </wsdl:message>
+  <wsdl:message name="IService_EnvioCorreo_InputMessage">
+    <wsdl:part name="parameters" element="tns:EnvioCorreo" />
+  </wsdl:message>
+  <wsdl:message name="IService_EnvioCorreo_OutputMessage">
+    <wsdl:part name="parameters" element="tns:EnvioCorreoResponse" />
+  </wsdl:message>
+  <wsdl:message name="IService_DescargaPDF_InputMessage">
+    <wsdl:part name="parameters" element="tns:DescargaPDF" />
+  </wsdl:message>
+  <wsdl:message name="IService_DescargaPDF_OutputMessage">
+    <wsdl:part name="parameters" element="tns:DescargaPDFResponse" />
+  </wsdl:message>
+  <wsdl:message name="IService_DescargaXML_InputMessage">
+    <wsdl:part name="parameters" element="tns:DescargaXML" />
+  </wsdl:message>
+  <wsdl:message name="IService_DescargaXML_OutputMessage">
+    <wsdl:part name="parameters" element="tns:DescargaXMLResponse" />
+  </wsdl:message>
+  <wsdl:message name="IService_FoliosRestantes_InputMessage">
+    <wsdl:part name="parameters" element="tns:FoliosRestantes" />
+  </wsdl:message>
+  <wsdl:message name="IService_FoliosRestantes_OutputMessage">
+    <wsdl:part name="parameters" element="tns:FoliosRestantesResponse" />
+  </wsdl:message>
+  <wsdl:message name="IService_CargarCertificado_InputMessage">
+    <wsdl:part name="parameters" element="tns:CargarCertificado" />
+  </wsdl:message>
+  <wsdl:message name="IService_CargarCertificado_OutputMessage">
+    <wsdl:part name="parameters" element="tns:CargarCertificadoResponse" />
+  </wsdl:message>
+  <wsdl:message name="IService_GenerarEvento_InputMessage">
+    <wsdl:part name="parameters" element="tns:GenerarEvento" />
+  </wsdl:message>
+  <wsdl:message name="IService_GenerarEvento_OutputMessage">
+    <wsdl:part name="parameters" element="tns:GenerarEventoResponse" />
+  </wsdl:message>
+  <wsdl:message name="IService_DescargarEventoXML_InputMessage">
+    <wsdl:part name="parameters" element="tns:DescargarEventoXML" />
+  </wsdl:message>
+  <wsdl:message name="IService_DescargarEventoXML_OutputMessage">
+    <wsdl:part name="parameters" element="tns:DescargarEventoXMLResponse" />
+  </wsdl:message>
+  <wsdl:message name="IService_GenerarContenedor_InputMessage">
+    <wsdl:part name="parameters" element="tns:GenerarContenedor" />
+  </wsdl:message>
+  <wsdl:message name="IService_GenerarContenedor_OutputMessage">
+    <wsdl:part name="parameters" element="tns:GenerarContenedorResponse" />
+  </wsdl:message>
+  <wsdl:portType name="IService">
+    <wsdl:operation name="Enviar">
+      <wsdl:input wsaw:Action="http://tempuri.org/IService/Enviar" message="tns:IService_Enviar_InputMessage" />
+      <wsdl:output wsaw:Action="http://tempuri.org/IService/EnviarResponse" message="tns:IService_Enviar_OutputMessage" />
+    </wsdl:operation>
+    <wsdl:operation name="EstadoDocumento">
+      <wsdl:input wsaw:Action="http://tempuri.org/IService/EstadoDocumento" message="tns:IService_EstadoDocumento_InputMessage" />
+      <wsdl:output wsaw:Action="http://tempuri.org/IService/EstadoDocumentoResponse" message="tns:IService_EstadoDocumento_OutputMessage" />
+    </wsdl:operation>
+    <wsdl:operation name="EnvioCorreo">
+      <wsdl:input wsaw:Action="http://tempuri.org/IService/EnvioCorreo" message="tns:IService_EnvioCorreo_InputMessage" />
+      <wsdl:output wsaw:Action="http://tempuri.org/IService/EnvioCorreoResponse" message="tns:IService_EnvioCorreo_OutputMessage" />
+    </wsdl:operation>
+    <wsdl:operation name="DescargaPDF">
+      <wsdl:input wsaw:Action="http://tempuri.org/IService/DescargaPDF" message="tns:IService_DescargaPDF_InputMessage" />
+      <wsdl:output wsaw:Action="http://tempuri.org/IService/DescargaPDFResponse" message="tns:IService_DescargaPDF_OutputMessage" />
+    </wsdl:operation>
+    <wsdl:operation name="DescargaXML">
+      <wsdl:input wsaw:Action="http://tempuri.org/IService/DescargaXML" message="tns:IService_DescargaXML_InputMessage" />
+      <wsdl:output wsaw:Action="http://tempuri.org/IService/DescargaXMLResponse" message="tns:IService_DescargaXML_OutputMessage" />
+    </wsdl:operation>
+    <wsdl:operation name="FoliosRestantes">
+      <wsdl:input wsaw:Action="http://tempuri.org/IService/FoliosRestantes" message="tns:IService_FoliosRestantes_InputMessage" />
+      <wsdl:output wsaw:Action="http://tempuri.org/IService/FoliosRestantesResponse" message="tns:IService_FoliosRestantes_OutputMessage" />
+    </wsdl:operation>
+    <wsdl:operation name="CargarCertificado">
+      <wsdl:input wsaw:Action="http://tempuri.org/IService/CargarCertificado" message="tns:IService_CargarCertificado_InputMessage" />
+      <wsdl:output wsaw:Action="http://tempuri.org/IService/CargarCertificadoResponse" message="tns:IService_CargarCertificado_OutputMessage" />
+    </wsdl:operation>
+    <wsdl:operation name="GenerarEvento">
+      <wsdl:input wsaw:Action="http://tempuri.org/IService/GenerarEvento" message="tns:IService_GenerarEvento_InputMessage" />
+      <wsdl:output wsaw:Action="http://tempuri.org/IService/GenerarEventoResponse" message="tns:IService_GenerarEvento_OutputMessage" />
+    </wsdl:operation>
+    <wsdl:operation name="DescargarEventoXML">
+      <wsdl:input wsaw:Action="http://tempuri.org/IService/DescargarEventoXML" message="tns:IService_DescargarEventoXML_InputMessage" />
+      <wsdl:output wsaw:Action="http://tempuri.org/IService/DescargarEventoXMLResponse" message="tns:IService_DescargarEventoXML_OutputMessage" />
+    </wsdl:operation>
+    <wsdl:operation name="GenerarContenedor">
+      <wsdl:input wsaw:Action="http://tempuri.org/IService/GenerarContenedor" message="tns:IService_GenerarContenedor_InputMessage" />
+      <wsdl:output wsaw:Action="http://tempuri.org/IService/GenerarContenedorResponse" message="tns:IService_GenerarContenedor_OutputMessage" />
+    </wsdl:operation>
+  </wsdl:portType>
+  <wsdl:binding name="BasicHttpBinding_IService" type="tns:IService">
+    <soap:binding transport="http://schemas.xmlsoap.org/soap/http" />
+    <wsdl:operation name="Enviar">
+      <soap:operation soapAction="http://tempuri.org/IService/Enviar" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="EstadoDocumento">
+      <soap:operation soapAction="http://tempuri.org/IService/EstadoDocumento" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="EnvioCorreo">
+      <soap:operation soapAction="http://tempuri.org/IService/EnvioCorreo" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="DescargaPDF">
+      <soap:operation soapAction="http://tempuri.org/IService/DescargaPDF" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="DescargaXML">
+      <soap:operation soapAction="http://tempuri.org/IService/DescargaXML" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="FoliosRestantes">
+      <soap:operation soapAction="http://tempuri.org/IService/FoliosRestantes" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="CargarCertificado">
+      <soap:operation soapAction="http://tempuri.org/IService/CargarCertificado" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="GenerarEvento">
+      <soap:operation soapAction="http://tempuri.org/IService/GenerarEvento" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="DescargarEventoXML">
+      <soap:operation soapAction="http://tempuri.org/IService/DescargarEventoXML" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="GenerarContenedor">
+      <soap:operation soapAction="http://tempuri.org/IService/GenerarContenedor" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+  </wsdl:binding>
+  <wsdl:binding name="BasicHttpsBinding_IService" type="tns:IService">
+    <wsp:PolicyReference URI="#BasicHttpsBinding_IService_policy" />
+    <soap:binding transport="http://schemas.xmlsoap.org/soap/http" />
+    <wsdl:operation name="Enviar">
+      <soap:operation soapAction="http://tempuri.org/IService/Enviar" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="EstadoDocumento">
+      <soap:operation soapAction="http://tempuri.org/IService/EstadoDocumento" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="EnvioCorreo">
+      <soap:operation soapAction="http://tempuri.org/IService/EnvioCorreo" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="DescargaPDF">
+      <soap:operation soapAction="http://tempuri.org/IService/DescargaPDF" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="DescargaXML">
+      <soap:operation soapAction="http://tempuri.org/IService/DescargaXML" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="FoliosRestantes">
+      <soap:operation soapAction="http://tempuri.org/IService/FoliosRestantes" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="CargarCertificado">
+      <soap:operation soapAction="http://tempuri.org/IService/CargarCertificado" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="GenerarEvento">
+      <soap:operation soapAction="http://tempuri.org/IService/GenerarEvento" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="DescargarEventoXML">
+      <soap:operation soapAction="http://tempuri.org/IService/DescargarEventoXML" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="GenerarContenedor">
+      <soap:operation soapAction="http://tempuri.org/IService/GenerarContenedor" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+  </wsdl:binding>
+  <wsdl:service name="Service">
+    <wsdl:port name="BasicHttpBinding_IService" binding="tns:BasicHttpBinding_IService">
+      <soap:address location="http://emision21.thefactoryhka.com.co/ws/v1.0/Service.svc" />
+    </wsdl:port>
+    <wsdl:port name="BasicHttpsBinding_IService" binding="tns:BasicHttpsBinding_IService">
+      <soap:address location="https://emision21.thefactoryhka.com.co/ws/v1.0/Service.svc" />
+    </wsdl:port>
+  </wsdl:service>
+</wsdl:definitions>

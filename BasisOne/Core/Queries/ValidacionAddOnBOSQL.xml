@@ -1,0 +1,39 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<Queries>
+  
+  <CheckUserDefineField>
+    SELECT FieldID FROM CUFD WHERE TableID = '%tabla%' AND AliasID = '%AliasID%'
+  </CheckUserDefineField>
+  
+  <ValidacionAddIn>
+    SELECT "U_Licencia" FROM "@BOAdminAddOn" WHERE "Code"='%AddIn%'
+  </ValidacionAddIn>
+
+  <ValidationExistingAddins>
+    SELECT "Code" AS "Code", "U_Version" AS "Version" FROM "@BOADMINADDON" WHERE "Code"='%AddIn%'
+  </ValidationExistingAddins>
+
+  <CheckAddInActivo>
+    SELECT "U_Status", "U_Licencia" FROM "@BOAdminAddOn" WHERE "Code"='%AddInSeleccionado%'
+  </CheckAddInActivo>
+  
+  <GridAddInAvailable>
+    SELECT "Code" AS "AddIn", "Name" AS "Nombre AddIn", "U_Version" AS "Version AddIn" FROM "@BOADMINADDON" WHERE "U_Status" = 'I'
+  </GridAddInAvailable>
+  
+  <GridAddInActive>
+    SELECT "Code" AS "AddIn",
+           "Name" AS "Nombre AddIn",
+           "U_Version" AS "Version AddIn",
+           CASE WHEN "U_Status" = 'A' THEN 'Activo'
+                WHEN "U_Status" = 'I' THEN 'Inactivo'
+                WHEN "U_Status" = 'S' THEN 'Sin licencia"'
+                 ELSE '' END AS "Estado"
+    FROM "@BOADMINADDON"
+    WHERE "U_Status" IN ('A','S')
+  </GridAddInActive>
+  
+  <AddInsActive>
+    SELECT Code FROM [@BOADMINADDON] WHERE  "U_Status" ='A'
+  </AddInsActive>
+</Queries>

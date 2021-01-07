@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<xs:schema xmlns:tns="http://schemas.datacontract.org/2004/07/ServiceSoap.UBL2._0.Models.Object" elementFormDefault="qualified" targetNamespace="http://schemas.datacontract.org/2004/07/ServiceSoap.UBL2._0.Models.Object" xmlns:xs="http://www.w3.org/2001/XMLSchema">
+  <xs:import schemaLocation="http://emision21.thefactoryhka.com.co/ws/adjuntos/Service.svc?xsd=xsd3" namespace="http://schemas.microsoft.com/2003/10/Serialization/Arrays" />
+  <xs:complexType name="CargarAdjuntos">
+    <xs:sequence>
+      <xs:element minOccurs="0" name="archivo" nillable="true" type="xs:base64Binary" />
+      <xs:element xmlns:q1="http://schemas.microsoft.com/2003/10/Serialization/Arrays" minOccurs="0" name="email" nillable="true" type="q1:ArrayOfstring" />
+      <xs:element minOccurs="0" name="enviar" nillable="true" type="xs:string" />
+      <xs:element minOccurs="0" name="formato" nillable="true" type="xs:string" />
+      <xs:element minOccurs="0" name="nombre" nillable="true" type="xs:string" />
+      <xs:element minOccurs="0" name="numeroDocumento" nillable="true" type="xs:string" />
+      <xs:element minOccurs="0" name="tipo" nillable="true" type="xs:string" />
+    </xs:sequence>
+  </xs:complexType>
+  <xs:element name="CargarAdjuntos" nillable="true" type="tns:CargarAdjuntos" />
+</xs:schema>

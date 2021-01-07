@@ -1,0 +1,16 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<Application>
+  <Menus>
+    <action type="update">
+      <Menu Checked="0" Enabled="1" FatherUID="43520" String="BasisOne" Type="2" UniqueID="mnuBasisOne"  >
+        <Menus>
+          <action type="add">
+            <Menu Checked="0" Enabled="1" FatherUID="mnuBasisOne" String="Menu 1" Type="1" UniqueID="mnuPropio1" />
+            <Menu Checked="0" Enabled="1" FatherUID="mnuBasisOne" String="Menu 2" Type="1" UniqueID="mnuPropio2" />
+            <Menu Checked="0" Enabled="1" FatherUID="mnuBasisOne" String="Menu 3" Type="1" UniqueID="mnuPropio3" />
+          </action>
+        </Menus>
+      </Menu>
+    </action>
+  </Menus>
+</Application>

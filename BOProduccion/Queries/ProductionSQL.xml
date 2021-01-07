@@ -1,0 +1,290 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<Queries>
+  <GetWorkOrder>
+    SELECT TOP 1  DocEntry,
+			  DocNum,
+			  ItemCode,
+        (SELECT TOP 1 U_BO_SNPT FROM [@BOPRODP]) AS 'SNPT'
+    FROM OWOR 
+    WHERE UserSign = '%UserSign%' AND U_BO_TO = 'T'
+    ORDER BY DocEntry DESC
+  </GetWorkOrder>
+  
+  <GetWorkOrderLine>
+    SELECT LineNum,
+		       VisOrder,
+		       ItemCode,
+		       PlannedQty,
+		       wareHouse,
+           (SELECT TOP 1 U_BO_SNPS FROM [@BOPRODP]) AS 'SNPS'
+    FROM WOR1 WHERE DocEntry = '%DocEntry%'
+  </GetWorkOrderLine>
+  
+  <SearchBOM>
+    SELECT Code FROM OITT WHERE Code = '%Item%'
+  </SearchBOM>
+
+  <GetNumberSerieActive>
+      SELECT TOP 1 T0.U_BO_SNPT AS 'Code_SNPT',
+			       T1.SeriesName AS 'Name_SNPT',
+			       T0.U_BO_SNPS AS 'Code_SNPS',
+			       T2.SeriesName AS 'Name_SNPS'
+
+      FROM [@BOPRODP] T0 LEFT JOIN NNM1 T1 ON T0.U_BO_SNPT=T1.Series AND  T1.ObjectCode = '202'
+				                 LEFT JOIN NNM1 T2 ON T0.U_BO_SNPS=T2.Series AND  T2.ObjectCode = '202'
+  </GetNumberSerieActive>
+
+  <GetNumberSerieSAP>
+    SELECT Series AS 'Code_SNPSAP',
+		       SeriesName AS 'Name_SNPSAP'
+	  FROM NNM1 WHERE ObjectCode = '202'
+  </GetNumberSerieSAP>
+
+  <GetParametersProduction>
+    select Code from [@BOPRODP]
+  </GetParametersProduction>
+
+  <SerachNextCode>
+    SELECT RIGHT('0000000000' + Ltrim(Rtrim(COUNT(CODE)+1)),10) AS 'ID' FROM [@BOPRODP]
+  </SerachNextCode>
+
+  <GetWorkOrders>
+    EXEC [dbo].[BO_OrdenesProduccion]
+  </GetWorkOrders>
+
+  <GetDocEntryWorkOrder>
+    SELECT DocEntry AS 'DocEntry' FROM OWOR WHERE DocNum = '%DocNum%' AND Series = (SELECT TOP 1 U_BO_SNPS FROM [@BOPRODP])
+  </GetDocEntryWorkOrder>
+
+  <GetMPE>
+    SELECT TOP 100 A.DocEntry,
+        (SELECT TOP 1 DocNum FROM OWOR WHERE DocEntry ='%DocEntryOPS%') AS 'OF',
+		    A.DocNum,
+		    A.DocDate,
+		    B.ItemCode,
+		    b.Dscription,
+		    B.Quantity,
+		    B.WhsCode
+    FROM OIGE A LEFT JOIN IGE1 B ON A.DocEntry=B.DocEntry --IGN1
+    WHERE BaseRef = (SELECT TOP 1 DocNum FROM OWOR WHERE DocEntry ='%DocEntryOPS%')
+  </GetMPE>
+
+  <DeleteProcedure>
+    IF EXISTS (SELECT * FROM sys.objects WHERE type = 'P' AND name = '%sNameProcedure%')
+    BEGIN
+    DROP PROCEDURE %sNameProcedure%
+    END
+  </DeleteProcedure>
+
+  <ProcedureWorkOrder>
+
+    CREATE PROCEDURE [dbo].[BO_OrdenesProduccion]
+
+    AS
+
+    BEGIN
+
+    ------------------------------------- Elimina las tablas temporales -------------------
+
+    IF EXISTS (SELECT 1 FROM tempdb.sys.objects WHERE OBJECT_ID=OBJECT_ID('tempdb..#OrdenesdeProduccion'))
+    BEGIN
+    DROP TABLE #OrdenesdeProduccion
+    END
+
+    IF EXISTS (SELECT 1 FROM tempdb.sys.objects WHERE OBJECT_ID=OBJECT_ID('tempdb..#OrdenesProduccionPT'))
+    BEGIN
+    DROP TABLE #OrdenesProduccionPT
+    END
+
+    IF EXISTS (SELECT 1 FROM tempdb.sys.objects WHERE OBJECT_ID=OBJECT_ID('tempdb..#OrdenesProduccionPS'))
+    BEGIN
+    DROP TABLE #OrdenesProduccionPS
+    END
+
+    ------------------------------------- Creacion las tablas temporales -------------------
+
+    CREATE TABLE #ControlOrdenesdeProduccion
+    (
+    DocEntry INT,
+    DocNumOPT INT,
+    StatusOPT NVARCHAR(50),
+    imgStatus NVARCHAR(254),
+    ItemCodeOPT NVARCHAR(50),
+    ItemNameOPT NVARCHAR(250),
+    WarehouseOPT NVARCHAR(10),
+    PlannedQtyOPT DECIMAL(19,3),
+    ReceivedQtyOPT DECIMAL(19,3),
+    QuantityCOLOROPT NVARCHAR(10),
+    --- Detalle -----------
+    PosIdOPS NVARCHAR(5),
+    EtapaProduccion NVARCHAR(200),
+    StatusOPS NVARCHAR(50),
+    DocEntryOPS NVARCHAR(50),
+    DocNumOPS NVARCHAR(50),
+    ItemCodeOPS NVARCHAR(50),
+    ItemNameOPS NVARCHAR(250),
+    WarehouseOPS NVARCHAR(10),
+    PlannedQtyOPS DECIMAL(19,3),
+    ReceivedQtyOPS DECIMAL(19,3),
+    QuantityCOLOROPS NVARCHAR(10),
+    imgMPDes NVARCHAR(254)
+
+    )
+
+    CREATE TABLE #OrdenesProduccionPT
+    (
+    DocEntry INT,
+    DocNumOPT INT,
+    StatusOPT NVARCHAR(50),
+    imgStatus NVARCHAR(254),
+    ItemCodeOPT NVARCHAR(50),
+    ItemNameOPT NVARCHAR(250),
+    WarehouseOPT NVARCHAR(10),
+    PlannedQtyOPT DECIMAL(19,3),
+    ReceivedQtyOPT DECIMAL(19,3),
+    ItemCodeOPS NVARCHAR(50),
+    EtapaProduccion NVARCHAR(200),
+    LineNum NVARCHAR(5)
+    )
+
+    CREATE TABLE #OrdenesProduccionPS
+    (
+    OPP NVARCHAR(50),
+    PosId NVARCHAR(10),
+    DocEntry INT,
+    DocNumOPS INT,
+    StatusOPS NVARCHAR(50),
+    imgStatus NVARCHAR(254),
+    ItemCodeOPS NVARCHAR(50),
+    ItemNameOPS NVARCHAR(250),
+    WarehouseOPS NVARCHAR(10),
+    PlannedQtyOPS DECIMAL(19,3),
+    ReceivedQtyOPS DECIMAL(19,3),
+    imgMPDes NVARCHAR(254)
+    )
+
+    ---------------------------------------- Busca las ordenes de produccion de Producto terminado -------------------
+
+    INSERT INTO #OrdenesProduccionPT
+
+    SELECT A.DocEntry AS 'DocEntry',
+    A.DocNum AS 'DocNumOPT',
+
+    CASE WHEN A.[Status] = 'P' THEN 'Planificado'
+    WHEN A.[Status] = 'R' THEN 'Liberado'
+    WHEN A.[Status] = 'L' THEN 'Cerrado'
+    WHEN A.[Status] = 'C' THEN 'Cancelado'
+    ELSE '' END AS 'StatusOPT',
+
+    CASE WHEN A.[Status] = 'P' THEN '%sPath%imgPlanificado.bmp'
+    WHEN A.[Status] = 'R' THEN '%sPath%imgLiberado.bmp'
+    WHEN A.[Status] = 'L' THEN '%sPath%imgCerrado.bmp'
+    WHEN A.[Status] = 'C' THEN '%sPath%imgCancelado.bmp'
+    ELSE '' END AS 'imgStatus',
+
+    A.ItemCode AS 'ItemCodeOPT',
+    B.ItemName AS 'ItemNameOPT',
+    A.Warehouse AS 'WarehouseOPT',
+    A.PlannedQty AS 'PlannedQtyOPT',
+
+    (SELECT COALESCE(SUM(T0.Quantity),0) FROM IGN1 T0 WHERE T0.BaseRef = A.DocNum AND T0.ItemCode=A.ItemCode AND T0.WhsCode = A.Warehouse ) AS 'ReceivedQtyOPT',
+
+    ------------ Detalle -------------------------
+    C.ItemCode AS 'ItemCodePS',
+    D.Code AS 'EtapaProduccion',
+    c.VisOrder AS 'LineNum'
+
+    FROM OWOR A LEFT JOIN OITM B ON A.ItemCode=B.ItemCode
+    LEFT JOIN WOR1 C ON A.DocEntry=C.DocEntry
+    LEFT JOIN ORST D ON C.StageId=D.AbsEntry
+
+    WHERE A.U_BO_TO = 'T' AND A.Series = (SELECT TOP 1 U_BO_SNPT FROM [@BOPRODP])
+
+    group by  A.DocEntry, a.DocNum, A.[Status], A.ItemCode, B.ItemName,  A.Warehouse, A.PlannedQty, C.ItemCode, D.Code, C.VisOrder
+    order by DocEntry, LineNum
+
+    ---------------------------------------- Busca las ordenes de produccion de Producto Semielaborado ---------------
+
+    INSERT INTO #OrdenesProduccionPS
+
+    SELECT   A.U_BO_OPP AS 'OPP',
+    A.U_BO_PosId AS 'PosId',
+    A.DocEntry AS 'DocEntry',
+    A.DocNum AS 'DocNumOPS',
+
+    CASE WHEN A.[Status] = 'P' THEN 'Planificado'
+    WHEN A.[Status] = 'R' THEN 'Liberado'
+    WHEN A.[Status] = 'L' THEN 'Cerrado'
+    WHEN A.[Status] = 'C' THEN 'Cancelado'
+    ELSE '' END AS 'StatusOPS',
+
+    CASE WHEN A.[Status] = 'P' THEN '%sPath%imgPlanificado.bmp'
+    WHEN A.[Status] = 'R' THEN '%sPath%imgLiberado.bmp'
+    WHEN A.[Status] = 'L' THEN '%sPath%imgCerrado.bmp'
+    WHEN A.[Status] = 'C' THEN '%sPath%imgCancelado.bmp'
+    ELSE '' END AS 'imgStatus',
+
+    A.ItemCode AS 'ItemCodeOPS',
+    B.ItemName AS 'ItemNameOPS',
+    A.Warehouse AS 'WarehouseOPS',
+    A.PlannedQty AS 'PlannedQtyOPS',
+
+    (SELECT COALESCE(SUM(T0.Quantity),0) FROM IGN1 T0 WHERE T0.BaseRef = A.DocNum AND T0.ItemCode=A.ItemCode AND T0.WhsCode = A.Warehouse ) AS 'ReceivedQtyOPS',
+    '%sPath%imgMPDes.bmp' AS 'imgMPDes'
+
+    FROM OWOR A LEFT JOIN OITM B ON A.ItemCode=B.ItemCode
+
+    WHERE A.U_BO_TO = 'S' AND A.Series = (SELECT TOP 1 U_BO_SNPS FROM [@BOPRODP])
+
+    ---------------------------------------- Inserta la informacion en la tabla final  -------------------------------
+
+    INSERT INTO #ControlOrdenesdeProduccion
+
+    SELECT A.DocEntry,
+    A.DocNumOPT,
+    A.StatusOPT,
+    A.imgStatus,
+    A.ItemCodeOPT,
+    A.ItemNameOPT,
+    A.WarehouseOPT,
+    A.PlannedQtyOPT,
+    A.ReceivedQtyOPT,
+
+    CASE WHEN (A.PlannedQtyOPT-A.ReceivedQtyOPT) = 0 THEN 'VERDE'
+    ELSE 'AZUL' END AS 'QuantityPTE',
+
+    A.LineNum,
+    A.EtapaProduccion,
+    B.StatusOPS,
+    B.DocEntry,
+    B.DocNumOPS,
+    A.ItemCodeOPS,
+    B.ItemNameOPS,
+    B.WarehouseOPS,
+    B.PlannedQtyOPS,
+    B.ReceivedQtyOPS,
+
+    CASE WHEN ( B.PlannedQtyOPS-B.ReceivedQtyOPS) = 0 THEN 'VERDE'
+    ELSE 'AZUL' END AS 'QuantityPTS',
+    B.imgMPDes AS 'imgMPDesc'
+
+
+    FROM #OrdenesProduccionPT A LEFT JOIN #OrdenesProduccionPS B ON A.DocNumOPT=B.OPP AND A.ItemCodeOPS=B.ItemCodeOPS AND A.LineNum=B.PosId
+    ORDER BY A.DocEntry, A.LineNum
+
+    ---------------------------------------- Consulta la orden de fabricación -------------------
+
+    UPDATE #ControlOrdenesdeProduccion
+
+    SET DocNumOPT = NULL, StatusOPT = NULl, ItemCodeOPT = NULL, ItemNameOPT = NULL, WarehouseOPT = NULL, PlannedQtyOPT = NULL, ReceivedQtyOPT = NULL, imgStatus = NULL, QuantityCOLOROPT = null
+    WHERE PosIdOPS NOT IN ('0')
+
+    ---------------------------------------- Consulta la orden de fabricación -------------------
+
+    SELECT * FROM #ControlOrdenesdeProduccion
+
+
+    END
+  </ProcedureWorkOrder>
+  
+</Queries>

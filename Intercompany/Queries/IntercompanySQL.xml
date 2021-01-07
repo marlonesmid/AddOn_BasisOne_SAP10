@@ -1,0 +1,7 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<Queries>
+  <DocsIntercompany>
+    SELECT "DocNum" AS 'Numero documento', "DocDate" AS 'Fecha documento', "Requester" AS 'Solicitante', CASE "U_BO_M" WHEN 'Y' THEN 'Si' WHEN 'N' THEN 'No' ELSE '' END AS 'Integrar Documento', CASE "U_BO_I" WHEN 'Y' THEN 'Si' WHEN 'N' THEN 'No' ELSE '' END AS 'Documento Migrado', CASE "U_BO_TD" WHEN 'O' THEN 'Origen' WHEN 'D' THEN 'Destino' ELSE '' END AS 'Tipo de transacción' FROM "OPRQ" 
+  </DocsIntercompany>
+</Queries>
+

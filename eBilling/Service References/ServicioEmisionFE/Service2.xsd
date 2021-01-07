@@ -1,0 +1,169 @@
+<?xml version="1.0" encoding="utf-8"?>
+<xs:schema xmlns:tns="http://tempuri.org/" elementFormDefault="qualified" targetNamespace="http://tempuri.org/" xmlns:xs="http://www.w3.org/2001/XMLSchema">
+  <xs:import schemaLocation="http://emision21.thefactoryhka.com.co/ws/v1.0/Service.svc?xsd=xsd2" namespace="http://schemas.datacontract.org/2004/07/ServiceSoap.UBL2._0.Models.Object" />
+  <xs:import schemaLocation="http://emision21.thefactoryhka.com.co/ws/v1.0/Service.svc?xsd=xsd4" namespace="http://schemas.datacontract.org/2004/07/ServiceSoap.UBL2._0.Response" />
+  <xs:element name="Enviar">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element minOccurs="0" name="tokenEmpresa" nillable="true" type="xs:string" />
+        <xs:element minOccurs="0" name="tokenPassword" nillable="true" type="xs:string" />
+        <xs:element xmlns:q1="http://schemas.datacontract.org/2004/07/ServiceSoap.UBL2._0.Models.Object" minOccurs="0" name="factura" nillable="true" type="q1:FacturaGeneral" />
+        <xs:element minOccurs="0" name="adjuntos" nillable="true" type="xs:string" />
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="EnviarResponse">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element xmlns:q2="http://schemas.datacontract.org/2004/07/ServiceSoap.UBL2._0.Response" minOccurs="0" name="EnviarResult" nillable="true" type="q2:DocumentResponse" />
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="EstadoDocumento">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element minOccurs="0" name="tokenEmpresa" nillable="true" type="xs:string" />
+        <xs:element minOccurs="0" name="tokenPassword" nillable="true" type="xs:string" />
+        <xs:element minOccurs="0" name="documento" nillable="true" type="xs:string" />
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="EstadoDocumentoResponse">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element xmlns:q3="http://schemas.datacontract.org/2004/07/ServiceSoap.UBL2._0.Response" minOccurs="0" name="EstadoDocumentoResult" nillable="true" type="q3:DocumentStatusResponse" />
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="EnvioCorreo">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element minOccurs="0" name="tokenEmpresa" nillable="true" type="xs:string" />
+        <xs:element minOccurs="0" name="tokenPassword" nillable="true" type="xs:string" />
+        <xs:element minOccurs="0" name="documento" nillable="true" type="xs:string" />
+        <xs:element minOccurs="0" name="correo" nillable="true" type="xs:string" />
+        <xs:element minOccurs="0" name="adjuntos" nillable="true" type="xs:string" />
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="EnvioCorreoResponse">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element xmlns:q4="http://schemas.datacontract.org/2004/07/ServiceSoap.UBL2._0.Response" minOccurs="0" name="EnvioCorreoResult" nillable="true" type="q4:SendEmailResponse" />
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="DescargaPDF">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element minOccurs="0" name="tokenEmpresa" nillable="true" type="xs:string" />
+        <xs:element minOccurs="0" name="tokenPassword" nillable="true" type="xs:string" />
+        <xs:element minOccurs="0" name="documento" nillable="true" type="xs:string" />
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="DescargaPDFResponse">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element xmlns:q5="http://schemas.datacontract.org/2004/07/ServiceSoap.UBL2._0.Response" minOccurs="0" name="DescargaPDFResult" nillable="true" type="q5:DownloadPDFResponse" />
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="DescargaXML">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element minOccurs="0" name="tokenEmpresa" nillable="true" type="xs:string" />
+        <xs:element minOccurs="0" name="tokenPassword" nillable="true" type="xs:string" />
+        <xs:element minOccurs="0" name="documento" nillable="true" type="xs:string" />
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="DescargaXMLResponse">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element xmlns:q6="http://schemas.datacontract.org/2004/07/ServiceSoap.UBL2._0.Response" minOccurs="0" name="DescargaXMLResult" nillable="true" type="q6:DownloadXMLResponse" />
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="FoliosRestantes">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element minOccurs="0" name="tokenEmpresa" nillable="true" type="xs:string" />
+        <xs:element minOccurs="0" name="tokenPassword" nillable="true" type="xs:string" />
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="FoliosRestantesResponse">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element xmlns:q7="http://schemas.datacontract.org/2004/07/ServiceSoap.UBL2._0.Response" minOccurs="0" name="FoliosRestantesResult" nillable="true" type="q7:FoliosRemainingResponse" />
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="CargarCertificado">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element minOccurs="0" name="tokenEmpresa" nillable="true" type="xs:string" />
+        <xs:element minOccurs="0" name="tokenPassword" nillable="true" type="xs:string" />
+        <xs:element minOccurs="0" name="certificado" nillable="true" type="xs:string" />
+        <xs:element minOccurs="0" name="password" nillable="true" type="xs:string" />
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="CargarCertificadoResponse">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element xmlns:q8="http://schemas.datacontract.org/2004/07/ServiceSoap.UBL2._0.Response" minOccurs="0" name="CargarCertificadoResult" nillable="true" type="q8:LoadCertificateResponse" />
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="GenerarEvento">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element minOccurs="0" name="tokenEmpresa" nillable="true" type="xs:string" />
+        <xs:element minOccurs="0" name="tokenPassword" nillable="true" type="xs:string" />
+        <xs:element xmlns:q9="http://schemas.datacontract.org/2004/07/ServiceSoap.UBL2._0.Models.Object" minOccurs="0" name="datosEvento" nillable="true" type="q9:DatosEvento" />
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="GenerarEventoResponse">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element xmlns:q10="http://schemas.datacontract.org/2004/07/ServiceSoap.UBL2._0.Response" minOccurs="0" name="GenerarEventoResult" nillable="true" type="q10:EventoResponse" />
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="DescargarEventoXML">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element minOccurs="0" name="tokenEmpresa" nillable="true" type="xs:string" />
+        <xs:element minOccurs="0" name="tokenPassword" nillable="true" type="xs:string" />
+        <xs:element minOccurs="0" name="documentoEvento" nillable="true" type="xs:string" />
+        <xs:element minOccurs="0" name="documento" nillable="true" type="xs:string" />
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="DescargarEventoXMLResponse">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element xmlns:q11="http://schemas.datacontract.org/2004/07/ServiceSoap.UBL2._0.Response" minOccurs="0" name="DescargarEventoXMLResult" nillable="true" type="q11:DescargarEventoResponse" />
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="GenerarContenedor">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element minOccurs="0" name="tokenEmpresa" nillable="true" type="xs:string" />
+        <xs:element minOccurs="0" name="tokenPassword" nillable="true" type="xs:string" />
+        <xs:element minOccurs="0" name="documento" nillable="true" type="xs:string" />
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="GenerarContenedorResponse">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element xmlns:q12="http://schemas.datacontract.org/2004/07/ServiceSoap.UBL2._0.Response" minOccurs="0" name="GenerarContenedorResult" nillable="true" type="q12:ContenedorResponse" />
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+</xs:schema>

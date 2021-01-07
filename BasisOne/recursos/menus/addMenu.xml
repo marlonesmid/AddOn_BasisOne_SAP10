@@ -1,0 +1,37 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<Application>
+	<Menus>
+		<action type="add">
+			<Menu Checked="0" Enabled="1" FatherUID="43520" String="BasisOne" Type="2" UniqueID="mnuBasisOne" Image="">
+				<Menus>
+					<action type="add">
+						<Menu Checked="0" Enabled="1" FatherUID="mnuBasisOne" String="Gestor AddOn" Type="1" UniqueID="mnuBO_GestorAddOn" Image=""/>
+						<Menu Checked="0" Enabled="1" FatherUID="mnuBasisOne" String="Presupuesto Avanzado" Type="2" UniqueID="mnuBO_Presupuesto" Image="">
+							<Menus>
+								<action type="add">
+									<Menu Checked="0" Enabled="1" FatherUID="mnuBO_Presupuesto" String="Parametrizaciones" Type="2" UniqueID="mnuBO_ParamPresup" Image="">
+										<Menus>
+											<action type="add">
+												<Menu Checked="0" Enabled="1" FatherUID="mnuBO_ParamPresup" String="Configuración" Type="1" UniqueID="mnuBO_ConfPresup" Image=""/>
+												<Menu Checked="0" Enabled="1" FatherUID="mnuBO_ParamPresup" String="Perfiles" Type="1" UniqueID="mnuBO_PerfilPresup" Image=""/>
+											</action>
+										</Menus>
+									</Menu>
+									<Menu Checked="0" Enabled="1" FatherUID="mnuBO_Presupuesto" String="Presupuesto por Cuenta" Type="1" UniqueID="mnuBO_PresupCuenta" Image=""/>
+									<Menu Checked="0" Enabled="1" FatherUID="mnuBO_Presupuesto" String="Presupuesto por Vendedor" Type="1" UniqueID="mnuBO_PresupVendor" Image=""/>
+									<Menu Checked="0" Enabled="1" FatherUID="mnuBO_Presupuesto" String="Presupuesto por Artículo" Type="1" UniqueID="mnuBO_PresupItem" Image=""/>
+									<Menu Checked="0" Enabled="1" FatherUID="mnuBO_Presupuesto" String="Presupuesto por Cliente" Type="1" UniqueID="mnuBO_PresupClienter" Image=""/>
+									<Menu Checked="0" Enabled="1" FatherUID="mnuBO_Presupuesto" String="Presupuesto por Proveedor" Type="1" UniqueID="mnuBO_PresupProv" Image=""/>
+									<Menu Checked="0" Enabled="1" FatherUID="mnuBO_Presupuesto" String="Presupuesto por Proyecto" Type="1" UniqueID="mnuBO_PresupProyec" Image=""/>
+									<Menu Checked="0" Enabled="1" FatherUID="mnuBO_Presupuesto" String="Presupuesto por Dimensión" Type="1" UniqueID="mnuBO_PresupDim" Image=""/>
+									<Menu Checked="0" Enabled="1" FatherUID="mnuBO_Presupuesto" String="Informes de Presupuesto" Type="1" UniqueID="mnuBO_InfoPresup" Image=""/>
+
+								</action>
+							</Menus>
+						</Menu>
+					</action>
+				</Menus>
+			</Menu>
+		</action>
+	</Menus>
+</Application>
