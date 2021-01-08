@@ -16,7 +16,7 @@
     <DebugSymbols>true</DebugSymbols>
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
-    <OutputPath>bin\x86\</OutputPath>
+    <OutputPath>bin\x64\</OutputPath>
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>3</WarningLevel>
@@ -54,6 +54,7 @@
   <ItemGroup>
     <Content Include="Formularios\Control_Production.srf" />
     <Content Include="Formularios\materia_prima_entregada.srf" />
+    <Content Include="Formularios\New_Work_Order.srf" />
     <Content Include="Formularios\parameters_production.srf" />
     <Content Include="Images\imgCancelado.bmp" />
     <Content Include="Images\imgCerrado.bmp" />

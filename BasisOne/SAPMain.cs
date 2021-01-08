@@ -944,6 +944,18 @@ namespace BasisOne
 
                                 #endregion
                             }
+                            else if (pVal.FormType == 65211 && pVal.ItemUID == "FolderBO1" && pVal.Before_Action == true)
+                            {
+                                #region Selecciona el Panel "Ruta de produccion"
+
+                                SAPbouiCOM.Form oFormWorkOrder;
+
+                                oFormWorkOrder = sboapp.Forms.GetFormByTypeAndCount(pVal.FormType, pVal.FormTypeCount);
+                                DllProduction.ChangePaneFolderWorkOrder(oFormWorkOrder);
+
+                                #endregion
+
+                            }
                             else if (pVal.FormUID == "BO_Par_Production" && pVal.ItemUID == "btnCan" && pVal.BeforeAction == true)
                             {
                                 DllFunciones.CloseFormXML(sboapp, "BO_Par_Production");
@@ -971,7 +983,6 @@ namespace BasisOne
                             {
                                 DllFunciones.CloseFormXML(sboapp, "BOFormCOP");
                             }
-
                             else if (pVal.FormUID == "BOFormCOP" && pVal.ItemUID == "btnAct" && pVal.BeforeAction == true)
                             {
                                 #region Actualiza el formulario ordenes de produccion
@@ -987,6 +998,29 @@ namespace BasisOne
 
                                 #endregion
                             }
+                            else if (pVal.FormUID == "BOFormCOP" && pVal.ItemUID == "btnNOP" && pVal.BeforeAction == true)
+                            {
+                                #region Carga formulario nueva orden de produccion
+
+                                try
+                                {
+                                    string ArchivoSRF = "New_Work_Order.srf";
+                                    DllFunciones.LoadFromXML(sboapp, "BOProduction", ref ArchivoSRF);
+
+                                    SAPbouiCOM.Form oFormNOP;
+                                    oFormNOP = sboapp.Forms.Item("BO_New_WO");
+
+                                    DllProduction.ChangueFormParProduction(sboapp, _company, oFormNOP);
+
+                                }
+                                catch (Exception e)
+                                {
+                                    DllFunciones.sendErrorMessage(sboapp, e);
+                                }
+
+                                #endregion
+                            }
+
                             else if (pVal.FormUID == "BOFormMPC" && pVal.ItemUID == "btnSalir" && pVal.BeforeAction == true)
                             {
                                 #region Actualiza el formulario materia prima entregada
@@ -1090,17 +1124,17 @@ namespace BasisOne
 
                         if (TieneLicenciaProduction == true)
                         {
-                            #region Produccion
+                            #region Produccion Avanzada
 
                             if (pVal.FormType == 65211 && pVal.EventType == SAPbouiCOM.BoEventTypes.et_FORM_LOAD && pVal.Before_Action == true)
                             {
-                                SAPbouiCOM.Form oFormProduction;
+                                SAPbouiCOM.Form oFormWorkOrder;
 
-                                oFormProduction = sboapp.Forms.GetFormByTypeAndCount(pVal.FormType, pVal.FormTypeCount);
+                                oFormWorkOrder = sboapp.Forms.GetFormByTypeAndCount(pVal.FormType, pVal.FormTypeCount);
 
                                 if (pVal.EventType == SAPbouiCOM.BoEventTypes.et_FORM_LOAD && pVal.Before_Action == true)
                                 {
-                                    DllProduction.AddItemsToDocumets(oFormProduction);
+                                    DllProduction.AddItemsToWorkOrder(oFormWorkOrder);
                                 }
                             }
 
@@ -1139,7 +1173,7 @@ namespace BasisOne
 
                             #endregion
                         }
-                         if (TieneLicenciaProduction == true)
+                        if (TieneLicenciaProduction == true)
                         {
                             #region Eventos Produccion 
 
@@ -1476,7 +1510,6 @@ namespace BasisOne
                         }
                         catch (Exception e)
                         {
-
                             DllFunciones.sendErrorMessage(sboapp, e);
                         }
 

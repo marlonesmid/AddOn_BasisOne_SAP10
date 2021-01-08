@@ -14,6 +14,81 @@ namespace BOProduccion
     public class Production
     {
 
+        private void AddMatrixToFormWorkOrderRouteProduction(SAPbouiCOM.Form oFormWorkOrder)
+        {
+
+            #region Variables y objetos
+
+            SAPbouiCOM.Matrix oMatrix = null;
+            SAPbouiCOM.Columns oColumns = null;
+            SAPbouiCOM.Column oColumn = null;
+            SAPbouiCOM.Item oItemOrigen = null;
+            SAPbouiCOM.Item oItem = null;
+            SAPbouiCOM.LinkedButton oLink = null;
+
+            oItemOrigen = oFormWorkOrder.Items.Item("37");
+
+            #endregion
+
+            #region Se adiciona la matrix al formulario orden de producción
+
+            //***************************
+            // Adding a Matrix item
+            //***************************
+            oItem = oFormWorkOrder.Items.Add("Matrix1", SAPbouiCOM.BoFormItemTypes.it_MATRIX);
+            oItem.Left = oItemOrigen.Left;
+            oItem.Width = oItemOrigen.Width;
+            oItem.Top = oItemOrigen.Top;
+            oItem.Height = oItemOrigen.Height;
+            oItem.FromPane = 28;
+            oItem.ToPane = 28;
+
+            oMatrix = ((SAPbouiCOM.Matrix)(oItem.Specific));
+            oColumns = oMatrix.Columns;
+
+            #endregion
+
+            #region Columnas Matrix
+
+            //***********************************
+            // Adding Culomn items to the matrix
+            //***********************************
+
+            oColumn = oColumns.Add("#", SAPbouiCOM.BoFormItemTypes.it_EDIT);
+            oColumn.TitleObject.Caption = "#";
+            oColumn.Width = 30;
+            oColumn.Editable = false;
+
+            oColumn = oColumns.Add("Col_0", SAPbouiCOM.BoFormItemTypes.it_EDIT);
+            oColumn.TitleObject.Caption = "Posicion";
+            oColumn.Width = 100;
+            oColumn.Editable = true;
+
+            oLink = ((SAPbouiCOM.LinkedButton)(oColumn.ExtendedObject));
+            oLink.LinkedObject = SAPbouiCOM.BoLinkedObject.lf_BusinessPartner;
+
+            oColumn = oColumns.Add("Col_1", SAPbouiCOM.BoFormItemTypes.it_LINKED_BUTTON);
+            oColumn.TitleObject.Caption = "Cod. Articulo";
+            oColumn.Width = 40;
+            oColumn.Editable = true;
+
+            oColumn = oColumns.Add("Col_2", SAPbouiCOM.BoFormItemTypes.it_EDIT);
+            oColumn.TitleObject.Caption = "Descripcion";
+            oColumn.Width = 40;
+            oColumn.Editable = true;
+
+            oColumn = oColumns.Add("Col_3", SAPbouiCOM.BoFormItemTypes.it_EDIT);
+            oColumn.TitleObject.Caption = "Cantidad";
+            oColumn.Width = 40;
+            oColumn.Editable = true;
+
+            #endregion
+
+
+
+
+        }
+
         public void CreateUDTandUDFProduction(SAPbouiCOM.Application sboapp, SAPbobsCOM.Company oCompany)
         {
             Funciones.Comunes DllFunciones = new Funciones.Comunes();
@@ -23,10 +98,10 @@ namespace BOProduccion
             DllFunciones.ProgressBar(oCompany, sboapp, 16, 1, "Creando Tabla - Parametros Produccion Avanzada, por favor espere...");
             DllFunciones.crearTabla(oCompany, sboapp, "BOPRODP", "BO-Param. Produc. Avan.", SAPbobsCOM.BoUTBTableType.bott_NoObject);
 
-            DllFunciones.ProgressBar(oCompany, sboapp, 16, 1, "Creando Tabla - BORTDC - BO Resgistro de tiempo detallado , por favor espere...");
+            DllFunciones.ProgressBar(oCompany, sboapp, 16, 1, "Creando Tabla - BORTDC - BO Registro de tiempo detallado , por favor espere...");
             DllFunciones.crearTabla(oCompany, sboapp, "BORTDC", "BO-Reg.Tiem.Deta.Ca", SAPbobsCOM.BoUTBTableType.bott_Document);
 
-            DllFunciones.ProgressBar(oCompany, sboapp, 16, 1, "Creando Tabla - BORTDD - BO Resgistro de tiempo detallado , por favor espere...");
+            DllFunciones.ProgressBar(oCompany, sboapp, 16, 1, "Creando Tabla - BORTDD - BO Registro de tiempo detallado , por favor espere...");
             DllFunciones.crearTabla(oCompany, sboapp, "BORTDD", "BO-Reg.Tiem.Deta.De", SAPbobsCOM.BoUTBTableType.bott_DocumentLines);
 
             #endregion
@@ -69,6 +144,16 @@ namespace BOProduccion
 
             DllFunciones.ProgressBar(oCompany, sboapp, 16, 1, "Creando Campo - BORTDD - Hora Hasta ... ");
             DllFunciones.CreaCamposUsr(oCompany, sboapp, BoFieldTypes.db_Date, BoFldSubTypes.st_Time, 254, "", BoYesNoEnum.tNO, null, "@BORTDD", "BO_TF", "Hora hasta");
+
+            DllFunciones.ProgressBar(oCompany, sboapp, 16, 1, "Creando Campo - BONOPD - Codigo Articulo ... ");
+            DllFunciones.CreaCamposUsr(oCompany, sboapp, BoFieldTypes.db_Date, BoFldSubTypes.st_Time, 254, "", BoYesNoEnum.tNO, null, "@BONOPD", "BO_ItemCode", "Codigo articulo");
+
+            DllFunciones.ProgressBar(oCompany, sboapp, 16, 1, "Creando Campo - BONOPD - Descripción ... ");
+            DllFunciones.CreaCamposUsr(oCompany, sboapp, BoFieldTypes.db_Date, BoFldSubTypes.st_Time, 254, "", BoYesNoEnum.tNO, null, "@BONOPD", "BO_Description", "Descripcion");
+
+            DllFunciones.ProgressBar(oCompany, sboapp, 16, 1, "Creando Campo - BONOPD - Cantidad ... ");
+            DllFunciones.CreaCamposUsr(oCompany, sboapp, BoFieldTypes.db_Date, BoFldSubTypes.st_Time, 254, "", BoYesNoEnum.tNO, null, "@BONOPD", "BO_Quantity", "Cantidad");
+
 
 
             #endregion
@@ -541,6 +626,13 @@ namespace BOProduccion
             }
         }
 
+        public void ChangePaneFolderWorkOrder(SAPbouiCOM.Form oFormWorkOrder)
+        {
+            SAPbouiCOM.Form _oFormWorkOrder;
+            _oFormWorkOrder = oFormWorkOrder;
+            _oFormWorkOrder.PaneLevel = 28;
+        }
+
         public void UpdateFormControlProduction(SAPbouiCOM.Application sboapp, SAPbobsCOM.Company oCompany, SAPbouiCOM.Form oFormControlProduction)
         {
             Funciones.Comunes DLLFunciones = new Funciones.Comunes();
@@ -764,7 +856,36 @@ namespace BOProduccion
             }
         }
 
-        public void AddItemsToDocumets(SAPbouiCOM.Form oFormProduction)
+        public void LoadFormNewWorkOrder(SAPbouiCOM.Application sboapp, SAPbobsCOM.Company oCompany, SAPbouiCOM.Form oFormNewWorkOrder)
+        {
+            #region Variables y objetos
+
+            SAPbouiCOM.Matrix oMatrixNOP = (SAPbouiCOM.Matrix)oFormNewWorkOrder.Items.Item("mtxRP").Specific;
+
+            SAPbouiCOM.PictureBox oLogoBO = (SAPbouiCOM.PictureBox)oFormNewWorkOrder.Items.Item("imgLogoBO").Specific;
+
+            #endregion
+
+            #region Centra en pantalla formulario
+
+            oFormNewWorkOrder.Left = (sboapp.Desktop.Width - oFormNewWorkOrder.Width) / 2;
+            oFormNewWorkOrder.Top = (sboapp.Desktop.Height - oFormNewWorkOrder.Height) / 4;
+
+            #endregion
+
+            #region Asignacion Logo BO
+
+            oLogoBO.Picture = (Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().Location) + "\\Core\\Imagenes\\BO.jpg");
+
+            #endregion
+
+            #region Adicionar primera linea en la Matrix
+
+            #endregion
+
+        }
+
+        public void AddItemsToWorkOrder(SAPbouiCOM.Form _oFormWorkOrder)
         {
             #region Variables y objetos 
 
@@ -774,8 +895,8 @@ namespace BOProduccion
             SAPbouiCOM.Item oDataMasterDate = null;
             SAPbouiCOM.StaticText oStaticText = null;
 
-            oUDF = oFormProduction.Items.Item("78");
-            oDataMasterDate = oFormProduction.Items.Item("6");
+            oUDF = _oFormWorkOrder.Items.Item("78");
+            oDataMasterDate = _oFormWorkOrder.Items.Item("6");
 
             #endregion
 
@@ -785,7 +906,7 @@ namespace BOProduccion
             // Se adiciona Label "Tipo de Orden"
             //*******************************************
 
-            oUDFProduction = oFormProduction.Items.Add("lblTO", SAPbouiCOM.BoFormItemTypes.it_STATIC);
+            oUDFProduction = _oFormWorkOrder.Items.Add("lblTO", SAPbouiCOM.BoFormItemTypes.it_STATIC);
             oUDFProduction.Left = oUDF.Left + 130;
             oUDFProduction.Width = oUDF.Width - 50;
             oUDFProduction.Top = oUDF.Top;
@@ -801,7 +922,7 @@ namespace BOProduccion
             // Se adiciona Tex Box "Tipo de Orden"
             //*******************************************
 
-            oUDFProduction = oFormProduction.Items.Add("txtTO", SAPbouiCOM.BoFormItemTypes.it_COMBO_BOX);
+            oUDFProduction = _oFormWorkOrder.Items.Add("txtTO", SAPbouiCOM.BoFormItemTypes.it_COMBO_BOX);
             oUDFProduction.Left = oUDF.Left + 205;
             oUDFProduction.Width = oUDF.Width;
             oUDFProduction.Top = oUDF.Top;
@@ -810,7 +931,7 @@ namespace BOProduccion
 
             oUDFProduction.DisplayDesc = true;
 
-            oFormProduction.DataSources.UserDataSources.Add("cboTO", SAPbouiCOM.BoDataType.dt_SHORT_TEXT, 20);
+            _oFormWorkOrder.DataSources.UserDataSources.Add("cboTO", SAPbouiCOM.BoDataType.dt_SHORT_TEXT, 20);
 
             oTO = ((SAPbouiCOM.ComboBox)(oUDFProduction.Specific));
 
@@ -821,10 +942,44 @@ namespace BOProduccion
             oTO.ValidValues.Add("T", "Producto Terminado");
             oTO.ValidValues.Add("S", "Prodcuto Semielaborado");
 
-            if (oFormProduction.Mode == BoFormMode.fm_ADD_MODE)
+            if (_oFormWorkOrder.Mode == BoFormMode.fm_ADD_MODE)
             {
                 oTO.Select("T", BoSearchKey.psk_ByValue);
             }
+
+            #endregion
+
+            #region Adicion Panel Ruta de produccion
+
+            SAPbouiCOM.Form _oFormWorOrder;
+            SAPbouiCOM.Item _oNewItem;
+            SAPbouiCOM.Item _oItem;
+            SAPbouiCOM.Folder _oFolderItem;
+
+            _oFormWorOrder = _oFormWorkOrder;
+            _oNewItem = _oFormWorOrder.Items.Add("FolderBO1", SAPbouiCOM.BoFormItemTypes.it_FOLDER);
+            _oItem = _oFormWorOrder.Items.Item("234000008");
+
+            _oNewItem.Top = _oItem.Top;
+            _oNewItem.Height = _oItem.Height;
+            _oNewItem.Width = _oItem.Width;
+            _oNewItem.Left = _oItem.Left + _oItem.Width;
+
+            _oFolderItem = ((SAPbouiCOM.Folder)(_oNewItem.Specific));
+
+            _oFolderItem.Caption = "Ruta de Producción";
+
+            _oFolderItem.GroupWith("234000008");
+
+            //ItemsDocuments(_oFormInvoices, _TipoDoc);
+
+            _oFormWorOrder.PaneLevel = 1;
+
+            #endregion
+
+            #region Adicionar Matrix Matrix Ruta de produccion
+
+            AddMatrixToFormWorkOrderRouteProduction(_oFormWorkOrder);
 
             #endregion
 
