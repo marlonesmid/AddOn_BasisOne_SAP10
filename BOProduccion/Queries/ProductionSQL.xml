@@ -286,5 +286,16 @@
 
     END
   </ProcedureWorkOrder>
+
+  <GetSNProduction>
+    
+    (SELECT TOP 1 U_BO_SNPT AS SNPT, U_BO_SNPS AS SNPS FROM [@BOPRODP])
+    
+  </GetSNProduction>
+
+  <GetNextDocNum>
+    SELECT MAX(DocNum+1) AS Consecutivo FROM OWOR WHERE Series = (SELECT TOP 1 U_BO_SNPT FROM [@BOPRODP])
+
+  </GetNextDocNum>
   
 </Queries>

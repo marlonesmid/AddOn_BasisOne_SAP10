@@ -2140,19 +2140,8 @@ IF (@ObjectIdLayout = '13' AND @TipoXML = 'Encabezado')
   </BO_FacturaXML_OK1>
 
   <BO_FacturaXML_BO>
-    USE [TERCIOPELOS]
-GO
-/****** Object:  StoredProcedure [dbo].[BO_FacturaXML]    Script Date: 12/17/2020 7:45:54 AM ******/
-SET ANSI_NULLS ON
-GO
-SET QUOTED_IDENTIFIER ON
-GO
-
-  
     
-  
-    
- ALTER PROCEDURE [dbo].[BO_FacturaXML]
+     CREATE PROCEDURE [dbo].[BO_FacturaXML]
 
       @DocEntry AS INT,
       @Object AS NVARCHAR(10),
@@ -2176,7 +2165,7 @@ GO
 
       BEGIN
 
-		  SET @CantidadDecimales = (SELECT CASE B."Decimals" WHEN '-1' THEN (SELECT TOP 1 "QueryDec" FROM "OADM") ELSE B."Decimals" END AS 'CantidadDecimales' FROM OINV A LEFT JOIN OCRN B ON A."DocCur"=B."CurrCode" WHERE A."DocEntry" = @DocEntryLayout)
+		  SET @CantidadDecimales = 0--(SELECT CASE B."Decimals" WHEN '-1' THEN (SELECT TOP 1 "QueryDec" FROM "OADM") ELSE B."Decimals" END AS 'CantidadDecimales' FROM OINV A LEFT JOIN OCRN B ON A."DocCur"=B."CurrCode" WHERE A."DocEntry" = @DocEntryLayout)
 
 			  SELECT  @CantidadDecimales AS 'CantidadDecimales',
 
@@ -2360,14 +2349,14 @@ GO
 			  SELECT '1' AS 'cantidadPorEmpaque',
 
 					CASE WHEN ISNULL(T0.U_BO_Msvc,'N') = 'N' THEN REPLACE(CONVERT(varchar(50),(CAST(T0."Quantity" AS DECIMAL(19,0))), 0), '.', ',')
-					ELSE '777' END 
+					ELSE '1' END 
 					AS 'cantidadReal',
 
 					  CASE WHEN isnull(T2."U_BO_UMDIAN",'')='' THEN 94
 						   ELSE T2."U_BO_UMDIAN"
 					  END AS 'cantidadRealUnidadMedida',
 
-					  CASE WHEN ISNULL(T0.U_BO_Msvc,'0') = '0' THEN REPLACE(CONVERT(varchar(50),(CAST(T0."Quantity" AS DECIMAL(19,0))), 0), '.', ',')
+					  CASE WHEN  ISNULL(T0.U_BO_Msvc,'N') = 'N' THEN REPLACE(CONVERT(varchar(50),(CAST(T0."Quantity" AS DECIMAL(19,0))), 0), '.', ',')
 					  ELSE '1' END 
 					  AS 'cantidadUnidades',
 
@@ -2376,9 +2365,8 @@ GO
 					  '999' AS 'estandarCodigo',
 					  T0."ItemCode" AS 'estandarCodigoProducto',
 
-					  CASE WHEN ISNULL(T0."LineTotal",'1') = '0' THEN REPLACE(CONVERT(varchar(50),(CAST(T0."LineTotal" AS DECIMAL(19,0))), 0), '.', ',') 
+					  CASE WHEN  ISNULL(T0.U_BO_Msvc,'N') = 'N' THEN REPLACE(CONVERT(varchar(50),(CAST(T0."LineTotal" AS DECIMAL(19,0))), 0), '.', ',') 
 					  ELSE  REPLACE(CONVERT(varchar(50),(CAST(T1.LstEvlPric AS DECIMAL(19,0))), 0), '.', ',')  END 
-					  
 					  AS 'baseImponibleTOTALImp',
 
 					  '01' AS 'codigoTOTALImp',
@@ -2389,23 +2377,27 @@ GO
 					  '' AS 'unidadMedida',
 					  '' AS 'unidadMedidaTributo',
 
-					  CASE WHEN isnull(T0."DiscPrcnt",0) = '0' THEN REPLACE(CONVERT(varchar(50),(CAST(((T0.LineTotal*T0.VatPrcnt)/100) AS DECIMAL(19,0))), 0), '.', ',') 
-						   WHEN isnull(T0."DiscPrcnt",0) != '0' THEN REPLACE(CONVERT(varchar(50),(CAST(((T0.LineTotal*T0.VatPrcnt)/100) AS DECIMAL(19,0))), 0), '.', ',') 
-						   ELSE '0' END AS 'valorTOTALImp',
+					  CASE WHEN isnull(T0."DiscPrcnt",0) = '0' AND ISNULL(T0.U_BO_Msvc,'N') = 'N' THEN REPLACE(CONVERT(varchar(50),(CAST(((T0.LineTotal*T0.VatPrcnt)/100) AS DECIMAL(19,0))), 0), '.', ',') 			   
+						   WHEN isnull(T0."DiscPrcnt",0) != '0' AND ISNULL(T0.U_BO_Msvc,'N') = 'N'  THEN REPLACE(CONVERT(varchar(50),(CAST(((T0.LineTotal*T0.VatPrcnt)/100) AS DECIMAL(19,0))), 0), '.', ',') 
+						   ELSE REPLACE(CONVERT(varchar(50),(CAST((((1*T1.LstEvlPric)*T0.VatPrcnt)/100) AS DECIMAL(19,0))), 0), '.', ',')  END AS 'valorTOTALImp',
 
 					  '' AS 'valorTributoUnidad',
 
-					   CASE WHEN isnull(T0."DiscPrcnt",0) = '0' THEN REPLACE(CONVERT(varchar(50),(CAST(((T0.LineTotal*T0.VatPrcnt)/100) AS DECIMAL(19,0))), 0), '.', ',') 
-						   WHEN isnull(T0."DiscPrcnt",0) != '0' THEN REPLACE(CONVERT(varchar(50),(CAST(((T0.LineTotal*T0.VatPrcnt)/100) AS DECIMAL(19,0))), 0), '.', ',')
-						   ELSE '0' END AS 'montoTotal',
+					   CASE WHEN isnull(T0."DiscPrcnt",0) = '0'  AND ISNULL(T0.U_BO_Msvc,'N') = 'N'  THEN REPLACE(CONVERT(varchar(50),(CAST(((T0.LineTotal*T0.VatPrcnt)/100) AS DECIMAL(19,0))), 0), '.', ',') 
+						   WHEN isnull(T0."DiscPrcnt",0) != '0'   AND ISNULL(T0.U_BO_Msvc,'N') = 'N' THEN REPLACE(CONVERT(varchar(50),(CAST(((T0.LineTotal*T0.VatPrcnt)/100) AS DECIMAL(19,0))), 0), '.', ',')
+						   ELSE REPLACE(CONVERT(varchar(50),(CAST((((1*T1.LstEvlPric)*T0.VatPrcnt)/100) AS DECIMAL(19,0))), 0), '.', ',') 
+						   END AS 'montoTotal',
 
 					  '' AS 'marca',
-					  '0' AS 'muestraGratis',
-
-					  CASE WHEN isnull(T0."DiscPrcnt",0) = '0' THEN REPLACE(CONVERT(varchar(50),(CAST(T0."LineTotal"+T0."VatSum" AS DECIMAL(19,0))), 0), '.', ',')
-						   WHEN isnull(T0."DiscPrcnt",0) != '0' THEN REPLACE(CONVERT(varchar(50),(CAST(T0."LineTotal"+T0."VatSum" AS DECIMAL(19,0))), 0), '.', ',')
-						   ELSE '0' END AS 'precioTotal',
 					  
+					  CASE WHEN ISNULL(T0.U_BO_Msvc,'N') = 'N' THEN '0 'ELSE '1'  END AS 'muestraGratis',
+
+					  CASE WHEN isnull(T0."DiscPrcnt",0) = '0' AND ISNULL(T0.U_BO_Msvc,'N') = 'N'  THEN REPLACE(CONVERT(varchar(50),(CAST(T0."LineTotal"+T0."VatSum" AS DECIMAL(19,0))), 0), '.', ',')
+						   WHEN isnull(T0."DiscPrcnt",0) != '0' AND ISNULL(T0.U_BO_Msvc,'N') = 'N'  THEN REPLACE(CONVERT(varchar(50),(CAST(T0."LineTotal"+T0."VatSum" AS DECIMAL(19,0))), 0), '.', ',')
+						   ELSE  REPLACE(CONVERT(varchar(50),(CAST((((1*T1.LstEvlPric)*T0.VatPrcnt)/100) AS DECIMAL(19,0))), 0), '.', ',') 
+						   END AS 'precioTotal',
+	
+
 					  REPLACE(CONVERT(varchar(50),(CAST(T0."LineTotal" AS DECIMAL(19,0))), 0), '.', ',') AS 'precioTotalSinImpuestos',
 					  
 					  CASE WHEN isnull(T0."DiscPrcnt",0) = '0' THEN REPLACE(CONVERT(varchar(50),(CAST(T0."Price" AS DECIMAL(19,0))), 0), '.', ',') 
@@ -2466,7 +2458,7 @@ GO
 
 				     '01' AS 'codigoTOTALImp',
 
-					  REPLACE(CONVERT(varchar(50),(CAST(T0."TaxRate" AS DECIMAL(19,0))), 0), '.', ',') AS 'porcentajeTOTALImp',
+					  REPLACE(CONVERT(varchar(50),(CAST(T0."TaxRate" AS DECIMAL(19,2))), 0), '.', ',') AS 'porcentajeTOTALImp',
 
 					  'WSD' AS 'unidadMedida',
 
@@ -2474,7 +2466,7 @@ GO
 
 			  FROM INV4 T0 LEFT JOIN OINV T1 ON T0.DocEntry=T1.DocEntry
 
-			  WHERE T0."DocEntry" = @DocEntryLayout AND T1."DocSubType" != 'DN'
+			  WHERE T0."DocEntry" = @DocEntryLayout AND T1."DocSubType" != 'DN' AND RelateType = 1
 
 			  GROUP BY T0."TaxRate"
 
@@ -2550,9 +2542,7 @@ GO
 
 				     '01' AS 'codigoTOTALImp',
 
-					  --REPLACE(CONVERT(varchar(50),(CAST(T0."TaxRate" AS DECIMAL(19,0))), 0), '.', ',') AS 'porcentajeTOTALImp',
-
-					  '19' AS 'porcentajeTOTALImp',
+					  REPLACE(CONVERT(varchar(50),(CAST(T0."TaxRate" AS DECIMAL(19,2))), 0), '.', ',') AS 'porcentajeTOTALImp',
 
 					  'WSD' AS 'unidadMedida',
 
@@ -2562,7 +2552,7 @@ GO
 
 			  WHERE T0."DocEntry" = @DocEntryLayout AND T1."DocSubType" != 'DN' AND T0."RelateType" = 1 AND T0."TaxSum" != 0
 
-			  --GROUP BY T0."TaxRate"
+			  GROUP BY T0."TaxRate"
 
 			        --------------------------- Consulta Impuestos ICA ---------------------------------------------------
 		  UNION ALL
@@ -3388,10 +3378,7 @@ GO
 			  GROUP BY T1."PrctBsAmnt", T1."U_BO_Tipo"
 
 		  END
-  
-  
-  
-  
+    
   </BO_FacturaXML_BO>
 
 </Queries>

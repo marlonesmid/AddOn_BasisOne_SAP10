@@ -7,12 +7,148 @@ using SAPbouiCOM;
 using Funciones;
 using System.IO;
 using System.Reflection;
+using System.Windows.Forms;
 
 
 namespace BOProduccion
 {
     public class Production
     {
+        public void AddItemsToWorkOrder(SAPbouiCOM.Form _oFormWorkOrder)
+        {
+            #region Variables y objetos 
+
+            SAPbouiCOM.ComboBox oTO = null;
+            SAPbouiCOM.Item oUDFProduction = null;
+            SAPbouiCOM.Item oUDF = null;
+            SAPbouiCOM.Item oDataMasterDate = null;
+            SAPbouiCOM.StaticText oStaticText = null;
+
+            oUDF = _oFormWorkOrder.Items.Item("78");
+            oDataMasterDate = _oFormWorkOrder.Items.Item("6");
+
+            #endregion
+
+            #region Campo Tipo de Orden
+
+            //*******************************************
+            // Se adiciona Label "Tipo de Orden"
+            //*******************************************
+
+            oUDFProduction = _oFormWorkOrder.Items.Add("lblTO", SAPbouiCOM.BoFormItemTypes.it_STATIC);
+            oUDFProduction.Left = oUDF.Left + 130;
+            oUDFProduction.Width = oUDF.Width - 50;
+            oUDFProduction.Top = oUDF.Top;
+            oUDFProduction.Height = oUDF.Height;
+
+            oUDFProduction.LinkTo = "txtTO";
+
+            oStaticText = ((SAPbouiCOM.StaticText)(oUDFProduction.Specific));
+
+            oStaticText.Caption = "Tipo de Orden";
+
+            //*******************************************
+            // Se adiciona Tex Box "Tipo de Orden"
+            //*******************************************
+
+            oUDFProduction = _oFormWorkOrder.Items.Add("txtTO", SAPbouiCOM.BoFormItemTypes.it_COMBO_BOX);
+            oUDFProduction.Left = oUDF.Left + 205;
+            oUDFProduction.Width = oUDF.Width;
+            oUDFProduction.Top = oUDF.Top;
+            oUDFProduction.Height = oUDF.Height;
+            oUDFProduction.Enabled = false;
+
+            oUDFProduction.DisplayDesc = true;
+
+            _oFormWorkOrder.DataSources.UserDataSources.Add("cboTO", SAPbouiCOM.BoDataType.dt_SHORT_TEXT, 20);
+
+            oTO = ((SAPbouiCOM.ComboBox)(oUDFProduction.Specific));
+
+
+            oTO.DataBind.SetBound(true, "OWOR", "U_BO_TO");
+
+
+            oTO.ValidValues.Add("T", "Producto Terminado");
+            oTO.ValidValues.Add("S", "Prodcuto Semielaborado");
+
+            if (_oFormWorkOrder.Mode == BoFormMode.fm_ADD_MODE)
+            {
+                oTO.Select("T", BoSearchKey.psk_ByValue);
+            }
+
+            #endregion
+
+            #region Adicion Panel Ruta de produccion
+
+            //SAPbouiCOM.Form _oFormWorOrder;
+            //SAPbouiCOM.Item _oNewItem;
+            //SAPbouiCOM.Item _oItem;
+            //SAPbouiCOM.Folder _oFolderItem;
+
+            //_oFormWorOrder = _oFormWorkOrder;
+            //_oNewItem = _oFormWorOrder.Items.Add("FolderBO1", SAPbouiCOM.BoFormItemTypes.it_FOLDER);
+            //_oItem = _oFormWorOrder.Items.Item("234000008");
+
+            //_oNewItem.Top = _oItem.Top;
+            //_oNewItem.Height = _oItem.Height;
+            //_oNewItem.Width = _oItem.Width;
+            //_oNewItem.Left = _oItem.Left + _oItem.Width;
+
+            //_oFolderItem = ((SAPbouiCOM.Folder)(_oNewItem.Specific));
+
+            //_oFolderItem.Caption = "Ruta de Producción";
+
+            //_oFolderItem.GroupWith("234000008");
+
+            ////ItemsDocuments(_oFormInvoices, _TipoDoc);
+
+            //_oFormWorOrder.PaneLevel = 1;
+
+            #endregion
+
+            #region Adicionar Matrix Matrix Ruta de produccion
+
+            //AddMatrixToFormWorkOrderRouteProduction(_oFormWorkOrder);
+
+            #endregion
+
+            oDataMasterDate.Click();
+
+        }
+
+        private void AddChooseFromListoOITM(SAPbouiCOM.Application _sboapp, SAPbouiCOM.Form _oFormWO)
+        {
+
+            SAPbouiCOM.ChooseFromListCollection oCFLs = null;
+            SAPbouiCOM.Conditions oCons = null;
+            SAPbouiCOM.Condition oCon = null;
+
+            oCFLs = _oFormWO.ChooseFromLists;
+
+            SAPbouiCOM.ChooseFromList oCFL = null;
+            SAPbouiCOM.ChooseFromListCreationParams oCFLCreationParams = null;
+            oCFLCreationParams = ((SAPbouiCOM.ChooseFromListCreationParams)(_sboapp.CreateObject(SAPbouiCOM.BoCreatableObjectType.cot_ChooseFromListCreationParams)));
+
+            //  Adding 2 CFL, one for the button and one for the edit text.
+            oCFLCreationParams.MultiSelection = false;
+            oCFLCreationParams.ObjectType = "4";
+            oCFLCreationParams.UniqueID = "CFL1";
+
+            oCFL = oCFLs.Add(oCFLCreationParams);
+
+            //  Adding Conditions to CFL1
+
+            oCons = oCFL.GetConditions();
+
+            oCon = oCons.Add();
+            oCon.Alias = "TreeType";
+            oCon.Operation = SAPbouiCOM.BoConditionOperation.co_EQUAL;
+            oCon.CondVal = "P";
+            oCFL.SetConditions(oCons);
+
+            oCFLCreationParams.UniqueID = "CFL2";
+            oCFL = oCFLs.Add(oCFLCreationParams);
+        }
 
         private void AddMatrixToFormWorkOrderRouteProduction(SAPbouiCOM.Form oFormWorkOrder)
         {
@@ -84,9 +220,61 @@ namespace BOProduccion
 
             #endregion
 
+        }
 
+        public void AddNewRowMatrix(SAPbouiCOM.Form oFormNewWO)
+        {
+            #region Variables y Objetos
 
+            int Counter = 0;
 
+            SAPbouiCOM.Matrix oMatrixNWO = (SAPbouiCOM.Matrix)oFormNewWO.Items.Item("mtxRP").Specific;
+
+            Counter = oMatrixNWO.RowCount + 1;
+
+            #endregion
+
+            #region Limipia datasource
+
+            oFormNewWO.DataSources.UserDataSources.Item("DSCol0").ValueEx = null;
+            oFormNewWO.DataSources.UserDataSources.Item("DSCol1").ValueEx = null;
+            oFormNewWO.DataSources.UserDataSources.Item("DSCol2").ValueEx = null;
+
+            #endregion
+
+            oMatrixNWO.AddRow();
+
+            oMatrixNWO.Columns.Item("Col_1").Cells.Item(Counter).Click();
+
+        }
+
+        public void DeleteRowMatrix(SAPbouiCOM.Application _sboapp, SAPbouiCOM.Form oFormNewWO)
+        {
+            #region Variables y Objetos
+
+            int RowIndex = 0;
+
+            SAPbouiCOM.Matrix oMatrixNWO = (SAPbouiCOM.Matrix)oFormNewWO.Items.Item("mtxRP").Specific;
+
+            RowIndex = oMatrixNWO.GetNextSelectedRow();
+
+            #endregion
+
+            #region Valida que no se pueda eliminar el producto terminado
+
+            if (RowIndex == 1)
+            {
+                Funciones.Comunes DllFunciones = new Funciones.Comunes();
+
+                DllFunciones.sendMessageBox(_sboapp, "No se puede eliminar la linea 1, corresponde al producto terminado");
+
+            }
+            else
+            {
+                oMatrixNWO.DeleteRow(RowIndex);
+            }
+
+            #endregion
         }
 
         public void CreateUDTandUDFProduction(SAPbouiCOM.Application sboapp, SAPbobsCOM.Company oCompany)
@@ -203,34 +391,7 @@ namespace BOProduccion
 
         }
 
-        public Boolean Validate_WorkOrder(SAPbouiCOM.Application sboapp, SAPbobsCOM.Company oCompany, SAPbouiCOM.Form oFormWorkOrder)
-        {
-            Funciones.Comunes DllFunciones = new Funciones.Comunes();
-
-            try
-            {
-                int iContinuar = DllFunciones.sendMessageBoxY_N(sboapp, "Se creara la ruta de produccion de la orden de fabricacion, ¿ Desea Crear ?");
-
-                if (iContinuar == 1)
-                {
-                    return true;
-                }
-                else
-                {
-                    return false;
-                }
-
-            }
-            catch (Exception)
-            {
-
-                throw;
-                return false;
-            }
-
-        }
-
-        public Boolean Create_Order_Prodcution(SAPbouiCOM.Application sboapp, SAPbobsCOM.Company oCompany, string _sMotor, string sUserSignature)
+        public Boolean Create_Order_Prodcution(SAPbouiCOM.Application sboapp, SAPbobsCOM.Company oCompany, string _sMotor, string sUserSignature, SAPbouiCOM.Form oFormNWO)
         {
             #region Variables globales
 
@@ -248,111 +409,112 @@ namespace BOProduccion
             {
                 #region Variables y objetos
 
-                string sGetWorkOrder;
+                string sGetSeriesNumberProduction;
+                string sGetNextDocNum;
 
-                SAPbobsCOM.Recordset oGetWorkOrder = (SAPbobsCOM.Recordset)oCompany.GetBusinessObject(BoObjectTypes.BoRecordset);
+                SAPbobsCOM.Recordset oGetSeriesNumberProduction = (SAPbobsCOM.Recordset)oCompany.GetBusinessObject(BoObjectTypes.BoRecordset);
+                SAPbobsCOM.Recordset oGetNextDocNum = (SAPbobsCOM.Recordset)oCompany.GetBusinessObject(BoObjectTypes.BoRecordset);
 
-                #endregion
-
-                #region Valida si existe la orden de produccion de producto terminado para crear los productos semielaborados
-
-                sGetWorkOrder = DllFunciones.GetStringXMLDocument(oCompany, "BOProduction", "Production", "GetWorkOrder");
-                sGetWorkOrder = sGetWorkOrder.Replace("%UserSign%", sUserSignature);
-
-                oGetWorkOrder.DoQuery(sGetWorkOrder);
+                SAPbouiCOM.Matrix oMatrixNWO = (SAPbouiCOM.Matrix)oFormNWO.Items.Item("mtxRP").Specific;
+                SAPbobsCOM.ProductionOrders oWorkOrder = (SAPbobsCOM.ProductionOrders)oCompany.GetBusinessObject(BoObjectTypes.oProductionOrders);
 
                 #endregion
 
-                if (oGetWorkOrder.RecordCount > 0)
+                #region Obtiene serie de numeracion activas para produccion
+
+                sGetSeriesNumberProduction = DllFunciones.GetStringXMLDocument(oCompany, "BOProduction", "Production", "GetSNProduction");
+                oGetSeriesNumberProduction.DoQuery(sGetSeriesNumberProduction);
+
+                #endregion
+
+                #region Obtiene el consecutivo del documento a crear
+
+                sGetNextDocNum = DllFunciones.GetStringXMLDocument(oCompany, "BOProduction", "Production", "GetNextDocNum");
+                oGetNextDocNum.DoQuery(sGetNextDocNum);
+
+                #endregion
+
+                #region Crea la orden de produccion y sus semielaborados
+
+                for (int i = 1; i <= oMatrixNWO.VisualRowCount; i++)
                 {
-                    #region Variable y Objetos
 
-                    string sGetWorkOrderLine;
-                    string sSearchBOMOriginal;
+                    string sTipoOrden = ((SAPbouiCOM.EditText)(oMatrixNWO.Columns.Item("Col_0").Cells.Item(i).Specific)).Value;
+                    string sArticulo = ((SAPbouiCOM.EditText)(oMatrixNWO.Columns.Item("Col_1").Cells.Item(i).Specific)).Value;
+                    string sQuantity = ((SAPbouiCOM.EditText)(oMatrixNWO.Columns.Item("Col_3").Cells.Item(i).Specific)).Value;
+                    sQuantity = sQuantity.Replace(".", ",");
+                    string sPosicion = Convert.ToString(i);
+                    string sDocNum = Convert.ToString(oGetNextDocNum.Fields.Item("Consecutivo").Value.ToString());
 
-                    SAPbobsCOM.Recordset oGetWorkOrderLine = (SAPbobsCOM.Recordset)oCompany.GetBusinessObject(BoObjectTypes.BoRecordset);
-
-                    #endregion
-
-                    #region Buscamos la Lineas de las ordenes de produccion
-
-                    sGetWorkOrderLine = DllFunciones.GetStringXMLDocument(oCompany, "BOProduction", "Production", "GetWorkOrderLine");
-                    sGetWorkOrderLine = sGetWorkOrderLine.Replace("%DocEntry%", Convert.ToString(oGetWorkOrder.Fields.Item("DocEntry").Value.ToString()));
-
-                    oGetWorkOrderLine.DoQuery(sGetWorkOrderLine);
-
-                    #endregion
-
-                    #region Busca el Query de la lista de materiales 
-
-                    sSearchBOMOriginal = DllFunciones.GetStringXMLDocument(oCompany, "BOProduction", "Production", "SearchBOM");
-
-                    #endregion
-
-                    if (oGetWorkOrderLine.RecordCount > 0)
+                    if (sTipoOrden == "P. Terminado")
                     {
+                        #region Crea la orden de produccion Principal
 
-                        DllFunciones.ProgressBar(oCompany, sboapp, oGetWorkOrderLine.RecordCount + 1, 1, "Creando ruta de producion, por favor espere...");
+                        oWorkOrder.ItemNo = sArticulo;
+                        oWorkOrder.Series = Convert.ToInt32(oGetSeriesNumberProduction.Fields.Item("SNPT").Value.ToString());
+                        oWorkOrder.StartDate = DateTime.Now;
+                        oWorkOrder.ProductionOrderType = BoProductionOrderTypeEnum.bopotStandard;
+                        oWorkOrder.PlannedQuantity = Convert.ToDouble(sQuantity);
+                        //oWorkOrder.Warehouse = Convert.ToString(oGetWorkOrderLine.Fields.Item("wareHouse").Value.ToString());
+                        oWorkOrder.UserFields.Fields.Item("U_BO_TO").Value = "T";
+                        oWorkOrder.UserFields.Fields.Item("U_BO_OPP").Value = sDocNum;
+                        oWorkOrder.UserFields.Fields.Item("U_BO_PosId").Value = Convert.ToString(i);
+                        int Rsd = oWorkOrder.Add();
 
-                        #region Variables y objetos
-
-                        string oSearchBOMCopia;
-
-                        SAPbobsCOM.Recordset oConsultaBOM = (SAPbobsCOM.Recordset)oCompany.GetBusinessObject(BoObjectTypes.BoRecordset);
-                        SAPbobsCOM.ProductionOrders oWorkOrder = (SAPbobsCOM.ProductionOrders)oCompany.GetBusinessObject(BoObjectTypes.oProductionOrders);
-
-                        #endregion
-
-                        #region Crea las ruta de produccion
-
-                        oGetWorkOrderLine.MoveFirst();
-
-                        for (int i = 0; oGetWorkOrderLine.RecordCount - 1 >= i; i++)
+                        if (Rsd == 0)
                         {
-                            #region Valida si existe la lista de materiales 
-
-                            oSearchBOMCopia = sSearchBOMOriginal.Replace("%Item%", Convert.ToString(oGetWorkOrderLine.Fields.Item("ItemCode").Value.ToString()));
-
-                            oConsultaBOM.DoQuery(oSearchBOMCopia);
-
-                            #endregion
-
-                            if (oConsultaBOM.RecordCount > 0)
+                            if (oMatrixNWO.VisualRowCount == 1)
                             {
-                                #region Crea la orden de produccion semielaborada
-
-                                oWorkOrder.ItemNo = Convert.ToString(oGetWorkOrderLine.Fields.Item("ItemCode").Value.ToString());
-                                oWorkOrder.Series = Convert.ToInt32(oGetWorkOrderLine.Fields.Item("SNPS").Value.ToString());
-                                oWorkOrder.StartDate = DateTime.Now;
-                                oWorkOrder.ProductionOrderType = BoProductionOrderTypeEnum.bopotStandard;
-                                oWorkOrder.PlannedQuantity = Convert.ToInt16(oGetWorkOrderLine.Fields.Item("PlannedQty").Value.ToString());
-                                oWorkOrder.Warehouse = Convert.ToString(oGetWorkOrderLine.Fields.Item("wareHouse").Value.ToString());
-                                oWorkOrder.UserFields.Fields.Item("U_BO_TO").Value = "S";
-                                oWorkOrder.UserFields.Fields.Item("U_BO_OPP").Value = Convert.ToString(oGetWorkOrder.Fields.Item("DocNum").Value.ToString());
-                                oWorkOrder.UserFields.Fields.Item("U_BO_PosId").Value = Convert.ToString(oGetWorkOrderLine.Fields.Item("VisOrder").Value.ToString());
-                                int Rsd = oWorkOrder.Add();
-
-                                if (Rsd == 0)
-                                {
-                                    DllFunciones.ProgressBar(oCompany, sboapp, oGetWorkOrderLine.RecordCount + 1, 1, "Creando ruta de producion, por favor espere...");
-                                }
-                                else
-                                {
-                                    DllFunciones.sendMessageBox(sboapp, oCompany.GetLastErrorDescription());
-                                }
-
-                                #endregion
+                                DllFunciones.StatusBar(sboapp, BoStatusBarMessageType.smt_Success, "Ruta de produccion creada correctamente");
                             }
-
-                            oGetWorkOrderLine.MoveNext();
+                            else
+                            {
+                                DllFunciones.ProgressBar(oCompany, sboapp, oMatrixNWO.VisualRowCount, 1, "Creando ruta de produción, por favor espere...");
+                            }
+                        }
+                        else
+                        {
+                            DllFunciones.sendMessageBox(sboapp, oCompany.GetLastErrorDescription());
                         }
 
                         #endregion
-
                     }
+                    else
+                    {
+                        #region Crea la orden de produccion Semielaborado
 
+                        oWorkOrder.ItemNo = sArticulo;
+                        oWorkOrder.Series = Convert.ToInt32(oGetSeriesNumberProduction.Fields.Item("SNPS").Value.ToString());
+                        oWorkOrder.StartDate = DateTime.Now;
+                        oWorkOrder.ProductionOrderType = BoProductionOrderTypeEnum.bopotStandard;
+                        oWorkOrder.PlannedQuantity = Convert.ToDouble(sQuantity);
+                        //oWorkOrder.Warehouse = Convert.ToString(oGetWorkOrderLine.Fields.Item("wareHouse").Value.ToString());
+                        oWorkOrder.UserFields.Fields.Item("U_BO_TO").Value = "S";
+                        oWorkOrder.UserFields.Fields.Item("U_BO_OPP").Value = sDocNum;
+                        oWorkOrder.UserFields.Fields.Item("U_BO_PosId").Value = Convert.ToString(i);
+                        int Rsd = oWorkOrder.Add();
+
+                        if (Rsd == 0)
+                        {
+                            DllFunciones.ProgressBar(oCompany, sboapp, oMatrixNWO.VisualRowCount, 1, "Creando ruta de produción, por favor espere...");
+
+                            if (i == oMatrixNWO.VisualRowCount)
+                            {
+                                DllFunciones.StatusBar(sboapp, BoStatusBarMessageType.smt_Success, "Ruta de produccion creada correctamente");
+                            }
+                        }
+                        else
+                        {
+                            DllFunciones.sendMessageBox(sboapp, oCompany.GetLastErrorDescription());
+                        }
+
+                        #endregion
+                    }
                 }
-                DllFunciones.StatusBar(sboapp, BoStatusBarMessageType.smt_Success, "Posiciones creadas correctamente");
+
+                #endregion
+
+
                 return Flag = true;
             }
             catch (Exception e)
@@ -611,6 +773,7 @@ namespace BOProduccion
 
                 #endregion
 
+                oFormControlProduction.State = BoFormStateEnum.fs_Maximized;
                 oFormControlProduction.Visible = true;
                 oFormControlProduction.Refresh();
 
@@ -631,6 +794,432 @@ namespace BOProduccion
             SAPbouiCOM.Form _oFormWorkOrder;
             _oFormWorkOrder = oFormWorkOrder;
             _oFormWorkOrder.PaneLevel = 28;
+        }
+
+        public void LoadFormMRawMaterial(SAPbouiCOM.Application sboapp, SAPbobsCOM.Company oCompany, SAPbouiCOM.Form oFormControlProduction, ItemEvent pVal)
+        {
+            Funciones.Comunes DllFunciones = new Funciones.Comunes();
+
+            try
+            {
+                #region Variables y objetos
+
+                SAPbouiCOM.Matrix oMatrixCOP = (Matrix)oFormControlProduction.Items.Item("MtxCOP").Specific;
+                SAPbobsCOM.Recordset oRsCOE = (SAPbobsCOM.Recordset)oCompany.GetBusinessObject(SAPbobsCOM.BoObjectTypes.BoRecordset);
+
+                string sConsultaMPE;
+                string sDocEntryOPS;
+                int iCount;
+
+                sDocEntryOPS = ((SAPbouiCOM.EditText)oMatrixCOP.Columns.Item("Col_14").Cells.Item(pVal.Row).Specific).Value;
+
+                #endregion
+
+                #region Consulta si existe materia prima entregada
+
+                sConsultaMPE = DllFunciones.GetStringXMLDocument(oCompany, "BOProduction", "Production", "GetMPE");
+
+                sConsultaMPE = sConsultaMPE.Replace("%DocEntryOPS%", sDocEntryOPS);
+
+                oRsCOE.DoQuery(sConsultaMPE);
+
+                iCount = oRsCOE.RecordCount;
+
+                DllFunciones.liberarObjetos(oRsCOE);
+
+                #endregion
+
+                if (iCount > 0)
+                {
+                    #region Carga Formulario Materia Prima Entregada
+
+                    string ArchivoSRF = "materia_prima_entregada.srf";
+                    DllFunciones.LoadFromXML(sboapp, "BOProduction", ref ArchivoSRF);
+
+                    SAPbouiCOM.Form oFormRawMaterial;
+                    oFormRawMaterial = sboapp.Forms.Item("BOFormMPC");
+
+                    #endregion
+
+                    #region Centra en pantalla formulario
+
+                    oFormRawMaterial.Left = (sboapp.Desktop.Width - oFormRawMaterial.Width) / 2;
+                    oFormRawMaterial.Top = (sboapp.Desktop.Height - oFormRawMaterial.Height) / 4;
+
+                    #endregion
+
+                    #region Consulta infomacion matertia prima entregada 
+
+                    SAPbouiCOM.DataTable oTableMPE = oFormRawMaterial.DataSources.DataTables.Add("DT_MPE");
+                    oTableMPE.ExecuteQuery(sConsultaMPE);
+
+                    #endregion
+
+                    oFormRawMaterial.Freeze(true);
+
+                    #region Carga Informacion al Matrix
+
+                    SAPbouiCOM.Matrix oMatrixMPE = (Matrix)oFormRawMaterial.Items.Item("MtxMPE").Specific;
+
+                    oMatrixMPE.Clear();
+
+                    oMatrixMPE.Columns.Item("Col_0").DataBind.Bind("DT_MPE", "DocEntry");
+                    oMatrixMPE.Columns.Item("Col_0").Visible = false;
+
+                    oMatrixMPE.Columns.Item("Col_1").DataBind.Bind("DT_MPE", "DocNum");
+
+                    oMatrixMPE.Columns.Item("Col_2").DataBind.Bind("DT_MPE", "DocDate");
+
+                    oMatrixMPE.Columns.Item("Col_3").DataBind.Bind("DT_MPE", "ItemCode");
+
+                    oMatrixMPE.Columns.Item("Col_4").DataBind.Bind("DT_MPE", "Dscription");
+
+                    oMatrixMPE.Columns.Item("Col_5").DataBind.Bind("DT_MPE", "Quantity");
+
+                    oMatrixMPE.Columns.Item("Col_6").DataBind.Bind("DT_MPE", "WhsCode");
+
+                    oMatrixMPE.Columns.Item("Col_7").DataBind.Bind("DT_MPE", "OF");
+
+                    oMatrixMPE.LoadFromDataSource();
+
+                    oMatrixMPE.AutoResizeColumns();
+
+                    oFormRawMaterial.Visible = true;
+                    oFormRawMaterial.Freeze(false);
+                    oFormRawMaterial.Refresh();
+
+                    DllFunciones.liberarObjetos(oMatrixMPE);
+                    DllFunciones.liberarObjetos(oTableMPE);
+                }
+
+                #endregion
+
+                DllFunciones.liberarObjetos(oMatrixCOP);
+            }
+            catch (Exception e)
+            {
+                DllFunciones.sendErrorMessage(sboapp, e);
+
+            }
+        }
+
+        public void LoadFormNewWorkOrder(SAPbouiCOM.Application sboapp, SAPbobsCOM.Company oCompany, SAPbouiCOM.Form oFormNewWorkOrder, SAPbouiCOM.ItemEvent pVal)
+        {
+            #region Variables y objetos
+
+            SAPbouiCOM.Matrix oMatrixNOP = (SAPbouiCOM.Matrix)oFormNewWorkOrder.Items.Item("mtxRP").Specific;
+
+            SAPbouiCOM.DataTable oTableWO = oFormNewWorkOrder.DataSources.DataTables.Item("DT_WO");
+
+            SAPbouiCOM.PictureBox oLogoBO = (SAPbouiCOM.PictureBox)oFormNewWorkOrder.Items.Item("imgLogoBO").Specific;
+
+            #endregion
+
+            #region Centra en pantalla formulario
+
+            oFormNewWorkOrder.Left = (sboapp.Desktop.Width - oFormNewWorkOrder.Width) / 2;
+            oFormNewWorkOrder.Top = (sboapp.Desktop.Height - oFormNewWorkOrder.Height) / 4;
+
+            #endregion
+
+            #region Asignacion Logo BO
+
+            oLogoBO.Picture = (Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().Location) + "\\Core\\Imagenes\\BO.jpg");
+
+            #endregion
+
+            #region Adicion de DataSource
+
+            oFormNewWorkOrder.DataSources.UserDataSources.Add("#", SAPbouiCOM.BoDataType.dt_SHORT_TEXT, 100);
+            oFormNewWorkOrder.DataSources.UserDataSources.Add("DSCol0", SAPbouiCOM.BoDataType.dt_SHORT_TEXT, 100);
+            oFormNewWorkOrder.DataSources.UserDataSources.Add("DSCol1", SAPbouiCOM.BoDataType.dt_SHORT_TEXT, 100);
+            oFormNewWorkOrder.DataSources.UserDataSources.Add("DSCol2", SAPbouiCOM.BoDataType.dt_SHORT_TEXT, 200);
+            oFormNewWorkOrder.DataSources.UserDataSources.Add("DSCol3", SAPbouiCOM.BoDataType.dt_QUANTITY, 100);
+
+            oMatrixNOP.Columns.Item("#").DataBind.SetBound(true, "", "#");
+            oMatrixNOP.Columns.Item("Col_0").DataBind.SetBound(true, "", "DSCol0");
+            oMatrixNOP.Columns.Item("Col_1").DataBind.SetBound(true, "", "DSCol1");
+            oMatrixNOP.Columns.Item("Col_2").DataBind.SetBound(true, "", "DSCol2");
+            oMatrixNOP.Columns.Item("Col_3").DataBind.SetBound(true, "", "DSCol3");
+
+            #endregion
+
+            #region Se adicona el ChooFromList 
+
+            AddChooseFromListoOITM(sboapp, oFormNewWorkOrder);
+
+            oMatrixNOP.Columns.Item("Col_1").ChooseFromListUID = "CFL1";
+            oMatrixNOP.Columns.Item("Col_1").ChooseFromListAlias = "CardCode";
+
+            #endregion         
+
+            #region Adicionar primera linea en la Matrix
+
+            oMatrixNOP.AddRow();
+
+            oMatrixNOP.Columns.Item("Col_1").Cells.Item(1).Click();
+
+            #endregion
+
+            oFormNewWorkOrder.Refresh();
+            oFormNewWorkOrder.Visible = true;
+
+        }
+
+        public void MatrixChooseFromListAfter(string _FormUID, SAPbouiCOM.Form _FormWO, ItemEvent pVal, SAPbobsCOM.Company _oCompany, SAPbouiCOM.Application _sboapp)
+        {
+            Funciones.Comunes DllFunciones = new Funciones.Comunes();
+
+            #region Variables y Objetos
+
+            string sCFL_ID = null;
+            string _sMotorDB = (Convert.ToString(_oCompany.DbServerType));
+            int NumeroLinea;
+
+            SAPbouiCOM.CellPosition _Cell;
+
+            SAPbouiCOM.Matrix oMatrixWO = (SAPbouiCOM.Matrix)_FormWO.Items.Item("mtxRP").Specific;
+
+            _Cell = oMatrixWO.GetCellFocus();
+
+            NumeroLinea = _Cell.rowIndex;
+
+            SAPbouiCOM.IChooseFromListEvent oCFLEvento = ((SAPbouiCOM.IChooseFromListEvent)(pVal));
+
+            sCFL_ID = oCFLEvento.ChooseFromListUID;
+
+            SAPbouiCOM.Form _oFormWO = _sboapp.Forms.Item(_FormUID);
+
+            SAPbouiCOM.ChooseFromList oCFL = _oFormWO.ChooseFromLists.Item(sCFL_ID);
+
+            #endregion
+
+            if (oCFLEvento.BeforeAction == false)
+            {
+
+                #region Variables y Objetos 
+
+                string Col_0 = null;
+                string Col_1 = null;
+                string Col_2 = null;
+
+
+                SAPbouiCOM.DataTable oDataTable = oCFLEvento.SelectedObjects;
+
+                #endregion
+
+                try
+                {
+                    Col_1 = System.Convert.ToString(oDataTable.GetValue(0, 0));
+                    Col_2 = System.Convert.ToString(oDataTable.GetValue(1, 0));
+
+                    if (_sMotorDB == "dst_MSSQL2012" || _sMotorDB == "dst_MSSQL2014" || _sMotorDB == "dst_MSSQL2016" || _sMotorDB == "dst_MSSQL2017" || _sMotorDB == "dst_HANADB")
+                    {
+                        if (pVal.ItemUID == "mtxRP" & pVal.ColUID == "Col_1")
+                        {
+                            if (pVal.Row == 1)
+                            {
+                                Col_0 = "P. Terminado";
+
+                                _FormWO.DataSources.UserDataSources.Item("DSCol0").ValueEx = Col_0;
+                            }
+                            else
+                            {
+                                Col_0 = "P. Semielaborado";
+
+                                _FormWO.DataSources.UserDataSources.Item("DSCol0").ValueEx = Col_0;
+
+                            }
+
+                            _FormWO.DataSources.UserDataSources.Item("#").ValueEx = System.Convert.ToString(pVal.Row);
+                            _FormWO.DataSources.UserDataSources.Item("DSCol1").ValueEx = Col_1;
+                            _FormWO.DataSources.UserDataSources.Item("DSCol2").ValueEx = Col_2;
+
+                            oMatrixWO.SetLineData(pVal.Row);
+                        }
+                    }
+                }
+                catch (Exception e)
+                {
+                    DllFunciones.sendErrorMessage(_sboapp, e);
+                }
+
+                if ((_FormUID == "CFL1") & (pVal.EventType == SAPbouiCOM.BoEventTypes.et_FORM_UNLOAD))
+                {
+                    System.Windows.Forms.Application.Exit();
+                }
+            }
+        }
+
+        public void LinkedButtonMatrixFormCOP(SAPbouiCOM.Application _sboapp, SAPbobsCOM.Company _oCompany, SAPbouiCOM.Form oFormCOP, ItemEvent pVal, string sColumna)
+        {
+            Funciones.Comunes DllFunciones = new Funciones.Comunes();
+
+            #region Consulta DocEntry Orden de Produccion
+
+            SAPbouiCOM.Matrix oMatrixCOP = (Matrix)oFormCOP.Items.Item("MtxCOP").Specific;
+
+            #endregion
+
+            if (sColumna == "Col_0")
+            {
+                #region LinkeButton Orden de produccion producto terminado 
+
+                ((EditText)oFormCOP.Items.Item("txtValor").Specific).Value = ((SAPbouiCOM.EditText)oMatrixCOP.Columns.Item("Col_20").Cells.Item(pVal.Row).Specific).Value;
+                Item itm = oFormCOP.Items.Item("lbValor");
+                ((LinkedButton)itm.Specific).LinkedObjectType = "202";
+                itm.Click();
+
+                #endregion
+            }
+            else if (sColumna == "Col_13")
+            {
+                #region LinkeButton Orden de produccion producto semielaborado
+
+                ((EditText)oFormCOP.Items.Item("txtValor").Specific).Value = ((SAPbouiCOM.EditText)oMatrixCOP.Columns.Item("Col_14").Cells.Item(pVal.Row).Specific).Value;
+                Item itm = oFormCOP.Items.Item("lbValor");
+                ((LinkedButton)itm.Specific).LinkedObjectType = "202";
+                itm.Click();
+
+                #endregion
+            }
+            else if (sColumna == "Col_1")
+            {
+                #region LinkeButton abre articulo Producto terminado
+
+                oFormCOP.Freeze(true);
+
+                SAPbouiCOM.Column oColumDocEntry;
+                SAPbouiCOM.LinkedButton LkBtnDocEntry;
+
+                oColumDocEntry = oMatrixCOP.Columns.Item("Col_2");
+
+                LkBtnDocEntry = (SAPbouiCOM.LinkedButton)oColumDocEntry.ExtendedObject;
+                LkBtnDocEntry.LinkedObject = BoLinkedObject.lf_Items;
+
+                oFormCOP.Freeze(false);
+
+                #endregion
+            }
+            else if (sColumna == "Col_8")
+            {
+                #region LinkeButton abre Producto Semielaborado
+
+                oFormCOP.Freeze(true);
+
+                SAPbouiCOM.Column oColumDocEntry;
+                SAPbouiCOM.LinkedButton LkBtnDocEntry;
+
+                oColumDocEntry = oMatrixCOP.Columns.Item("4");
+
+                LkBtnDocEntry = (SAPbouiCOM.LinkedButton)oColumDocEntry.ExtendedObject;
+                LkBtnDocEntry.LinkedObject = BoLinkedObject.lf_Items;
+
+                oFormCOP.Freeze(false);
+
+                #endregion
+            }
+        }
+
+        public void LinkedButtonMatrixFormMPE(SAPbouiCOM.Application _sboapp, SAPbobsCOM.Company _oCompany, SAPbouiCOM.Form BOFormMPC, ItemEvent pVal, string sColumna)
+        {
+            Funciones.Comunes DllFunciones = new Funciones.Comunes();
+
+            #region Consulta DocEntry Orden de Produccion
+
+            SAPbouiCOM.Matrix oMatrixMPE = (Matrix)BOFormMPC.Items.Item("MtxMPE").Specific;
+
+            #endregion
+
+            if (sColumna == "Col_1")
+            {
+                #region LinkeButton Materia prima consumida 
+
+                ((EditText)BOFormMPC.Items.Item("txtValor").Specific).Value = ((SAPbouiCOM.EditText)oMatrixMPE.Columns.Item("Col_0").Cells.Item(pVal.Row).Specific).Value;
+                string doceentry = ((SAPbouiCOM.EditText)oMatrixMPE.Columns.Item("Col_0").Cells.Item(pVal.Row).Specific).Value;
+                Item itm = BOFormMPC.Items.Item("lbValor");
+                ((LinkedButton)itm.Specific).LinkedObjectType = "60";
+                itm.Click();
+
+                #endregion
+            }
+        }
+
+        public void UpdateParametersProduction(SAPbouiCOM.Application sboapp, SAPbobsCOM.Company _oCompany, SAPbouiCOM.Form _oFormParProduction)
+        {
+            Funciones.Comunes DllFunciones = new Funciones.Comunes();
+
+            #region Variables y objetos
+
+            SAPbobsCOM.UserTable oUDT = (SAPbobsCOM.UserTable)(_oCompany.UserTables.Item("BOPRODP"));
+
+            SAPbouiCOM.ComboBox cboSNPT = (SAPbouiCOM.ComboBox)_oFormParProduction.Items.Item("txtSNPT").Specific;
+            SAPbouiCOM.ComboBox cboSNPS = (SAPbouiCOM.ComboBox)_oFormParProduction.Items.Item("txtSNPS").Specific;
+            SAPbouiCOM.Button btnOK = (SAPbouiCOM.Button)_oFormParProduction.Items.Item("btnUpdate").Specific;
+
+            string sValidateParametersProduccion = null;
+
+            SAPbobsCOM.Recordset oParametersProduccion = (SAPbobsCOM.Recordset)_oCompany.GetBusinessObject(SAPbobsCOM.BoObjectTypes.BoRecordset);
+
+            #endregion
+
+            #region Consulta si existe parametros configurados de produccion
+
+            sValidateParametersProduccion = DllFunciones.GetStringXMLDocument(_oCompany, "BOProduction", "Production", "GetParametersProduction");
+
+            oParametersProduccion.DoQuery(sValidateParametersProduccion);
+
+            #endregion
+
+            if (oParametersProduccion.RecordCount > 0)
+            {
+                #region Si existe, actualice el code 
+
+                oUDT.GetByKey(Convert.ToString(oParametersProduccion.Fields.Item("Code").Value.ToString()));
+                oUDT.UserFields.Fields.Item("U_BO_SNPT").Value = cboSNPT.Selected.Value;
+                oUDT.UserFields.Fields.Item("U_BO_SNPS").Value = cboSNPS.Selected.Value;
+
+                oUDT.Update();
+
+                #endregion
+            }
+            else
+            {
+                #region Variables y Objetos
+
+                string sSearchNextCode = null;
+
+                SAPbobsCOM.Recordset oSearchNextCode = (SAPbobsCOM.Recordset)_oCompany.GetBusinessObject(SAPbobsCOM.BoObjectTypes.BoRecordset);
+
+                #endregion
+
+                #region Consulta el Code a asignar
+
+                sSearchNextCode = DllFunciones.GetStringXMLDocument(_oCompany, "BOProduction", "Production", "SerachNextCode");
+
+                oSearchNextCode.DoQuery(sSearchNextCode);
+
+                #endregion
+
+                #region Si no existe, inserta el code 
+
+                oUDT.Code = Convert.ToString(oSearchNextCode.Fields.Item("ID").Value.ToString());
+                oUDT.Name = Convert.ToString(oSearchNextCode.Fields.Item("ID").Value.ToString());
+                oUDT.UserFields.Fields.Item("U_BO_SNPT").Value = cboSNPT.Selected.Value;
+                oUDT.UserFields.Fields.Item("U_BO_SNPS").Value = cboSNPS.Selected.Value;
+
+                oUDT.Add();
+
+                #endregion
+
+            }
+
+            DllFunciones.StatusBar(sboapp, BoStatusBarMessageType.smt_Success, "Actualizado correctamente...");
+            btnOK.Caption = "OK";
+            _oFormParProduction.Mode = BoFormMode.fm_OK_MODE;
+            _oFormParProduction.Refresh();
+
+
         }
 
         public void UpdateFormControlProduction(SAPbouiCOM.Application sboapp, SAPbobsCOM.Company oCompany, SAPbouiCOM.Form oFormControlProduction)
@@ -749,413 +1338,90 @@ namespace BOProduccion
             }
         }
 
-        public void LoadFormMRawMaterial(SAPbouiCOM.Application sboapp, SAPbobsCOM.Company oCompany, SAPbouiCOM.Form oFormControlProduction, ItemEvent pVal)
+        public Boolean Validate_WorkOrder(SAPbouiCOM.Application sboapp, SAPbobsCOM.Company oCompany, SAPbouiCOM.Form oFormNewWorkOrder)
         {
             Funciones.Comunes DllFunciones = new Funciones.Comunes();
 
             try
             {
-                #region Variables y objetos
 
-                SAPbouiCOM.Matrix oMatrixCOP = (Matrix)oFormControlProduction.Items.Item("MtxCOP").Specific;
-                SAPbobsCOM.Recordset oRsCOE = (SAPbobsCOM.Recordset)oCompany.GetBusinessObject(SAPbobsCOM.BoObjectTypes.BoRecordset);
+                #region Variables y Objetos
 
-                string sConsultaMPE;
-                string sDocEntryOPS;
-                int iCount;
+                SAPbouiCOM.Matrix oMatrixNWO = (SAPbouiCOM.Matrix)oFormNewWorkOrder.Items.Item("mtxRP").Specific;
 
-                sDocEntryOPS = ((SAPbouiCOM.EditText)oMatrixCOP.Columns.Item("Col_14").Cells.Item(pVal.Row).Specific).Value;
+                string sCodArticulo = null;
+                decimal iQuantity1 = 0;
+                bool _BubbleEvent = false;
 
                 #endregion
 
-                #region Consulta si existe materia prima entregada
+                #region Valida que no exista una linea duplicada o la cantidad esta en 0
 
-                sConsultaMPE = DllFunciones.GetStringXMLDocument(oCompany, "BOProduction", "Production", "GetMPE");
-
-                sConsultaMPE = sConsultaMPE.Replace("%DocEntryOPS%", sDocEntryOPS);
-
-                oRsCOE.DoQuery(sConsultaMPE);
-
-                iCount = oRsCOE.RecordCount;
-
-                DllFunciones.liberarObjetos(oRsCOE);
-
-                #endregion
-
-                if (iCount > 0)
+                for (int i = 1; i <= oMatrixNWO.VisualRowCount; i++)
                 {
-                    #region Carga Formulario Materia Prima Entregada
+                    sCodArticulo = ((SAPbouiCOM.EditText)(oMatrixNWO.Columns.Item("Col_1").Cells.Item(i).Specific)).Value;
+                    iQuantity1 = Convert.ToDecimal(((SAPbouiCOM.EditText)(oMatrixNWO.Columns.Item("Col_3").Cells.Item(i).Specific)).Value);
 
-                    string ArchivoSRF = "materia_prima_entregada.srf";
-                    DllFunciones.LoadFromXML(sboapp, "BOProduction", ref ArchivoSRF);
+                    if (iQuantity1 == 0)
+                    {
+                        DllFunciones.sendMessageBox(sboapp, "En el articulo " + sCodArticulo + " la cantidad esta en 0, por favor corrija para poder continuar.");
 
-                    SAPbouiCOM.Form oFormRawMaterial;
-                    oFormRawMaterial = sboapp.Forms.Item("BOFormMPC");
+                        _BubbleEvent = false;
+                        return _BubbleEvent;
 
-                    #endregion
+                    }
+                    else
+                    {
+                        #region Compara la Matriz buscando articulos duplicados
 
-                    #region Centra en pantalla formulario
+                        for (int j = i + 1; j <= oMatrixNWO.VisualRowCount; j++)
+                        {
+                            string sCodArticulo2 = null;
 
-                    oFormRawMaterial.Left = (sboapp.Desktop.Width - oFormRawMaterial.Width) / 2;
-                    oFormRawMaterial.Top = (sboapp.Desktop.Height - oFormRawMaterial.Height) / 4;
+                            sCodArticulo2 = ((SAPbouiCOM.EditText)(oMatrixNWO.Columns.Item("Col_1").Cells.Item(j).Specific)).Value;
 
-                    #endregion
+                            if (sCodArticulo == sCodArticulo2)
+                            {
+                                DllFunciones.sendMessageBox(sboapp, "El articulo " + sCodArticulo + " esta duplicado en las lineas de la orden de fabricacion, por favor corrija para poder continuar.");
 
-                    #region Consulta infomacion matertia prima entregada 
+                                _BubbleEvent = false;
+                                return _BubbleEvent;
+                            }
+                        }
 
-                    SAPbouiCOM.DataTable oTableMPE = oFormRawMaterial.DataSources.DataTables.Add("DT_MPE");
-                    oTableMPE.ExecuteQuery(sConsultaMPE);
+                        #endregion
 
-                    #endregion
+                    }
 
-                    oFormRawMaterial.Freeze(true);
 
-                    #region Carga Informacion al Matrix
 
-                    SAPbouiCOM.Matrix oMatrixMPE = (Matrix)oFormRawMaterial.Items.Item("MtxMPE").Specific;
 
-                    oMatrixMPE.Clear();
+                }
 
-                    oMatrixMPE.Columns.Item("Col_0").DataBind.Bind("DT_MPE", "DocEntry");
-                    oMatrixMPE.Columns.Item("Col_0").Visible = false;
+                int iContinuar = DllFunciones.sendMessageBoxY_N(sboapp, "Se creara la orden de produccion y sus semielaborados, ¿ Desea Continuar ?");
 
-                    oMatrixMPE.Columns.Item("Col_1").DataBind.Bind("DT_MPE", "DocNum");
+                if (iContinuar == 1)
+                {
+                    _BubbleEvent = true;
+                    return _BubbleEvent;
+                }
+                else
+                {
+                    _BubbleEvent = true;
+                    return _BubbleEvent;
 
-                    oMatrixMPE.Columns.Item("Col_2").DataBind.Bind("DT_MPE", "DocDate");
-
-                    oMatrixMPE.Columns.Item("Col_3").DataBind.Bind("DT_MPE", "ItemCode");
-
-                    oMatrixMPE.Columns.Item("Col_4").DataBind.Bind("DT_MPE", "Dscription");
-
-                    oMatrixMPE.Columns.Item("Col_5").DataBind.Bind("DT_MPE", "Quantity");
-
-                    oMatrixMPE.Columns.Item("Col_6").DataBind.Bind("DT_MPE", "WhsCode");
-
-                    oMatrixMPE.Columns.Item("Col_7").DataBind.Bind("DT_MPE", "OF");
-
-                    oMatrixMPE.LoadFromDataSource();
-
-                    oMatrixMPE.AutoResizeColumns();
-
-                    oFormRawMaterial.Visible = true;
-                    oFormRawMaterial.Freeze(false);
-                    oFormRawMaterial.Refresh();
-
-                    DllFunciones.liberarObjetos(oMatrixMPE);
-                    DllFunciones.liberarObjetos(oTableMPE);
                 }
 
                 #endregion
 
-                DllFunciones.liberarObjetos(oMatrixCOP);
             }
-            catch (Exception e)
+            catch (Exception)
             {
-                DllFunciones.sendErrorMessage(sboapp, e);
 
-            }
-        }
-
-        public void LoadFormNewWorkOrder(SAPbouiCOM.Application sboapp, SAPbobsCOM.Company oCompany, SAPbouiCOM.Form oFormNewWorkOrder)
-        {
-            #region Variables y objetos
-
-            SAPbouiCOM.Matrix oMatrixNOP = (SAPbouiCOM.Matrix)oFormNewWorkOrder.Items.Item("mtxRP").Specific;
-
-            SAPbouiCOM.PictureBox oLogoBO = (SAPbouiCOM.PictureBox)oFormNewWorkOrder.Items.Item("imgLogoBO").Specific;
-
-            #endregion
-
-            #region Centra en pantalla formulario
-
-            oFormNewWorkOrder.Left = (sboapp.Desktop.Width - oFormNewWorkOrder.Width) / 2;
-            oFormNewWorkOrder.Top = (sboapp.Desktop.Height - oFormNewWorkOrder.Height) / 4;
-
-            #endregion
-
-            #region Asignacion Logo BO
-
-            oLogoBO.Picture = (Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().Location) + "\\Core\\Imagenes\\BO.jpg");
-
-            #endregion
-
-            #region Adicionar primera linea en la Matrix
-
-            #endregion
-
-        }
-
-        public void AddItemsToWorkOrder(SAPbouiCOM.Form _oFormWorkOrder)
-        {
-            #region Variables y objetos 
-
-            SAPbouiCOM.ComboBox oTO = null;
-            SAPbouiCOM.Item oUDFProduction = null;
-            SAPbouiCOM.Item oUDF = null;
-            SAPbouiCOM.Item oDataMasterDate = null;
-            SAPbouiCOM.StaticText oStaticText = null;
-
-            oUDF = _oFormWorkOrder.Items.Item("78");
-            oDataMasterDate = _oFormWorkOrder.Items.Item("6");
-
-            #endregion
-
-            #region Campo Tipo de Orden
-
-            //*******************************************
-            // Se adiciona Label "Tipo de Orden"
-            //*******************************************
-
-            oUDFProduction = _oFormWorkOrder.Items.Add("lblTO", SAPbouiCOM.BoFormItemTypes.it_STATIC);
-            oUDFProduction.Left = oUDF.Left + 130;
-            oUDFProduction.Width = oUDF.Width - 50;
-            oUDFProduction.Top = oUDF.Top;
-            oUDFProduction.Height = oUDF.Height;
-
-            oUDFProduction.LinkTo = "txtTO";
-
-            oStaticText = ((SAPbouiCOM.StaticText)(oUDFProduction.Specific));
-
-            oStaticText.Caption = "Tipo de Orden";
-
-            //*******************************************
-            // Se adiciona Tex Box "Tipo de Orden"
-            //*******************************************
-
-            oUDFProduction = _oFormWorkOrder.Items.Add("txtTO", SAPbouiCOM.BoFormItemTypes.it_COMBO_BOX);
-            oUDFProduction.Left = oUDF.Left + 205;
-            oUDFProduction.Width = oUDF.Width;
-            oUDFProduction.Top = oUDF.Top;
-            oUDFProduction.Height = oUDF.Height;
-            //oUDFProduction.Enabled = false;
-
-            oUDFProduction.DisplayDesc = true;
-
-            _oFormWorkOrder.DataSources.UserDataSources.Add("cboTO", SAPbouiCOM.BoDataType.dt_SHORT_TEXT, 20);
-
-            oTO = ((SAPbouiCOM.ComboBox)(oUDFProduction.Specific));
-
-
-            oTO.DataBind.SetBound(true, "OWOR", "U_BO_TO");
-
-
-            oTO.ValidValues.Add("T", "Producto Terminado");
-            oTO.ValidValues.Add("S", "Prodcuto Semielaborado");
-
-            if (_oFormWorkOrder.Mode == BoFormMode.fm_ADD_MODE)
-            {
-                oTO.Select("T", BoSearchKey.psk_ByValue);
+                throw;
+                return false;
             }
 
-            #endregion
-
-            #region Adicion Panel Ruta de produccion
-
-            SAPbouiCOM.Form _oFormWorOrder;
-            SAPbouiCOM.Item _oNewItem;
-            SAPbouiCOM.Item _oItem;
-            SAPbouiCOM.Folder _oFolderItem;
-
-            _oFormWorOrder = _oFormWorkOrder;
-            _oNewItem = _oFormWorOrder.Items.Add("FolderBO1", SAPbouiCOM.BoFormItemTypes.it_FOLDER);
-            _oItem = _oFormWorOrder.Items.Item("234000008");
-
-            _oNewItem.Top = _oItem.Top;
-            _oNewItem.Height = _oItem.Height;
-            _oNewItem.Width = _oItem.Width;
-            _oNewItem.Left = _oItem.Left + _oItem.Width;
-
-            _oFolderItem = ((SAPbouiCOM.Folder)(_oNewItem.Specific));
-
-            _oFolderItem.Caption = "Ruta de Producción";
-
-            _oFolderItem.GroupWith("234000008");
-
-            //ItemsDocuments(_oFormInvoices, _TipoDoc);
-
-            _oFormWorOrder.PaneLevel = 1;
-
-            #endregion
-
-            #region Adicionar Matrix Matrix Ruta de produccion
-
-            AddMatrixToFormWorkOrderRouteProduction(_oFormWorkOrder);
-
-            #endregion
-
-            oDataMasterDate.Click();
-
-        }
-
-        public void UpdateParametersProduction(SAPbouiCOM.Application sboapp, SAPbobsCOM.Company _oCompany, SAPbouiCOM.Form _oFormParProduction)
-        {
-            Funciones.Comunes DllFunciones = new Funciones.Comunes();
-
-            #region Variables y objetos
-
-            SAPbobsCOM.UserTable oUDT = (SAPbobsCOM.UserTable)(_oCompany.UserTables.Item("BOPRODP"));
-
-            SAPbouiCOM.ComboBox cboSNPT = (ComboBox)_oFormParProduction.Items.Item("txtSNPT").Specific;
-            SAPbouiCOM.ComboBox cboSNPS = (ComboBox)_oFormParProduction.Items.Item("txtSNPS").Specific;
-            SAPbouiCOM.Button btnOK = (Button)_oFormParProduction.Items.Item("btnUpdate").Specific;
-
-            string sValidateParametersProduccion = null;
-
-            SAPbobsCOM.Recordset oParametersProduccion = (SAPbobsCOM.Recordset)_oCompany.GetBusinessObject(SAPbobsCOM.BoObjectTypes.BoRecordset);
-
-            #endregion
-
-            #region Consulta si existe parametros configurados de produccion
-
-            sValidateParametersProduccion = DllFunciones.GetStringXMLDocument(_oCompany, "BOProduction", "Production", "GetParametersProduction");
-
-            oParametersProduccion.DoQuery(sValidateParametersProduccion);
-
-            #endregion
-
-            if (oParametersProduccion.RecordCount > 0)
-            {
-                #region Si existe, actualice el code 
-
-                oUDT.GetByKey(Convert.ToString(oParametersProduccion.Fields.Item("Code").Value.ToString()));
-                oUDT.UserFields.Fields.Item("U_BO_SNPT").Value = cboSNPT.Selected.Value;
-                oUDT.UserFields.Fields.Item("U_BO_SNPS").Value = cboSNPS.Selected.Value;
-
-                oUDT.Update();
-
-                #endregion
-            }
-            else
-            {
-                #region Variables y Objetos
-
-                string sSearchNextCode = null;
-
-                SAPbobsCOM.Recordset oSearchNextCode = (SAPbobsCOM.Recordset)_oCompany.GetBusinessObject(SAPbobsCOM.BoObjectTypes.BoRecordset);
-
-                #endregion
-
-                #region Consulta el Code a asignar
-
-                sSearchNextCode = DllFunciones.GetStringXMLDocument(_oCompany, "BOProduction", "Production", "SerachNextCode");
-
-                oSearchNextCode.DoQuery(sSearchNextCode);
-
-                #endregion
-
-                #region Si no existe, inserta el code 
-
-                oUDT.Code = Convert.ToString(oSearchNextCode.Fields.Item("ID").Value.ToString());
-                oUDT.Name = Convert.ToString(oSearchNextCode.Fields.Item("ID").Value.ToString());
-                oUDT.UserFields.Fields.Item("U_BO_SNPT").Value = cboSNPT.Selected.Value;
-                oUDT.UserFields.Fields.Item("U_BO_SNPS").Value = cboSNPS.Selected.Value;
-
-                oUDT.Add();
-
-                #endregion
-
-            }
-
-            DllFunciones.StatusBar(sboapp, BoStatusBarMessageType.smt_Success, "Actualizado correctamente...");
-            btnOK.Caption = "OK";
-            _oFormParProduction.Mode = BoFormMode.fm_OK_MODE;
-            _oFormParProduction.Refresh();
-
-
-        }
-
-        public void LinkedButtonMatrixFormCOP(SAPbouiCOM.Application _sboapp, SAPbobsCOM.Company _oCompany, SAPbouiCOM.Form oFormCOP, ItemEvent pVal, string sColumna)
-        {
-            Funciones.Comunes DllFunciones = new Funciones.Comunes();
-
-            #region Consulta DocEntry Orden de Produccion
-
-            SAPbouiCOM.Matrix oMatrixCOP = (Matrix)oFormCOP.Items.Item("MtxCOP").Specific;
-
-            #endregion
-
-            if (sColumna == "Col_0")
-            {
-                #region LinkeButton Orden de produccion producto terminado 
-
-                ((EditText)oFormCOP.Items.Item("txtValor").Specific).Value = ((SAPbouiCOM.EditText)oMatrixCOP.Columns.Item("Col_20").Cells.Item(pVal.Row).Specific).Value;
-                Item itm = oFormCOP.Items.Item("lbValor");
-                ((LinkedButton)itm.Specific).LinkedObjectType = "202";
-                itm.Click();
-
-                #endregion
-            }
-            else if (sColumna == "Col_13")
-            {
-                #region LinkeButton Orden de produccion producto semielaborado
-
-                ((EditText)oFormCOP.Items.Item("txtValor").Specific).Value = ((SAPbouiCOM.EditText)oMatrixCOP.Columns.Item("Col_14").Cells.Item(pVal.Row).Specific).Value;
-                Item itm = oFormCOP.Items.Item("lbValor");
-                ((LinkedButton)itm.Specific).LinkedObjectType = "202";
-                itm.Click();
-
-                #endregion
-            }
-            else if (sColumna == "Col_1")
-            {
-                #region LinkeButton abre articulo Producto terminado
-
-                oFormCOP.Freeze(true);
-
-                SAPbouiCOM.Column oColumDocEntry;
-                SAPbouiCOM.LinkedButton LkBtnDocEntry;
-
-                oColumDocEntry = oMatrixCOP.Columns.Item("Col_2");
-
-                LkBtnDocEntry = (SAPbouiCOM.LinkedButton)oColumDocEntry.ExtendedObject;
-                LkBtnDocEntry.LinkedObject = BoLinkedObject.lf_Items;
-
-                oFormCOP.Freeze(false);
-
-                #endregion
-            }
-            else if (sColumna == "Col_8")
-            {
-                #region LinkeButton abre Producto Semielaborado
-
-                oFormCOP.Freeze(true);
-
-                SAPbouiCOM.Column oColumDocEntry;
-                SAPbouiCOM.LinkedButton LkBtnDocEntry;
-
-                oColumDocEntry = oMatrixCOP.Columns.Item("4");
-
-                LkBtnDocEntry = (SAPbouiCOM.LinkedButton)oColumDocEntry.ExtendedObject;
-                LkBtnDocEntry.LinkedObject = BoLinkedObject.lf_Items;
-
-                oFormCOP.Freeze(false);
-
-                #endregion
-            }
-        }
-
-        public void LinkedButtonMatrixFormMPE(SAPbouiCOM.Application _sboapp, SAPbobsCOM.Company _oCompany, SAPbouiCOM.Form BOFormMPC, ItemEvent pVal, string sColumna)
-        {
-            Funciones.Comunes DllFunciones = new Funciones.Comunes();
-
-            #region Consulta DocEntry Orden de Produccion
-
-            SAPbouiCOM.Matrix oMatrixMPE = (Matrix)BOFormMPC.Items.Item("MtxMPE").Specific;
-
-            #endregion
-
-            if (sColumna == "Col_1")
-            {
-                #region LinkeButton Materia prima consumida 
-
-                ((EditText)BOFormMPC.Items.Item("txtValor").Specific).Value = ((SAPbouiCOM.EditText)oMatrixMPE.Columns.Item("Col_0").Cells.Item(pVal.Row).Specific).Value;
-                string doceentry = ((SAPbouiCOM.EditText)oMatrixMPE.Columns.Item("Col_0").Cells.Item(pVal.Row).Specific).Value;
-                Item itm = BOFormMPC.Items.Item("lbValor");
-                ((LinkedButton)itm.Specific).LinkedObjectType = "60";
-                itm.Click();
-
-                #endregion
-            }
         }
 
         public string VersionDll()
@@ -1177,6 +1443,7 @@ namespace BOProduccion
             }
 
         }
+
 
     }
 }
