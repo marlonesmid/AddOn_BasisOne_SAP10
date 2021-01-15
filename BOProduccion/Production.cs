@@ -639,7 +639,7 @@ namespace BOProduccion
                 SAPbouiCOM.Matrix oMatrixCOP = (Matrix)oFormControlProduction.Items.Item("MtxCOP").Specific;
                 SAPbouiCOM.PictureBox oLogoBO = (SAPbouiCOM.PictureBox)oFormControlProduction.Items.Item("imgLogoBO").Specific;
                 SAPbouiCOM.CommonSetting CS = oMatrixCOP.CommonSetting;
-
+                SAPbouiCOM.ComboBox ocboEOP = (SAPbouiCOM.ComboBox)oFormControlProduction.Items.Item("cboEOP").Specific;
                 SAPbouiCOM.DataTable oTableCOP = oFormControlProduction.DataSources.DataTables.Add("DT_COP");
 
                 string sConsultaOP;
@@ -657,6 +657,12 @@ namespace BOProduccion
                 #region Asignacion Logo BO
 
                 oLogoBO.Picture = (Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().Location) + "\\Core\\Imagenes\\BO.jpg");
+
+                #endregion
+
+                #region Asigna valores por defecto en los campos
+
+                ocboEOP.Select("-", BoSearchKey.psk_ByValue);
 
                 #endregion
 
@@ -734,17 +740,17 @@ namespace BOProduccion
 
                         if (((SAPbouiCOM.EditText)oMatrixCOP.Columns.Item("Col_16").Cells.Item(i).Specific).Value == "Liberado")
                         {
-                            oMatrixCOP.CommonSetting.SetCellBackColor(i, 12, DLLFunciones.ColorSB1_NARANJA());
+                            oMatrixCOP.CommonSetting.SetCellBackColor(i, 11, DLLFunciones.ColorSB1_NARANJA());
                         }
 
                         if (((SAPbouiCOM.EditText)oMatrixCOP.Columns.Item("Col_16").Cells.Item(i).Specific).Value == "Planificado")
                         {
-                            oMatrixCOP.CommonSetting.SetCellBackColor(i, 12, DLLFunciones.ColorSB1_AGUA());
+                            oMatrixCOP.CommonSetting.SetCellBackColor(i, 11, DLLFunciones.ColorSB1_AGUA());
                         }
 
                         if (((SAPbouiCOM.EditText)oMatrixCOP.Columns.Item("Col_16").Cells.Item(i).Specific).Value == "Cerrado")
                         {
-                            oMatrixCOP.CommonSetting.SetCellBackColor(i, 12, DLLFunciones.ColorSB1_LIMA());
+                            oMatrixCOP.CommonSetting.SetCellBackColor(i, 11, DLLFunciones.ColorSB1_LIMA());
                         }
 
                         if (((SAPbouiCOM.EditText)oMatrixCOP.Columns.Item("Col_17").Cells.Item(i).Specific).Value == "VERDE")
@@ -816,6 +822,13 @@ namespace BOProduccion
                 #endregion
 
                 #region Consulta si existe materia prima entregada
+
+
+                if (string.IsNullOrEmpty(sDocEntryOPS))
+                {
+                    sDocEntryOPS = ((SAPbouiCOM.EditText)oMatrixCOP.Columns.Item("Col_20").Cells.Item(pVal.Row).Specific).Value;
+                }
+
 
                 sConsultaMPE = DllFunciones.GetStringXMLDocument(oCompany, "BOProduction", "Production", "GetMPE");
 
@@ -1010,34 +1023,44 @@ namespace BOProduccion
 
                 try
                 {
-                    Col_1 = System.Convert.ToString(oDataTable.GetValue(0, 0));
-                    Col_2 = System.Convert.ToString(oDataTable.GetValue(1, 0));
 
-                    if (_sMotorDB == "dst_MSSQL2012" || _sMotorDB == "dst_MSSQL2014" || _sMotorDB == "dst_MSSQL2016" || _sMotorDB == "dst_MSSQL2017" || _sMotorDB == "dst_HANADB")
+                    if (oDataTable == null)
                     {
-                        if (pVal.ItemUID == "mtxRP" & pVal.ColUID == "Col_1")
-                        {
-                            if (pVal.Row == 1)
-                            {
-                                Col_0 = "P. Terminado";
-
-                                _FormWO.DataSources.UserDataSources.Item("DSCol0").ValueEx = Col_0;
-                            }
-                            else
-                            {
-                                Col_0 = "P. Semielaborado";
-
-                                _FormWO.DataSources.UserDataSources.Item("DSCol0").ValueEx = Col_0;
-
-                            }
-
-                            _FormWO.DataSources.UserDataSources.Item("#").ValueEx = System.Convert.ToString(pVal.Row);
-                            _FormWO.DataSources.UserDataSources.Item("DSCol1").ValueEx = Col_1;
-                            _FormWO.DataSources.UserDataSources.Item("DSCol2").ValueEx = Col_2;
-
-                            oMatrixWO.SetLineData(pVal.Row);
-                        }
                     }
+                    else
+                    {
+                        Col_1 = System.Convert.ToString(oDataTable.GetValue(0, 0));
+                        Col_2 = System.Convert.ToString(oDataTable.GetValue(1, 0));
+
+                        if (_sMotorDB == "dst_MSSQL2012" || _sMotorDB == "dst_MSSQL2014" || _sMotorDB == "dst_MSSQL2016" || _sMotorDB == "dst_MSSQL2017" || _sMotorDB == "dst_HANADB")
+                        {
+                            if (pVal.ItemUID == "mtxRP" & pVal.ColUID == "Col_1")
+                            {
+                                if (pVal.Row == 1)
+                                {
+                                    Col_0 = "P. Terminado";
+
+                                    _FormWO.DataSources.UserDataSources.Item("DSCol0").ValueEx = Col_0;
+                                }
+                                else
+                                {
+                                    Col_0 = "P. Semielaborado";
+
+                                    _FormWO.DataSources.UserDataSources.Item("DSCol0").ValueEx = Col_0;
+
+                                }
+
+                                _FormWO.DataSources.UserDataSources.Item("#").ValueEx = System.Convert.ToString(pVal.Row);
+                                _FormWO.DataSources.UserDataSources.Item("DSCol1").ValueEx = Col_1;
+                                _FormWO.DataSources.UserDataSources.Item("DSCol2").ValueEx = Col_2;
+
+                                oMatrixWO.SetLineData(pVal.Row);
+                            }
+                        }
+
+                    }
+
+
                 }
                 catch (Exception e)
                 {
@@ -1110,7 +1133,7 @@ namespace BOProduccion
                 SAPbouiCOM.Column oColumDocEntry;
                 SAPbouiCOM.LinkedButton LkBtnDocEntry;
 
-                oColumDocEntry = oMatrixCOP.Columns.Item("4");
+                oColumDocEntry = oMatrixCOP.Columns.Item("Col_8");
 
                 LkBtnDocEntry = (SAPbouiCOM.LinkedButton)oColumDocEntry.ExtendedObject;
                 LkBtnDocEntry.LinkedObject = BoLinkedObject.lf_Items;

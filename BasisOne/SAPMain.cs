@@ -399,6 +399,30 @@ namespace BasisOne
 
                                 #endregion
                             }
+                            else if (pVal.FormUID == "BO_New_WO" && pVal.ItemUID == "mtxRP" && pVal.Before_Action == true && pVal.Action_Success == false)
+                            {
+                                #region Selecciona la infomracion de la matrix Nueva orden de produccion
+
+                                try
+                                {
+                                    #region Variables
+
+                                    SAPbouiCOM.Form BO_New_WO = sboapp.Forms.Item("BO_New_WO");
+                                    SAPbouiCOM.Matrix oMtxNWO = (Matrix)BO_New_WO.Items.Item("mtxRP").Specific;
+
+                                    #endregion
+
+                                    DllFunciones.SelectRowMatrix(oMtxNWO, pVal);
+
+                                }
+                                catch (Exception)
+                                {
+
+                                    throw;
+                                }
+
+                                #endregion
+                            }
 
                             #endregion
                         }
@@ -477,12 +501,29 @@ namespace BasisOne
                         if (TieneLicenciaeBilling == true)
                         {
                             #region Eventos_eBilling
+
                             if (pVal.FormUID == "BOVDEB" && pVal.ItemUID == "txtSN" && pVal.BeforeAction == false)
                             {
                                 SAPbouiCOM.Form oFormVisorDocs = sboapp.Forms.GetFormByTypeAndCount(pVal.FormType, pVal.FormTypeCount);
 
                                 DlleBilling.ChooFormListSN(FormUID, oFormVisorDocs, pVal, _company, sboapp);
                             }
+
+                            #endregion
+                        }
+
+                        if (TieneLicenciaProduction == true)
+                        {
+                            #region Eventos_Produccion
+
+                            if (pVal.FormUID == "BO_New_WO" && pVal.ItemUID == "mtxRP" && pVal.BeforeAction == false)
+                            {
+                                SAPbouiCOM.Form oForWO = sboapp.Forms.GetFormByTypeAndCount(pVal.FormType, pVal.FormTypeCount);
+
+                                DllProduction.MatrixChooseFromListAfter(FormUID, oForWO, pVal, _company, sboapp);
+
+                            }
+
                             #endregion
                         }
 
@@ -744,7 +785,7 @@ namespace BasisOne
 
                             #region Factura de venta
 
-                            else if (pVal.FormType == 133 && pVal.ItemUID == "FolderBO2" && pVal.Before_Action == true)
+                            else if (pVal.FormType == 133 && pVal.ItemUID == "FolderBO1" && pVal.Before_Action == true)
                             {
                                 SAPbouiCOM.Form oFormInvoice;
 
@@ -905,46 +946,7 @@ namespace BasisOne
                         {
                             #region Eventos Production
 
-                            if (pVal.FormType == 65211 && pVal.ItemUID == "1" && pVal.Before_Action == true && pVal.Action_Success == false && (pVal.FormMode == 3))
-                            {
-                                #region Validacion de campos en Orden de produccion
-
-                                SAPbouiCOM.Form oFormProduccion;
-                                oFormProduccion = sboapp.Forms.GetFormByTypeAndCount(pVal.FormType, pVal.FormTypeCount);
-
-                                BubbleEvent = DllProduction.Validate_WorkOrder(sboapp, _company, oFormProduccion);
-
-                                if (BubbleEvent == false)
-                                {
-                                    sPosciones = "NO";
-                                }
-                                else
-                                {
-                                    sPosciones = "SI";
-                                }
-
-                                #endregion
-                            }
-                            else if (pVal.FormType == 65211 && pVal.ItemUID == "1" && pVal.Before_Action == false && pVal.Action_Success == true)
-                            {
-                                #region Crea Posiciones ordenes de produccion
-
-                                SAPbouiCOM.Form oFormProduccion;
-                                oFormProduccion = sboapp.Forms.GetFormByTypeAndCount(pVal.FormType, pVal.FormTypeCount);
-
-                                if (oFormProduccion.Mode == BoFormMode.fm_ADD_MODE)
-                                {
-                                    sCurrentUser = Convert.ToString(_company.UserSignature);
-
-                                    if (sPosciones == "SI")
-                                    {
-                                        BubbleEvent = DllProduction.Create_Order_Prodcution(sboapp, _company, sMotor, sCurrentUser);
-                                    }
-                                }
-
-                                #endregion
-                            }
-                            else if (pVal.FormType == 65211 && pVal.ItemUID == "FolderBO1" && pVal.Before_Action == true)
+                            if (pVal.FormType == 65211 && pVal.ItemUID == "FolderBO1" && pVal.Before_Action == true)
                             {
                                 #region Selecciona el Panel "Ruta de produccion"
 
@@ -1010,7 +1012,7 @@ namespace BasisOne
                                     SAPbouiCOM.Form oFormNOP;
                                     oFormNOP = sboapp.Forms.Item("BO_New_WO");
 
-                                    DllProduction.ChangueFormParProduction(sboapp, _company, oFormNOP);
+                                    DllProduction.LoadFormNewWorkOrder(sboapp, _company, oFormNOP, pVal);
 
                                 }
                                 catch (Exception e)
@@ -1020,19 +1022,80 @@ namespace BasisOne
 
                                 #endregion
                             }
-
+                            else if (pVal.FormUID == "BOFormCOP" && pVal.ItemUID == "btnNLM" && pVal.BeforeAction == true)
+                            {
+                                sboapp.Menus.Item("4353").Activate();
+                            }
+                            else if (pVal.FormUID == "BOFormCOP" && pVal.ItemUID == "btnNSC" && pVal.BeforeAction == true)
+                            {
+                                sboapp.Menus.Item("39724").Activate();
+                            }
                             else if (pVal.FormUID == "BOFormMPC" && pVal.ItemUID == "btnSalir" && pVal.BeforeAction == true)
                             {
                                 #region Actualiza el formulario materia prima entregada
 
-                                //SAPbouiCOM.Form oFormMPC;
-                                //FormMPC = sboapp.Forms.Item("FormMPC");
-
-                                //DllProduction.LoadFormMRawMaterial(sboapp, _company, oFormMPC, pVal);
                                 DllFunciones.CloseFormXML(sboapp, "BOFormMPC");
 
                                 #endregion
                             }
+                            else if (pVal.FormUID == "BO_New_WO" && pVal.ItemUID == "btnCan" && pVal.BeforeAction == true)
+                            {
+                                DllFunciones.CloseFormXML(sboapp, "BO_New_WO");
+                            }
+                            else if (pVal.FormUID == "BO_New_WO" && pVal.ItemUID == "btnNL" && pVal.BeforeAction == true)
+                            {
+                                #region Adiciona linea en matriz
+
+                                SAPbouiCOM.Form oFormNWO;
+                                oFormNWO = sboapp.Forms.Item("BO_New_WO");
+
+                                DllProduction.AddNewRowMatrix(oFormNWO);
+
+                                #endregion
+
+                            }
+                            else if (pVal.FormUID == "BO_New_WO" && pVal.ItemUID == "btnDL" && pVal.BeforeAction == true)
+                            {
+                                #region Se elimina linea de la matrz
+
+                                SAPbouiCOM.Form oFormNWO;
+                                oFormNWO = sboapp.Forms.Item("BO_New_WO");
+
+                                DllProduction.DeleteRowMatrix(sboapp, oFormNWO);
+
+                                #endregion
+
+                            }
+                            else if (pVal.FormUID == "BO_New_WO" && pVal.ItemUID == "btnNLM" && pVal.BeforeAction == true)
+                            {
+                                sboapp.Menus.Item("4353").Activate();
+                            }
+                            else if (pVal.FormUID == "BO_New_WO" && pVal.ItemUID == "btnCreate" && pVal.Before_Action == true && pVal.Action_Success == false)
+                            {
+                                #region Validacion de campos en Orden de produccion
+
+                                SAPbouiCOM.Form oFormNWO;
+                                oFormNWO = sboapp.Forms.GetFormByTypeAndCount(pVal.FormType, pVal.FormTypeCount);
+
+                                BubbleEvent = DllProduction.Validate_WorkOrder(sboapp, _company, oFormNWO);
+
+                                if (BubbleEvent == false)
+                                {
+
+                                }
+                                else
+                                {
+                                    sCurrentUser = Convert.ToString(_company.UserSignature);
+
+                                    BubbleEvent = DllProduction.Create_Order_Prodcution(sboapp, _company, sMotor, sCurrentUser, oFormNWO);
+
+                                    DllFunciones.CloseFormXML(sboapp, "BO_New_WO");
+
+                                }
+
+                                #endregion
+                            }
+
 
                             #endregion
                         }
@@ -2000,7 +2063,7 @@ namespace BasisOne
                         _oCreationPackage.Type = SAPbouiCOM.BoMenuType.mt_POPUP;
                         _oCreationPackage.UniqueID = "mnuBO_P";
                         _oCreationPackage.Enabled = true;
-                        _oCreationPackage.String = "Produccion Avanzada";
+                        _oCreationPackage.String = "Producción Avanzada";
                         _oCreationPackage.Image = "";
                         _oCreationPackage.Position = _oCreationPackage.Position + 1;
                         _oMenus = _oMenuItem.SubMenus;
@@ -2011,7 +2074,16 @@ namespace BasisOne
                         _oCreationPackage.Position = _oCreationPackage.Position + 1;
                         _oCreationPackage.Type = SAPbouiCOM.BoMenuType.mt_STRING;
                         _oCreationPackage.UniqueID = "mnuBO_PP";
-                        _oCreationPackage.String = "Parametos produccion avanzada";
+                        _oCreationPackage.String = "Parametos iniciales";
+                        _oCreationPackage.Image = "";
+                        _oMenuItem.SubMenus.AddEx(_oCreationPackage);
+
+                        _oMenuItem = sboapp.Menus.Item("mnuBO_P");
+                        _oCreationPackage.Enabled = true;
+                        _oCreationPackage.Position = _oCreationPackage.Position + 1;
+                        _oCreationPackage.Type = SAPbouiCOM.BoMenuType.mt_STRING;
+                        _oCreationPackage.UniqueID = "mnuBO_RP";
+                        _oCreationPackage.String = "Rutas de producción";
                         _oCreationPackage.Image = "";
                         _oMenuItem.SubMenus.AddEx(_oCreationPackage);
 
@@ -2020,7 +2092,7 @@ namespace BasisOne
                         _oCreationPackage.Position = _oCreationPackage.Position + 1;
                         _oCreationPackage.Type = SAPbouiCOM.BoMenuType.mt_STRING;
                         _oCreationPackage.UniqueID = "mnuBO_COP";
-                        _oCreationPackage.String = "Control ordenes produccion";
+                        _oCreationPackage.String = "Ordenes de produccion";
                         _oCreationPackage.Image = "";
                         _oMenuItem.SubMenus.AddEx(_oCreationPackage);
 
