@@ -5893,6 +5893,9 @@ namespace eBilling.ServicioEmisionFE {
         private bool esValidoDianField;
         
         [System.Runtime.Serialization.OptionalFieldAttribute()]
+        private string fechaAceptacionDIANField;
+        
+        [System.Runtime.Serialization.OptionalFieldAttribute()]
         private string fechaRespuestaField;
         
         [System.Runtime.Serialization.OptionalFieldAttribute()]
@@ -5983,6 +5986,19 @@ namespace eBilling.ServicioEmisionFE {
                 if ((this.esValidoDianField.Equals(value) != true)) {
                     this.esValidoDianField = value;
                     this.RaisePropertyChanged("esValidoDian");
+                }
+            }
+        }
+        
+        [System.Runtime.Serialization.DataMemberAttribute()]
+        public string fechaAceptacionDIAN {
+            get {
+                return this.fechaAceptacionDIANField;
+            }
+            set {
+                if ((object.ReferenceEquals(this.fechaAceptacionDIANField, value) != true)) {
+                    this.fechaAceptacionDIANField = value;
+                    this.RaisePropertyChanged("fechaAceptacionDIAN");
                 }
             }
         }
@@ -6153,6 +6169,18 @@ namespace eBilling.ServicioEmisionFE {
         private bool aceptacionFisicaField;
         
         [System.Runtime.Serialization.OptionalFieldAttribute()]
+        private string acuseComentarioField;
+        
+        [System.Runtime.Serialization.OptionalFieldAttribute()]
+        private string acuseEstatusField;
+        
+        [System.Runtime.Serialization.OptionalFieldAttribute()]
+        private string acuseResponsableField;
+        
+        [System.Runtime.Serialization.OptionalFieldAttribute()]
+        private string acuseRespuestaField;
+        
+        [System.Runtime.Serialization.OptionalFieldAttribute()]
         private string ambienteField;
         
         [System.Runtime.Serialization.OptionalFieldAttribute()]
@@ -6187,6 +6215,9 @@ namespace eBilling.ServicioEmisionFE {
         
         [System.Runtime.Serialization.OptionalFieldAttribute()]
         private eBilling.ServicioEmisionFE.Evento[] eventosField;
+        
+        [System.Runtime.Serialization.OptionalFieldAttribute()]
+        private string fechaAceptacionDIANField;
         
         [System.Runtime.Serialization.OptionalFieldAttribute()]
         private string fechaDocumentoField;
@@ -6240,6 +6271,58 @@ namespace eBilling.ServicioEmisionFE {
                 if ((this.aceptacionFisicaField.Equals(value) != true)) {
                     this.aceptacionFisicaField = value;
                     this.RaisePropertyChanged("aceptacionFisica");
+                }
+            }
+        }
+        
+        [System.Runtime.Serialization.DataMemberAttribute()]
+        public string acuseComentario {
+            get {
+                return this.acuseComentarioField;
+            }
+            set {
+                if ((object.ReferenceEquals(this.acuseComentarioField, value) != true)) {
+                    this.acuseComentarioField = value;
+                    this.RaisePropertyChanged("acuseComentario");
+                }
+            }
+        }
+        
+        [System.Runtime.Serialization.DataMemberAttribute()]
+        public string acuseEstatus {
+            get {
+                return this.acuseEstatusField;
+            }
+            set {
+                if ((object.ReferenceEquals(this.acuseEstatusField, value) != true)) {
+                    this.acuseEstatusField = value;
+                    this.RaisePropertyChanged("acuseEstatus");
+                }
+            }
+        }
+        
+        [System.Runtime.Serialization.DataMemberAttribute()]
+        public string acuseResponsable {
+            get {
+                return this.acuseResponsableField;
+            }
+            set {
+                if ((object.ReferenceEquals(this.acuseResponsableField, value) != true)) {
+                    this.acuseResponsableField = value;
+                    this.RaisePropertyChanged("acuseResponsable");
+                }
+            }
+        }
+        
+        [System.Runtime.Serialization.DataMemberAttribute()]
+        public string acuseRespuesta {
+            get {
+                return this.acuseRespuestaField;
+            }
+            set {
+                if ((object.ReferenceEquals(this.acuseRespuestaField, value) != true)) {
+                    this.acuseRespuestaField = value;
+                    this.RaisePropertyChanged("acuseRespuesta");
                 }
             }
         }
@@ -6396,6 +6479,19 @@ namespace eBilling.ServicioEmisionFE {
                 if ((object.ReferenceEquals(this.eventosField, value) != true)) {
                     this.eventosField = value;
                     this.RaisePropertyChanged("eventos");
+                }
+            }
+        }
+        
+        [System.Runtime.Serialization.DataMemberAttribute()]
+        public string fechaAceptacionDIAN {
+            get {
+                return this.fechaAceptacionDIANField;
+            }
+            set {
+                if ((object.ReferenceEquals(this.fechaAceptacionDIANField, value) != true)) {
+                    this.fechaAceptacionDIANField = value;
+                    this.RaisePropertyChanged("fechaAceptacionDIAN");
                 }
             }
         }
@@ -7024,6 +7120,15 @@ namespace eBilling.ServicioEmisionFE {
         private System.Runtime.Serialization.ExtensionDataObject extensionDataField;
         
         [System.Runtime.Serialization.OptionalFieldAttribute()]
+        private string LeidoEmailIPAddressField;
+        
+        [System.Runtime.Serialization.OptionalFieldAttribute()]
+        private string LeidoEstatusField;
+        
+        [System.Runtime.Serialization.OptionalFieldAttribute()]
+        private string LeidoFechaField;
+        
+        [System.Runtime.Serialization.OptionalFieldAttribute()]
         private string canalDeEntregaField;
         
         [System.Runtime.Serialization.OptionalFieldAttribute()]
@@ -7069,6 +7174,45 @@ namespace eBilling.ServicioEmisionFE {
             }
             set {
                 this.extensionDataField = value;
+            }
+        }
+        
+        [System.Runtime.Serialization.DataMemberAttribute()]
+        public string LeidoEmailIPAddress {
+            get {
+                return this.LeidoEmailIPAddressField;
+            }
+            set {
+                if ((object.ReferenceEquals(this.LeidoEmailIPAddressField, value) != true)) {
+                    this.LeidoEmailIPAddressField = value;
+                    this.RaisePropertyChanged("LeidoEmailIPAddress");
+                }
+            }
+        }
+        
+        [System.Runtime.Serialization.DataMemberAttribute()]
+        public string LeidoEstatus {
+            get {
+                return this.LeidoEstatusField;
+            }
+            set {
+                if ((object.ReferenceEquals(this.LeidoEstatusField, value) != true)) {
+                    this.LeidoEstatusField = value;
+                    this.RaisePropertyChanged("LeidoEstatus");
+                }
+            }
+        }
+        
+        [System.Runtime.Serialization.DataMemberAttribute()]
+        public string LeidoFecha {
+            get {
+                return this.LeidoFechaField;
+            }
+            set {
+                if ((object.ReferenceEquals(this.LeidoFechaField, value) != true)) {
+                    this.LeidoFechaField = value;
+                    this.RaisePropertyChanged("LeidoFecha");
+                }
             }
         }
         

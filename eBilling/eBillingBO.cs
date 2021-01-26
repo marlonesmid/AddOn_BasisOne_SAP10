@@ -36,6 +36,7 @@ namespace eBilling
         string _IDCategory;
         int Rsd = 0;
 
+
         #endregion
 
         #region Parametros globales TFHKA
@@ -95,12 +96,29 @@ namespace eBilling
 
             _ItemEnviarOriginal = _oFormInvoices.Items.Add("BtnEnvi", SAPbouiCOM.BoFormItemTypes.it_BUTTON);
             _ItemEnviarOriginal.Left = _ItemEnviarCopia.Left;
-            _ItemEnviarOriginal.Width = _ItemEnviarCopia.Width + 30;
             _ItemEnviarOriginal.Top = _ItemEnviarCopia.Top + 20;
+            _ItemEnviarOriginal.Width = _ItemEnviarCopia.Width + 30;
             _ItemEnviarOriginal.Height = _ItemEnviarCopia.Height + 10;
 
             SAPbouiCOM.Button _BtnEnviar = (SAPbouiCOM.Button)_ItemEnviarOriginal.Specific;
             _BtnEnviar.Caption = "Enviar a DIAN";
+
+            #endregion
+
+            #region Button Reenviar E-mail
+
+            //*******************************************
+            // Se adiciona Label "Boton Re-Enviar E-mail"
+            //*******************************************
+
+            _ItemEnviarOriginal = _oFormInvoices.Items.Add("BtnSM", SAPbouiCOM.BoFormItemTypes.it_BUTTON);
+            _ItemEnviarOriginal.Left = _ItemEnviarCopia.Left + 142;
+            _ItemEnviarOriginal.Top = _ItemEnviarCopia.Top + 20;
+            _ItemEnviarOriginal.Width = 100;
+            _ItemEnviarOriginal.Height = _ItemEnviarCopia.Height + 5;
+
+            SAPbouiCOM.Button _BtnSM = (SAPbouiCOM.Button)_ItemEnviarOriginal.Specific;
+            _BtnSM.Caption = "Reenviar E-Mail";
 
             #endregion
 
@@ -2039,10 +2057,6 @@ namespace eBilling
 
                 throw;
             }
-
-
-
-
         }
 
         private FacturaGeneral oBuillInvoice(SAPbobsCOM.Recordset oCabecera, SAPbobsCOM.Recordset oLineas, SAPbobsCOM.Recordset oImpuestos, SAPbobsCOM.Recordset oImpuestosTotales, SAPbobsCOM.Recordset OCUFEInvoice, string ___TipoDocumento)
@@ -2817,6 +2831,429 @@ namespace eBilling
 
             otxtFI.Item.Click();
 
+        }
+
+        public void LoadFormSendMail(SAPbobsCOM.Company oCompany, SAPbouiCOM.Application _sboapp, SAPbouiCOM.Form oFormSM, string _sMotor, string _sPrefijoDocNumSM)
+        {
+            Funciones.Comunes DLLFunciones = new Funciones.Comunes();
+
+            try
+            {
+                #region Variables y objetos
+
+                SAPbouiCOM.PictureBox oLogoBO = (SAPbouiCOM.PictureBox)oFormSM.Items.Item("LogoBO").Specific;
+
+                SAPbouiCOM.Item oFieldSendMail = null;
+                SAPbouiCOM.StaticText oStaticText = null;
+
+                SAPbouiCOM.EditText otxtEmail1 = null;
+
+                #endregion
+
+                #region Asignacion Logo BO
+
+                oLogoBO.Picture = (Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().Location) + "\\Core\\Imagenes\\BO.jpg");
+
+                #endregion
+
+                #region Centrar el formulario
+
+                oFormSM.Left = (_sboapp.Desktop.Width - oFormSM.Width) / 2;
+                oFormSM.Top = (_sboapp.Desktop.Height - oFormSM.Height) / 4;
+
+                #endregion
+
+                #region Consultar cantidad de correos 
+
+                string sQuantityEmails;
+                int iQuantityEmails;
+
+                SAPbobsCOM.Recordset oQuantityEmails = (SAPbobsCOM.Recordset)oCompany.GetBusinessObject(SAPbobsCOM.BoObjectTypes.BoRecordset);
+
+                sQuantityEmails = DLLFunciones.GetStringXMLDocument(oCompany, "eBilling", "eBilling", "GetQuantityEmails");
+                oQuantityEmails.DoQuery(sQuantityEmails);
+
+                iQuantityEmails = Convert.ToInt32(oQuantityEmails.Fields.Item(0).Value.ToString());
+
+                DLLFunciones.liberarObjetos(oQuantityEmails);
+
+                #endregion
+
+                #region Se obtiene el numero de documento 
+
+                //*******************************************
+                // Se adiciona Label con el numero del documento
+                //*******************************************
+
+                oFieldSendMail = oFormSM.Items.Add("lbl1", SAPbouiCOM.BoFormItemTypes.it_STATIC);
+                oFieldSendMail.Left = 10;
+                oFieldSendMail.Top = 10;
+                oFieldSendMail.Height = 10;
+                oFieldSendMail.Width = 10;
+
+                oStaticText = ((SAPbouiCOM.StaticText)(oFieldSendMail.Specific));
+
+                oStaticText.Caption = _sPrefijoDocNumSM;
+
+                oFieldSendMail.Visible = false;
+
+                #endregion
+
+                if (iQuantityEmails == 2)
+                {
+
+                    #region Correo 2
+
+                    //*******************************************
+                    // Se adiciona Label "Correo Electronico 2"
+                    //*******************************************
+
+                    oFieldSendMail = oFormSM.Items.Add("blbEmail2", SAPbouiCOM.BoFormItemTypes.it_STATIC);
+                    oFieldSendMail.Left = 20;
+                    oFieldSendMail.Top = 30;
+                    oFieldSendMail.Height = 14;
+                    oFieldSendMail.Width = 71;
+
+                    oFieldSendMail.LinkTo = "txtEmail2";
+
+                    oStaticText = ((SAPbouiCOM.StaticText)(oFieldSendMail.Specific));
+
+                    oStaticText.Caption = "Correo 2";
+
+                    //*******************************************
+                    // Se adiciona Tex Box "Correo Electronico 2"
+                    //*******************************************
+
+                    oFieldSendMail = oFormSM.Items.Add("txtEmail2", SAPbouiCOM.BoFormItemTypes.it_EDIT);
+                    oFieldSendMail.Left = 96;
+                    oFieldSendMail.Top = 30;
+                    oFieldSendMail.Height = 14;
+                    oFieldSendMail.Width = 201;
+
+                    otxtEmail1 = ((SAPbouiCOM.EditText)(oFieldSendMail.Specific));
+
+                    #endregion
+
+                }
+                else if (iQuantityEmails == 3)
+                {
+
+                    #region Correo 2
+
+                    //*******************************************
+                    // Se adiciona Label "Correo Electronico 2"
+                    //*******************************************
+
+                    oFieldSendMail = oFormSM.Items.Add("blbEmail2", SAPbouiCOM.BoFormItemTypes.it_STATIC);
+                    oFieldSendMail.Left = 20;
+                    oFieldSendMail.Top = 30;
+                    oFieldSendMail.Height = 14;
+                    oFieldSendMail.Width = 71;
+
+                    oFieldSendMail.LinkTo = "txtEmail2";
+
+                    oStaticText = ((SAPbouiCOM.StaticText)(oFieldSendMail.Specific));
+
+                    oStaticText.Caption = "Correo 2";
+
+                    //*******************************************
+                    // Se adiciona Tex Box "Correo Electronico 1"
+                    //*******************************************
+
+                    oFieldSendMail = oFormSM.Items.Add("txtEmail2", SAPbouiCOM.BoFormItemTypes.it_EDIT);
+                    oFieldSendMail.Left = 96;
+                    oFieldSendMail.Top = 30;
+                    oFieldSendMail.Height = 14;
+                    oFieldSendMail.Width = 201;
+
+                    otxtEmail1 = ((SAPbouiCOM.EditText)(oFieldSendMail.Specific));
+
+
+                    #endregion
+
+                    #region Correo 3
+
+                    //*******************************************
+                    // Se adiciona Label "Correo Electronico 3"
+                    //*******************************************
+
+                    oFieldSendMail = oFormSM.Items.Add("blbEmail3", SAPbouiCOM.BoFormItemTypes.it_STATIC);
+                    oFieldSendMail.Left = 20;
+                    oFieldSendMail.Top = 45;
+                    oFieldSendMail.Height = 14;
+                    oFieldSendMail.Width = 71;
+
+                    oFieldSendMail.LinkTo = "txtEmail3";
+
+                    oStaticText = ((SAPbouiCOM.StaticText)(oFieldSendMail.Specific));
+
+                    oStaticText.Caption = "Correo 3";
+
+                    //*******************************************
+                    // Se adiciona Tex Box "Correo Electronico 1"
+                    //*******************************************
+
+                    oFieldSendMail = oFormSM.Items.Add("txtEmail3", SAPbouiCOM.BoFormItemTypes.it_EDIT);
+                    oFieldSendMail.Left = 96;
+                    oFieldSendMail.Top = 45;
+                    oFieldSendMail.Height = 14;
+                    oFieldSendMail.Width = 201;
+
+                    otxtEmail1 = ((SAPbouiCOM.EditText)(oFieldSendMail.Specific));
+
+
+                    #endregion
+
+                }
+                else if (iQuantityEmails == 4)
+                {
+
+                    #region Correo 2
+
+                    //*******************************************
+                    // Se adiciona Label "Correo Electronico 2"
+                    //*******************************************
+
+                    oFieldSendMail = oFormSM.Items.Add("blbEmail2", SAPbouiCOM.BoFormItemTypes.it_STATIC);
+                    oFieldSendMail.Left = 20;
+                    oFieldSendMail.Top = 30;
+                    oFieldSendMail.Height = 14;
+                    oFieldSendMail.Width = 71;
+
+                    oFieldSendMail.LinkTo = "txtEmail2";
+
+                    oStaticText = ((SAPbouiCOM.StaticText)(oFieldSendMail.Specific));
+
+                    oStaticText.Caption = "Correo 2";
+
+                    //*******************************************
+                    // Se adiciona Tex Box "Correo Electronico 2"
+                    //*******************************************
+
+                    oFieldSendMail = oFormSM.Items.Add("txtEmail2", SAPbouiCOM.BoFormItemTypes.it_EDIT);
+                    oFieldSendMail.Left = 96;
+                    oFieldSendMail.Top = 30;
+                    oFieldSendMail.Height = 14;
+                    oFieldSendMail.Width = 201;
+
+                    otxtEmail1 = ((SAPbouiCOM.EditText)(oFieldSendMail.Specific));
+
+
+                    #endregion
+
+                    #region Correo 3
+
+                    //*******************************************
+                    // Se adiciona Label "Correo Electronico 3"
+                    //*******************************************
+
+                    oFieldSendMail = oFormSM.Items.Add("blbEmail3", SAPbouiCOM.BoFormItemTypes.it_STATIC);
+                    oFieldSendMail.Left = 20;
+                    oFieldSendMail.Top = 45;
+                    oFieldSendMail.Height = 14;
+                    oFieldSendMail.Width = 71;
+
+                    oFieldSendMail.LinkTo = "txtEmail3";
+
+                    oStaticText = ((SAPbouiCOM.StaticText)(oFieldSendMail.Specific));
+
+                    oStaticText.Caption = "Correo 3";
+
+                    //*******************************************
+                    // Se adiciona Tex Box "Correo Electronico 3"
+                    //*******************************************
+
+                    oFieldSendMail = oFormSM.Items.Add("txtEmail3", SAPbouiCOM.BoFormItemTypes.it_EDIT);
+                    oFieldSendMail.Left = 96;
+                    oFieldSendMail.Top = 45;
+                    oFieldSendMail.Height = 14;
+                    oFieldSendMail.Width = 201;
+
+                    otxtEmail1 = ((SAPbouiCOM.EditText)(oFieldSendMail.Specific));
+
+
+                    #endregion
+
+                    #region Correo 4
+
+                    //*******************************************
+                    // Se adiciona Label "Correo Electronico 4"
+                    //*******************************************
+
+                    oFieldSendMail = oFormSM.Items.Add("blbEmail4", SAPbouiCOM.BoFormItemTypes.it_STATIC);
+                    oFieldSendMail.Left = 20;
+                    oFieldSendMail.Top = 45;
+                    oFieldSendMail.Height = 14;
+                    oFieldSendMail.Width = 71;
+
+                    oFieldSendMail.LinkTo = "txtEmail4";
+
+                    oStaticText = ((SAPbouiCOM.StaticText)(oFieldSendMail.Specific));
+
+                    oStaticText.Caption = "Correo 4";
+
+                    //*******************************************
+                    // Se adiciona Tex Box "Correo Electronico 4"
+                    //*******************************************
+
+                    oFieldSendMail = oFormSM.Items.Add("txtEmail4", SAPbouiCOM.BoFormItemTypes.it_EDIT);
+                    oFieldSendMail.Left = 96;
+                    oFieldSendMail.Top = 45;
+                    oFieldSendMail.Height = 14;
+                    oFieldSendMail.Width = 201;
+
+                    otxtEmail1 = ((SAPbouiCOM.EditText)(oFieldSendMail.Specific));
+
+
+                    #endregion
+
+                }
+                else if (iQuantityEmails == 5)
+                {
+
+                    #region Correo 2
+
+                    //*******************************************
+                    // Se adiciona Label "Correo Electronico 2"
+                    //*******************************************
+
+                    oFieldSendMail = oFormSM.Items.Add("blbEmail2", SAPbouiCOM.BoFormItemTypes.it_STATIC);
+                    oFieldSendMail.Left = 20;
+                    oFieldSendMail.Top = 30;
+                    oFieldSendMail.Height = 14;
+                    oFieldSendMail.Width = 71;
+
+                    oFieldSendMail.LinkTo = "txtEmail2";
+
+                    oStaticText = ((SAPbouiCOM.StaticText)(oFieldSendMail.Specific));
+
+                    oStaticText.Caption = "Correo 2";
+
+                    //*******************************************
+                    // Se adiciona Tex Box "Correo Electronico 2"
+                    //*******************************************
+
+                    oFieldSendMail = oFormSM.Items.Add("txtEmail2", SAPbouiCOM.BoFormItemTypes.it_EDIT);
+                    oFieldSendMail.Left = 96;
+                    oFieldSendMail.Top = 30;
+                    oFieldSendMail.Height = 14;
+                    oFieldSendMail.Width = 201;
+
+                    otxtEmail1 = ((SAPbouiCOM.EditText)(oFieldSendMail.Specific));
+
+
+                    #endregion
+
+                    #region Correo 3
+
+                    //*******************************************
+                    // Se adiciona Label "Correo Electronico 3"
+                    //*******************************************
+
+                    oFieldSendMail = oFormSM.Items.Add("blbEmail3", SAPbouiCOM.BoFormItemTypes.it_STATIC);
+                    oFieldSendMail.Left = 20;
+                    oFieldSendMail.Top = 45;
+                    oFieldSendMail.Height = 14;
+                    oFieldSendMail.Width = 71;
+
+                    oFieldSendMail.LinkTo = "txtEmail3";
+
+                    oStaticText = ((SAPbouiCOM.StaticText)(oFieldSendMail.Specific));
+
+                    oStaticText.Caption = "Correo 3";
+
+                    //*******************************************
+                    // Se adiciona Tex Box "Correo Electronico 3"
+                    //*******************************************
+
+                    oFieldSendMail = oFormSM.Items.Add("txtEmail3", SAPbouiCOM.BoFormItemTypes.it_EDIT);
+                    oFieldSendMail.Left = 96;
+                    oFieldSendMail.Top = 45;
+                    oFieldSendMail.Height = 14;
+                    oFieldSendMail.Width = 201;
+
+                    otxtEmail1 = ((SAPbouiCOM.EditText)(oFieldSendMail.Specific));
+
+
+                    #endregion
+
+                    #region Correo 4
+
+                    //*******************************************
+                    // Se adiciona Label "Correo Electronico 4"
+                    //*******************************************
+
+                    oFieldSendMail = oFormSM.Items.Add("blbEmail4", SAPbouiCOM.BoFormItemTypes.it_STATIC);
+                    oFieldSendMail.Left = 20;
+                    oFieldSendMail.Top = 45;
+                    oFieldSendMail.Height = 14;
+                    oFieldSendMail.Width = 71;
+
+                    oFieldSendMail.LinkTo = "txtEmail4";
+
+                    oStaticText = ((SAPbouiCOM.StaticText)(oFieldSendMail.Specific));
+
+                    oStaticText.Caption = "Correo 4";
+
+                    //*******************************************
+                    // Se adiciona Tex Box "Correo Electronico 4"
+                    //*******************************************
+
+                    oFieldSendMail = oFormSM.Items.Add("txtEmail4", SAPbouiCOM.BoFormItemTypes.it_EDIT);
+                    oFieldSendMail.Left = 96;
+                    oFieldSendMail.Top = 45;
+                    oFieldSendMail.Height = 14;
+                    oFieldSendMail.Width = 201;
+
+                    otxtEmail1 = ((SAPbouiCOM.EditText)(oFieldSendMail.Specific));
+
+
+                    #endregion
+
+                    #region Correo 5
+
+                    //*******************************************
+                    // Se adiciona Label "Correo Electronico 5"
+                    //*******************************************
+
+                    oFieldSendMail = oFormSM.Items.Add("blbEmail5", SAPbouiCOM.BoFormItemTypes.it_STATIC);
+                    oFieldSendMail.Left = 20;
+                    oFieldSendMail.Top = 45;
+                    oFieldSendMail.Height = 14;
+                    oFieldSendMail.Width = 71;
+
+                    oFieldSendMail.LinkTo = "txtEmail5";
+
+                    oStaticText = ((SAPbouiCOM.StaticText)(oFieldSendMail.Specific));
+
+                    oStaticText.Caption = "Correo 5";
+
+                    //*******************************************
+                    // Se adiciona Tex Box "Correo Electronico 5"
+                    //*******************************************
+
+                    oFieldSendMail = oFormSM.Items.Add("txtEmail5", SAPbouiCOM.BoFormItemTypes.it_EDIT);
+                    oFieldSendMail.Left = 96;
+                    oFieldSendMail.Top = 45;
+                    oFieldSendMail.Height = 14;
+                    oFieldSendMail.Width = 201;
+
+                    otxtEmail1 = ((SAPbouiCOM.EditText)(oFieldSendMail.Specific));
+
+
+                    #endregion
+
+                }
+
+
+                oFormSM.Visible = true;
+
+            }
+            catch (Exception e)
+            {
+                DLLFunciones.sendErrorMessage(sboapp, e);
+
+            }
         }
 
         public void ChangePaneFolderDocuments(SAPbouiCOM.Form oFormInvoice)
@@ -7072,7 +7509,7 @@ namespace eBilling
                     uploadAttachment.email = correoEntrega;
                     uploadAttachment.nombre = file.Name.Substring(0, file.Name.Length - 4);
                     uploadAttachment.formato = file.Extension.Substring(1);
-                    uploadAttachment.tipo = "2";
+                    uploadAttachment.tipo = "1";
 
                     if (Convert.ToString(oCabecera.Fields.Item("notificar").Value.ToString()) == "NO")
                     {
@@ -7497,35 +7934,39 @@ namespace eBilling
             oCFL = oCFLs.Add(oCFLCreationParams);
         }
 
-        public void Right_Click(ref SAPbouiCOM.ContextMenuInfo _eventInfo, SAPbouiCOM.Application _sboapp)
+        public void Right_Click(ref SAPbouiCOM.ContextMenuInfo _eventInfo, SAPbouiCOM.Application _sboapp, string NumeroID)
         {
             SAPbouiCOM.MenuItem oMenuItem = null;
             SAPbouiCOM.Menus oMenus = null;
 
             try
             {
-                #region Click derecho para adicionar linea en Matrix en Series numeracion
 
-                if (_sboapp.Menus.Exists("AddRowMtx"))
+                if (NumeroID == "1")
                 {
+                    #region Click derecho para adicionar linea en Matrix en Series numeracion
 
-                }
-                else
-                {
-                    SAPbouiCOM.MenuCreationParams oCreationPackage = null;
-                    oCreationPackage = ((SAPbouiCOM.MenuCreationParams)(_sboapp.CreateObject(SAPbouiCOM.BoCreatableObjectType.cot_MenuCreationParams)));
+                    if (_sboapp.Menus.Exists("AddRowMtx"))
+                    {
 
-                    oCreationPackage.Type = SAPbouiCOM.BoMenuType.mt_STRING;
-                    oCreationPackage.UniqueID = "AddRowMtx";
-                    oCreationPackage.String = "Añadir Serie Numeración";
-                    oCreationPackage.Enabled = true;
+                    }
+                    else
+                    {
+                        SAPbouiCOM.MenuCreationParams oCreationPackage = null;
+                        oCreationPackage = ((SAPbouiCOM.MenuCreationParams)(_sboapp.CreateObject(SAPbouiCOM.BoCreatableObjectType.cot_MenuCreationParams)));
 
-                    oMenuItem = _sboapp.Menus.Item("1280"); // Data'
-                    oMenus = oMenuItem.SubMenus;
-                    oMenus.AddEx(oCreationPackage);
+                        oCreationPackage.Type = SAPbouiCOM.BoMenuType.mt_STRING;
+                        oCreationPackage.UniqueID = "AddRowMtx";
+                        oCreationPackage.String = "Añadir Serie Numeración";
+                        oCreationPackage.Enabled = true;
+
+                        oMenuItem = _sboapp.Menus.Item("1280"); // Data'
+                        oMenus = oMenuItem.SubMenus;
+                        oMenus.AddEx(oCreationPackage);
+
+                    }
 
                     #endregion
-
                 }
             }
             catch (Exception ex)
@@ -7831,6 +8272,298 @@ namespace eBilling
             {
 
                 throw;
+            }
+
+
+        }
+
+        public void EnviarCorreo(SAPbobsCOM.Company _oCompany, SAPbouiCOM.Application _sboapp, string sPrefijoDocumentoSM)
+        {
+            Funciones.Comunes DllFunciones = new Funciones.Comunes();
+
+            #region Consulta URL
+
+            string sGetModo = null;
+            string sURLEmision = null;
+            string sURLAdjuntos = null;
+            string sModo = null;
+
+            SAPbobsCOM.Recordset oConsultarGetModo = (SAPbobsCOM.Recordset)_oCompany.GetBusinessObject(SAPbobsCOM.BoObjectTypes.BoRecordset);
+
+            sGetModo = DllFunciones.GetStringXMLDocument(_oCompany, "eBilling", "eBilling", "GetModoandURL");
+
+            sGetModo = sGetModo.Replace("%Estado%", "\"U_BO_Status\" = 'Y'").Replace("%DocEntry%", " ");
+
+            oConsultarGetModo.DoQuery(sGetModo);
+
+            sURLEmision = Convert.ToString(oConsultarGetModo.Fields.Item("URLTFHKA").Value.ToString()) + "/ws/v1.0/Service.svc?wsdl";
+            sModo = Convert.ToString(oConsultarGetModo.Fields.Item("Modo").Value.ToString());
+
+            DllFunciones.liberarObjetos(oConsultarGetModo);
+
+            #endregion
+
+            #region Instanciacion parametros TFHKA
+
+            //Especifica el puerto (HTTP o HTTPS)
+            if (sModo == "PRU")
+            {
+                BasicHttpBinding port = new BasicHttpBinding();
+            }
+            else if (sModo == "PRO")
+            {
+                BasicHttpsBinding port = new BasicHttpsBinding();
+            }
+
+            port.MaxBufferPoolSize = Int32.MaxValue;
+            port.MaxBufferSize = Int32.MaxValue;
+            port.MaxReceivedMessageSize = Int32.MaxValue;
+            port.ReaderQuotas.MaxStringContentLength = Int32.MaxValue;
+            port.SendTimeout = TimeSpan.FromMinutes(2);
+            port.ReceiveTimeout = TimeSpan.FromMinutes(2);
+
+            //Especifica la dirección de conexion para Emision y Adjuntos 
+            EndpointAddress endPointEmision = new EndpointAddress(sURLEmision); //URL DEMO EMISION      
+
+            #endregion
+
+            #region Variables
+
+            serviceClient = new eBilling.ServicioEmisionFE.ServiceClient(port, endPointEmision);
+
+            string sCadenaCorreos = null;
+            string sCorreoPrefijo = null;
+            #endregion
+
+            #region obtiene formulario correo 
+
+            SAPbouiCOM.Form oFormSM;
+            oFormSM = _sboapp.Forms.Item("BO_SM");
+
+            #endregion
+
+            #region Consulta y obtinene y el password
+
+            SAPbobsCOM.Recordset oLlaveyPassword = (SAPbobsCOM.Recordset)_oCompany.GetBusinessObject(SAPbobsCOM.BoObjectTypes.BoRecordset);
+
+            string sQueryDocEntryDocument = DllFunciones.GetStringXMLDocument(_oCompany, "eBilling", "eBilling", "GetLlaveAndPassword");
+
+            oLlaveyPassword.DoQuery(sQueryDocEntryDocument);
+
+            #endregion
+
+            #region Consultar cantidad de correos 
+
+            string sQuantityEmails;
+            int iQuantityEmails;
+
+            SAPbobsCOM.Recordset oQuantityEmails = (SAPbobsCOM.Recordset)_oCompany.GetBusinessObject(SAPbobsCOM.BoObjectTypes.BoRecordset);
+
+            sQuantityEmails = DllFunciones.GetStringXMLDocument(_oCompany, "eBilling", "eBilling", "GetQuantityEmails");
+            oQuantityEmails.DoQuery(sQuantityEmails);
+
+            iQuantityEmails = Convert.ToInt32(oQuantityEmails.Fields.Item(0).Value.ToString());
+
+            DllFunciones.liberarObjetos(oQuantityEmails);
+
+            #endregion
+
+            #region Se obtiene el numero de documento
+
+            SAPbouiCOM.StaticText olblL1 = (SAPbouiCOM.StaticText)(oFormSM.Items.Item("lbl1").Specific);
+
+            #endregion
+
+            #region Envio del correo
+
+            if (iQuantityEmails == 2)
+            {
+                #region Obtiene la cadena de correos
+
+                SAPbouiCOM.EditText txtEmail1 = (SAPbouiCOM.EditText)(oFormSM.Items.Item("txtEmail1").Specific);
+                SAPbouiCOM.EditText txtEmail2 = (SAPbouiCOM.EditText)(oFormSM.Items.Item("txtEmail2").Specific);
+
+                sCadenaCorreos = txtEmail1.Value.ToString();
+
+                if (string.IsNullOrEmpty(txtEmail2.Value.ToString()))
+                {
+
+                }
+                else
+                {
+                    sCadenaCorreos = sCadenaCorreos + ";" + txtEmail2.Value.ToString();
+
+                }
+
+                DllFunciones.liberarObjetos(txtEmail1);
+                DllFunciones.liberarObjetos(txtEmail2);
+
+                #endregion
+            }
+            else if (iQuantityEmails == 3)
+            {
+                #region Obtiene la cadena de correos
+
+                SAPbouiCOM.EditText txtEmail1 = (SAPbouiCOM.EditText)(oFormSM.Items.Item("txtEmail1").Specific);
+                SAPbouiCOM.EditText txtEmail2 = (SAPbouiCOM.EditText)(oFormSM.Items.Item("txtEmail2").Specific);
+                SAPbouiCOM.EditText txtEmail3 = (SAPbouiCOM.EditText)(oFormSM.Items.Item("txtEmail2").Specific);
+
+                sCadenaCorreos = txtEmail1.Value.ToString();
+
+                if (string.IsNullOrEmpty(txtEmail2.Value.ToString()))
+                {
+
+                }
+                else
+                {
+                    sCadenaCorreos = sCadenaCorreos + ";" + txtEmail2.Value.ToString();
+
+                }
+
+                if (string.IsNullOrEmpty(txtEmail3.Value.ToString()))
+                {
+
+                }
+                else
+                {
+                    sCadenaCorreos = sCadenaCorreos + ";" + txtEmail3.Value.ToString();
+
+                }
+
+                #endregion
+            }
+            else if (iQuantityEmails == 4)
+            {
+                #region Obtiene la cadena de correos
+
+                SAPbouiCOM.EditText txtEmail1 = (SAPbouiCOM.EditText)(oFormSM.Items.Item("txtEmail1").Specific);
+                SAPbouiCOM.EditText txtEmail2 = (SAPbouiCOM.EditText)(oFormSM.Items.Item("txtEmail2").Specific);
+                SAPbouiCOM.EditText txtEmail3 = (SAPbouiCOM.EditText)(oFormSM.Items.Item("txtEmail3").Specific);
+                SAPbouiCOM.EditText txtEmail4 = (SAPbouiCOM.EditText)(oFormSM.Items.Item("txtEmail4").Specific);
+
+                sCadenaCorreos = txtEmail1.Value.ToString();
+
+                if (string.IsNullOrEmpty(txtEmail2.Value.ToString()))
+                {
+
+                }
+                else
+                {
+                    sCadenaCorreos = sCadenaCorreos + ";" + txtEmail2.Value.ToString();
+
+                }
+
+                if (string.IsNullOrEmpty(txtEmail3.Value.ToString()))
+                {
+
+                }
+                else
+                {
+                    sCadenaCorreos = sCadenaCorreos + ";" + txtEmail3.Value.ToString();
+
+                }
+
+                if (string.IsNullOrEmpty(txtEmail4.Value.ToString()))
+                {
+
+                }
+                else
+                {
+                    sCadenaCorreos = sCadenaCorreos + ";" + txtEmail4.Value.ToString();
+
+                }
+
+                #endregion
+            }
+            else if (iQuantityEmails == 5)
+            {
+                #region Obtiene la cadena de correos
+                SAPbouiCOM.EditText txtEmail1 = (SAPbouiCOM.EditText)(oFormSM.Items.Item("txtEmail1").Specific);
+                SAPbouiCOM.EditText txtEmail2 = (SAPbouiCOM.EditText)(oFormSM.Items.Item("txtEmail2").Specific);
+                SAPbouiCOM.EditText txtEmail3 = (SAPbouiCOM.EditText)(oFormSM.Items.Item("txtEmail3").Specific);
+                SAPbouiCOM.EditText txtEmail4 = (SAPbouiCOM.EditText)(oFormSM.Items.Item("txtEmail4").Specific);
+                SAPbouiCOM.EditText txtEmail5 = (SAPbouiCOM.EditText)(oFormSM.Items.Item("txtEmail5").Specific);
+
+                sCadenaCorreos = txtEmail1.Value.ToString();
+
+                if (string.IsNullOrEmpty(txtEmail2.Value.ToString()))
+                {
+
+                }
+                else
+                {
+                    sCadenaCorreos = sCadenaCorreos + ";" + txtEmail2.Value.ToString();
+
+                }
+
+                if (string.IsNullOrEmpty(txtEmail3.Value.ToString()))
+                {
+
+                }
+                else
+                {
+                    sCadenaCorreos = sCadenaCorreos + ";" + txtEmail3.Value.ToString();
+
+                }
+
+                if (string.IsNullOrEmpty(txtEmail4.Value.ToString()))
+                {
+
+                }
+                else
+                {
+                    sCadenaCorreos = sCadenaCorreos + ";" + txtEmail4.Value.ToString();
+
+                }
+
+                if (string.IsNullOrEmpty(txtEmail5.Value.ToString()))
+                {
+
+                }
+                else
+                {
+                    sCadenaCorreos = sCadenaCorreos + ";" + txtEmail5.Value.ToString();
+
+                }
+                #endregion
+            }
+
+            SendEmailResponse RespuestaEnvioCorreo = serviceClient.EnvioCorreo(Convert.ToString(oLlaveyPassword.Fields.Item("Llave").Value.ToString()), Convert.ToString(oLlaveyPassword.Fields.Item("Password").Value.ToString()), olblL1.Caption.ToString(), sCadenaCorreos, null);
+
+            if (RespuestaEnvioCorreo.codigo == 200)
+            {
+                DllFunciones.sendMessageBox(_sboapp, RespuestaEnvioCorreo.mensaje);
+            }
+            else
+            {
+                DllFunciones.sendMessageBox(_sboapp, RespuestaEnvioCorreo.mensaje);
+            }
+
+            #endregion
+
+        }
+
+        public bool validacionEnviarCorreo(SAPbouiCOM.Application sboapp)
+        {
+            Funciones.Comunes DllFunciones = new Funciones.Comunes();
+
+            #region obtiene formulario correo 
+
+            SAPbouiCOM.Form oFormSM;
+            oFormSM = sboapp.Forms.Item("BO_SM");
+
+            #endregion
+
+            SAPbouiCOM.EditText txtEmail1 = (SAPbouiCOM.EditText)(oFormSM.Items.Item("txtEmail1").Specific);
+
+            if (string.IsNullOrEmpty(txtEmail1.Value.ToString()))
+            {
+                DllFunciones.sendMessageBox(sboapp, "Debe ingresar almenos un correo electronico para poder enviar");
+                return false;
+            }
+            else
+            {
+                return true;
             }
 
 

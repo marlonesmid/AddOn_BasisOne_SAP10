@@ -36,7 +36,7 @@ namespace BasisOne
         string sQuerieValidacion = null;
         string sQuerieValidacionCopia = null;
         string sCurrentUser;
-        string sPosciones;
+        string sPrefijoDocNumSM = null;
 
         #endregion
 
@@ -523,6 +523,13 @@ namespace BasisOne
                                 DllProduction.MatrixChooseFromListAfter(FormUID, oForWO, pVal, _company, sboapp);
 
                             }
+                            else if (pVal.FormUID == "BO_New_WO" && pVal.ItemUID == "txtIPR" && pVal.BeforeAction == false)
+                            {
+                                SAPbouiCOM.Form oForWO = sboapp.Forms.GetFormByTypeAndCount(pVal.FormType, pVal.FormTypeCount);
+
+                                DllProduction.CFLAfterIRP(FormUID, oForWO, pVal, _company, sboapp);
+
+                            }
 
                             #endregion
                         }
@@ -801,6 +808,85 @@ namespace BasisOne
                                 DlleBilling.EnviarDocumentoTFHKA(sboapp, _company, oFormInvoice, "FacturaDeClientes", "A");
 
                             }
+                            else if (pVal.FormType == 133 && pVal.ItemUID == "BtnSM" && pVal.Before_Action == true)
+                            {
+                                SAPbouiCOM.Form oFormInvoice = sboapp.Forms.GetFormByTypeAndCount(pVal.FormType, pVal.FormTypeCount);
+
+                                if (oFormInvoice.Mode == BoFormMode.fm_OK_MODE)
+                                {
+
+                                    #region Consulta de documento en la base de datos
+
+                                    string sDocNumInvoice = ((SAPbouiCOM.EditText)(oFormInvoice.Items.Item("8").Specific)).Value.ToString();
+                                    SAPbouiCOM.ComboBox cbSerieNumeracion = (SAPbouiCOM.ComboBox)(oFormInvoice.Items.Item("88").Specific);
+                                    string sSerieNumeracion = cbSerieNumeracion.Selected.Value;
+
+                                    SAPbobsCOM.Recordset oConsultaDocEntry = (SAPbobsCOM.Recordset)_company.GetBusinessObject(SAPbobsCOM.BoObjectTypes.BoRecordset);
+
+                                    string sQueryDocEntryDocument = DllFunciones.GetStringXMLDocument(_company, "eBilling", "eBilling", "GetPrefijoSeries");
+                                    sQueryDocEntryDocument = sQueryDocEntryDocument.Replace("%Code%", sSerieNumeracion);
+
+                                    oConsultaDocEntry.DoQuery(sQueryDocEntryDocument);
+
+                                    sPrefijoDocNumSM = Convert.ToString(oConsultaDocEntry.Fields.Item("Prefijo").Value.ToString()) + sDocNumInvoice;
+
+                                    DllFunciones.liberarObjetos(oConsultaDocEntry);
+                                    DllFunciones.liberarObjetos(oFormInvoice);
+
+                                    #endregion
+
+                                    #region Abre Formulario enviar correo
+
+                                    try
+                                    {
+                                        string ArchivoSRF = "Send_Mail.srf";
+
+                                        DllFunciones.LoadFromXML(sboapp, "eBilling", ref ArchivoSRF);
+
+                                        SAPbouiCOM.Form oFormSM;
+                                        oFormSM = sboapp.Forms.Item("BO_SM");
+
+                                        DlleBilling.LoadFormSendMail(_company, sboapp, oFormSM, sMotor, sPrefijoDocNumSM);
+
+                                    }
+                                    catch (Exception e)
+                                    {
+
+                                        DllFunciones.sendErrorMessage(sboapp, e);
+                                    }
+
+                                    #endregion
+
+                                    DllFunciones.liberarObjetos(oFormInvoice);
+                                }
+                            }
+                            else if (pVal.FormUID == "BO_SM" && pVal.ItemUID == "btnSend" && pVal.Before_Action == true)
+                            {
+                                BubbleEvent = true;
+
+                                BubbleEvent = DlleBilling.validacionEnviarCorreo(sboapp);
+
+                                #region Enviar Correo
+
+                                if (BubbleEvent == true)
+                                {
+                                    DlleBilling.EnviarCorreo(_company, sboapp, sPrefijoDocNumSM);
+                                }
+
+                                #endregion
+
+                            }
+
+
+                            #endregion
+
+                            #region Enviar E-Mail
+
+                            else if (pVal.FormUID == "BO_SM" && pVal.ItemUID == "btnClose" && pVal.Before_Action == true)
+                            {
+                                DllFunciones.CloseFormXML(sboapp, "BO_SM");
+                            }
+
                             #endregion
 
                             #region Factura de reserva de clientes
@@ -1030,6 +1116,30 @@ namespace BasisOne
                             {
                                 sboapp.Menus.Item("39724").Activate();
                             }
+                            else if (pVal.FormUID == "BOFormCOP" && pVal.ItemUID == "btnRP" && pVal.Before_Action == true && pVal.Action_Success == false)
+                            {
+                                #region Carga Formulario Control Ordenes de Produccion
+
+                                try
+                                {
+
+                                    string ArchivoSRF = "Production_Route.srf";
+                                    DllFunciones.LoadFromXML(sboapp, "BOProduction", ref ArchivoSRF);
+
+                                    SAPbouiCOM.Form oFormBOPR;
+                                    oFormBOPR = sboapp.Forms.Item("BO_PR");
+
+                                    DllProduction.ChangueFormProductionRoute(sboapp, _company, oFormBOPR);
+
+                                }
+                                catch (Exception e)
+                                {
+
+                                    DllFunciones.sendErrorMessage(sboapp, e);
+                                }
+
+                                #endregion
+                            }
                             else if (pVal.FormUID == "BOFormMPC" && pVal.ItemUID == "btnSalir" && pVal.BeforeAction == true)
                             {
                                 #region Actualiza el formulario materia prima entregada
@@ -1095,7 +1205,33 @@ namespace BasisOne
 
                                 #endregion
                             }
+                            else if (pVal.FormUID == "BO_New_WO" && pVal.ItemUID == "btnAdd" && pVal.Before_Action == true && pVal.Action_Success == false)
+                            {
+                                #region Adiciona ruta de produccion a la Matrix
 
+                                SAPbouiCOM.Form oFormNWO;
+                                oFormNWO = sboapp.Forms.GetFormByTypeAndCount(pVal.FormType, pVal.FormTypeCount);
+
+                                DllProduction.AddItemsNWOMatrix(oFormNWO, _company, sboapp);
+
+                                #endregion
+                            }
+                            else if (pVal.FormUID == "BO_PR" && pVal.ItemUID == "btnNRP" && pVal.Before_Action == true && pVal.Action_Success == false)
+                            {
+                                #region Abre formulario ruta de produccion
+
+                                sboapp.Menus.Item("47640").Activate();
+
+                                #endregion
+                            }
+                            else if (pVal.FormUID == "BO_PR" && pVal.ItemUID == "btnClose" && pVal.Before_Action == true && pVal.Action_Success == false)
+                            {
+                                #region Cierre el formulario ruta de produccion
+
+                                DllFunciones.CloseFormXML(sboapp, "BO_PR");
+
+                                #endregion
+                            }
 
                             #endregion
                         }
@@ -1549,7 +1685,6 @@ namespace BasisOne
 
                     break;
 
-
                 #endregion
 
                 #region Eventos en el Menu Produccion Avanzada
@@ -1615,6 +1750,36 @@ namespace BasisOne
 
                     break;
 
+                case "mnuBO_RP":
+
+                    if (TieneLicenciaProduction == true)
+                    {
+                        #region Carga Formulario Control Ordenes de Produccion
+
+                        try
+                        {
+
+                            string ArchivoSRF = "Production_Route.srf";
+                            DllFunciones.LoadFromXML(sboapp, "BOProduction", ref ArchivoSRF);
+
+                            SAPbouiCOM.Form oFormBOPR;
+                            oFormBOPR = sboapp.Forms.Item("BO_PR");
+
+                            DllProduction.ChangueFormProductionRoute(sboapp, _company, oFormBOPR);
+
+                        }
+                        catch (Exception e)
+                        {
+
+                            DllFunciones.sendErrorMessage(sboapp, e);
+                        }
+
+                        #endregion
+
+                    }
+
+                    break;
+
                     #endregion
             }
 
@@ -1624,33 +1789,41 @@ namespace BasisOne
         {
             BubbleEvent = true;
 
-            #region Eliminar menus existentes
-
-            if (sboapp.Menus.Exists("AddRowMtx"))
+            try
             {
-                sboapp.Menus.RemoveEx("AddRowMtx");
-            }
+                SAPbouiCOM.Form oFormActive = sboapp.Forms.ActiveForm;
 
-            #endregion
-
-            if (eventInfo.BeforeAction == true)
-            {
-                switch (eventInfo.FormUID)
+                if (oFormActive.TypeEx == "BO_eBillingP" && eventInfo.BeforeAction == true && oFormActive.Mode == SAPbouiCOM.BoFormMode.fm_OK_MODE)
                 {
+                    #region Eliminar menus existentes
 
-                    #region Righ Click eBilling
-
-                    case "BO_eBillingP":
-
-                        DlleBilling.Right_Click(ref eventInfo, sboapp);
-
-                        break;
+                    if (sboapp.Menus.Exists("AddRowMtx"))
+                    {
+                        sboapp.Menus.RemoveEx("AddRowMtx");
+                    }
 
                     #endregion
 
-                    default:
-                        break;
+                    DlleBilling.Right_Click(ref eventInfo, sboapp, "1");
                 }
+                else if (oFormActive.TypeEx == "133" && eventInfo.BeforeAction == true && oFormActive.Mode == SAPbouiCOM.BoFormMode.fm_OK_MODE)
+                {
+                    #region Eliminar menus existentes
+
+                    if (sboapp.Menus.Exists("AddSM"))
+                    {
+                        sboapp.Menus.RemoveEx("AddSM");
+                    }
+
+                    #endregion
+
+                    DlleBilling.Right_Click(ref eventInfo, sboapp, "2");
+                }
+            }
+            catch (Exception)
+            {
+
+                throw;
             }
         }
 

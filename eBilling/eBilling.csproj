@@ -98,20 +98,20 @@
     <None Include="Service References\ServicioAdjuntosFE\eBilling.ServicioAdjuntosFE.UploadAttachmentResponse.datasource">
       <DependentUpon>Reference.svcmap</DependentUpon>
     </None>
-    <None Include="Service References\ServicioAdjuntosFE\Service.wsdl" />
-    <None Include="Service References\ServicioAdjuntosFE\Service.xsd">
+    <None Include="Service References\ServicioAdjuntosFE\Service1.wsdl" />
+    <None Include="Service References\ServicioAdjuntosFE\Service5.xsd">
       <SubType>Designer</SubType>
     </None>
-    <None Include="Service References\ServicioAdjuntosFE\Service1.xsd">
+    <None Include="Service References\ServicioAdjuntosFE\Service51.xsd">
       <SubType>Designer</SubType>
     </None>
-    <None Include="Service References\ServicioAdjuntosFE\Service2.xsd">
+    <None Include="Service References\ServicioAdjuntosFE\Service52.xsd">
       <SubType>Designer</SubType>
     </None>
-    <None Include="Service References\ServicioAdjuntosFE\Service3.xsd">
+    <None Include="Service References\ServicioAdjuntosFE\Service53.xsd">
       <SubType>Designer</SubType>
     </None>
-    <None Include="Service References\ServicioAdjuntosFE\Service4.xsd">
+    <None Include="Service References\ServicioAdjuntosFE\Service54.xsd">
       <SubType>Designer</SubType>
     </None>
     <None Include="Service References\ServicioEmisionFE\eBilling.ServicioEmisionFE.ContenedorResponse.datasource">
@@ -144,23 +144,23 @@
     <None Include="Service References\ServicioEmisionFE\eBilling.ServicioEmisionFE.SendEmailResponse.datasource">
       <DependentUpon>Reference.svcmap</DependentUpon>
     </None>
-    <None Include="Service References\ServicioEmisionFE\Service.wsdl" />
-    <None Include="Service References\ServicioEmisionFE\Service.xsd">
+    <None Include="Service References\ServicioEmisionFE\Service1.wsdl" />
+    <None Include="Service References\ServicioEmisionFE\Service6.xsd">
       <SubType>Designer</SubType>
     </None>
-    <None Include="Service References\ServicioEmisionFE\Service1.xsd">
+    <None Include="Service References\ServicioEmisionFE\Service61.xsd">
       <SubType>Designer</SubType>
     </None>
-    <None Include="Service References\ServicioEmisionFE\Service2.xsd">
+    <None Include="Service References\ServicioEmisionFE\Service62.xsd">
       <SubType>Designer</SubType>
     </None>
-    <None Include="Service References\ServicioEmisionFE\Service3.xsd">
+    <None Include="Service References\ServicioEmisionFE\Service63.xsd">
       <SubType>Designer</SubType>
     </None>
-    <None Include="Service References\ServicioEmisionFE\Service4.xsd">
+    <None Include="Service References\ServicioEmisionFE\Service64.xsd">
       <SubType>Designer</SubType>
     </None>
-    <None Include="Service References\ServicioEmisionFE\Service5.xsd">
+    <None Include="Service References\ServicioEmisionFE\Service65.xsd">
       <SubType>Designer</SubType>
     </None>
   </ItemGroup>
@@ -168,6 +168,7 @@
     <WCFMetadata Include="Service References\" />
   </ItemGroup>
   <ItemGroup>
+    <Content Include="Formularios\Send_Mail.srf" />
     <Content Include="Formularios\Unidades_Medida.srf" />
     <Content Include="Queries\eBillingHANA.xml">
       <SubType>Designer</SubType>

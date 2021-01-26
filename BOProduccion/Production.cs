@@ -150,6 +150,40 @@ namespace BOProduccion
             oCFL = oCFLs.Add(oCFLCreationParams);
         }
 
+        private void AddCFLProductionRoute(SAPbouiCOM.Application _sboapp, SAPbouiCOM.Form _oFormWO)
+        {
+
+            SAPbouiCOM.ChooseFromListCollection oCFLs = null;
+            SAPbouiCOM.Conditions oCons = null;
+            SAPbouiCOM.Condition oCon = null;
+
+            oCFLs = _oFormWO.ChooseFromLists;
+
+            SAPbouiCOM.ChooseFromList oCFL = null;
+            SAPbouiCOM.ChooseFromListCreationParams oCFLCreationParams = null;
+            oCFLCreationParams = ((SAPbouiCOM.ChooseFromListCreationParams)(_sboapp.CreateObject(SAPbouiCOM.BoCreatableObjectType.cot_ChooseFromListCreationParams)));
+
+            //  Adding 2 CFL, one for the button and one for the edit text.
+            oCFLCreationParams.MultiSelection = false;
+            oCFLCreationParams.ObjectType = "BO_RP";
+            oCFLCreationParams.UniqueID = "CFL3";
+
+            oCFL = oCFLs.Add(oCFLCreationParams);
+
+            //  Adding Conditions to CFL1
+
+            //oCons = oCFL.GetConditions();
+
+            //oCon = oCons.Add();
+            //oCon.Alias = "TreeType";
+            //oCon.Operation = SAPbouiCOM.BoConditionOperation.co_EQUAL;
+            //oCon.CondVal = "P";
+            //oCFL.SetConditions(oCons);
+
+            //oCFLCreationParams.UniqueID = "CFL2";
+            //oCFL = oCFLs.Add(oCFLCreationParams);
+        }
+
         private void AddMatrixToFormWorkOrderRouteProduction(SAPbouiCOM.Form oFormWorkOrder)
         {
 
@@ -802,6 +836,71 @@ namespace BOProduccion
             _oFormWorkOrder.PaneLevel = 28;
         }
 
+        public void ChangueFormProductionRoute(SAPbouiCOM.Application sboapp, SAPbobsCOM.Company oCompany, SAPbouiCOM.Form oFormProductionRoute)
+        {
+            Funciones.Comunes DLLFunciones = new Funciones.Comunes();
+
+            try
+            {
+                #region Variables y objetos
+
+                SAPbouiCOM.Grid oGridRP = (Grid)oFormProductionRoute.Items.Item("GridRP").Specific;
+                SAPbouiCOM.PictureBox oLogoBO = (SAPbouiCOM.PictureBox)oFormProductionRoute.Items.Item("imgLogoBO").Specific;
+
+                #endregion
+
+                #region Centra en pantalla formulario
+
+                oFormProductionRoute.Left = (sboapp.Desktop.Width - oFormProductionRoute.Width) / 2;
+                oFormProductionRoute.Top = (sboapp.Desktop.Height - oFormProductionRoute.Height) / 4;
+
+                #endregion
+
+                #region Asignacion Logo BO
+
+                oLogoBO.Picture = (Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().Location) + "\\Core\\Imagenes\\BO.jpg");
+
+                #endregion
+
+                #region Carga Informacion al Matrix
+
+                string sGetProductionRouteStructure = DLLFunciones.GetStringXMLDocument(oCompany, "BOProduction", "Production", "GetProductionRouteStructure");
+
+                oFormProductionRoute.DataSources.DataTables.Add("DT_PR1");
+                oFormProductionRoute.DataSources.DataTables.Item(0).ExecuteQuery(sGetProductionRouteStructure);
+                oGridRP.DataTable = oFormProductionRoute.DataSources.DataTables.Item("DT_PR1");
+
+
+
+                oGridRP.Columns.Item(0).Editable = false;
+                oGridRP.Columns.Item(1).Editable = false;
+                oGridRP.Columns.Item(2).Editable = false;
+                oGridRP.Columns.Item(3).Editable = false;
+                oGridRP.Columns.Item(4).Editable = false;
+                oGridRP.Columns.Item(5).Editable = false;
+
+                oGridRP.CollapseLevel = 2;
+
+                oGridRP.Rows.CollapseAll();
+
+                #endregion
+
+                oFormProductionRoute.State = BoFormStateEnum.fs_Maximized;
+                oFormProductionRoute.Visible = true;
+                oFormProductionRoute.Refresh();
+
+                //DLLFunciones.liberarObjetos(oMatrixCOP);
+                //DLLFunciones.liberarObjetos(oTableCOP);
+                //DLLFunciones.liberarObjetos(CS);
+
+            }
+            catch (Exception e)
+            {
+                DLLFunciones.sendErrorMessage(sboapp, e);
+
+            }
+        }
+
         public void LoadFormMRawMaterial(SAPbouiCOM.Application sboapp, SAPbobsCOM.Company oCompany, SAPbouiCOM.Form oFormControlProduction, ItemEvent pVal)
         {
             Funciones.Comunes DllFunciones = new Funciones.Comunes();
@@ -926,6 +1025,8 @@ namespace BOProduccion
 
             SAPbouiCOM.PictureBox oLogoBO = (SAPbouiCOM.PictureBox)oFormNewWorkOrder.Items.Item("imgLogoBO").Specific;
 
+            SAPbouiCOM.EditText otxtIPR = (SAPbouiCOM.EditText)oFormNewWorkOrder.Items.Item("txtIPR").Specific;
+
             #endregion
 
             #region Centra en pantalla formulario
@@ -943,11 +1044,17 @@ namespace BOProduccion
 
             #region Adicion de DataSource
 
+            oFormNewWorkOrder.DataSources.DataTables.Add("DTRP");
+
+            oFormNewWorkOrder.DataSources.UserDataSources.Add("IRPDS", SAPbouiCOM.BoDataType.dt_SHORT_TEXT, 254);
+
             oFormNewWorkOrder.DataSources.UserDataSources.Add("#", SAPbouiCOM.BoDataType.dt_SHORT_TEXT, 100);
             oFormNewWorkOrder.DataSources.UserDataSources.Add("DSCol0", SAPbouiCOM.BoDataType.dt_SHORT_TEXT, 100);
             oFormNewWorkOrder.DataSources.UserDataSources.Add("DSCol1", SAPbouiCOM.BoDataType.dt_SHORT_TEXT, 100);
             oFormNewWorkOrder.DataSources.UserDataSources.Add("DSCol2", SAPbouiCOM.BoDataType.dt_SHORT_TEXT, 200);
             oFormNewWorkOrder.DataSources.UserDataSources.Add("DSCol3", SAPbouiCOM.BoDataType.dt_QUANTITY, 100);
+
+            otxtIPR.DataBind.SetBound(true, "", "IRPDS");
 
             oMatrixNOP.Columns.Item("#").DataBind.SetBound(true, "", "#");
             oMatrixNOP.Columns.Item("Col_0").DataBind.SetBound(true, "", "DSCol0");
@@ -959,7 +1066,12 @@ namespace BOProduccion
 
             #region Se adicona el ChooFromList 
 
+            AddCFLProductionRoute(sboapp, oFormNewWorkOrder);
             AddChooseFromListoOITM(sboapp, oFormNewWorkOrder);
+
+            otxtIPR.ChooseFromListUID = "CFL3";
+            otxtIPR.ChooseFromListAlias = "U_BO_ItemCode";
+
 
             oMatrixNOP.Columns.Item("Col_1").ChooseFromListUID = "CFL1";
             oMatrixNOP.Columns.Item("Col_1").ChooseFromListAlias = "CardCode";
@@ -1072,6 +1184,129 @@ namespace BOProduccion
                     System.Windows.Forms.Application.Exit();
                 }
             }
+        }
+
+        public void CFLAfterIRP(string _FormUID, SAPbouiCOM.Form _FormWO, ItemEvent pVal, SAPbobsCOM.Company _oCompany, SAPbouiCOM.Application _sboapp)
+        {
+            Funciones.Comunes DllFunciones = new Funciones.Comunes();
+
+            #region Variables y Objetos
+
+            string sCFL_ID = null;
+            string _sMotorDB = (Convert.ToString(_oCompany.DbServerType));
+            int NumeroLinea;
+
+            SAPbouiCOM.EditText otxtIPR = (SAPbouiCOM.EditText)_FormWO.Items.Item("txtIPR").Specific;
+
+            SAPbouiCOM.IChooseFromListEvent oCFLEvento = ((SAPbouiCOM.IChooseFromListEvent)(pVal));
+
+            sCFL_ID = oCFLEvento.ChooseFromListUID;
+
+            SAPbouiCOM.Form _oFormWO = _sboapp.Forms.Item(_FormUID);
+
+            SAPbouiCOM.ChooseFromList oCFL = _oFormWO.ChooseFromLists.Item(sCFL_ID);
+
+            #endregion
+
+            if (oCFLEvento.BeforeAction == false)
+            {
+                #region Variables y Objetos 
+
+                string val = null;
+
+                SAPbouiCOM.DataTable oDataTable = oCFLEvento.SelectedObjects;
+
+                #endregion
+
+                try
+                {
+
+                    if (oDataTable == null)
+                    {
+                    }
+                    else
+                    {
+                        val = System.Convert.ToString(oDataTable.GetValue(20, 0));
+
+                        SAPbobsCOM.Recordset oPR = (SAPbobsCOM.Recordset)_oCompany.GetBusinessObject(SAPbobsCOM.BoObjectTypes.BoRecordset);
+
+                        if (_sMotorDB == "dst_MSSQL2012" || _sMotorDB == "dst_MSSQL2014" || _sMotorDB == "dst_MSSQL2016" || _sMotorDB == "dst_MSSQL2017" || _sMotorDB == "dst_HANADB")
+                        {
+                            _oFormWO.DataSources.UserDataSources.Item("IRPDS").ValueEx = val;
+
+                        }
+
+                    }
+                }
+                catch (Exception e)
+                {
+                    DllFunciones.sendErrorMessage(_sboapp, e);
+                }
+
+                if ((_FormUID == "CFL3") & (pVal.EventType == SAPbouiCOM.BoEventTypes.et_FORM_UNLOAD))
+                {
+                    System.Windows.Forms.Application.Exit();
+                }
+            }
+        }
+
+        public void AddItemsNWOMatrix(SAPbouiCOM.Form _FormWO, SAPbobsCOM.Company _oCompany, SAPbouiCOM.Application _sboapp)
+        {
+            Funciones.Comunes DllFunciones = new Funciones.Comunes();
+
+            #region Variables y Objetos
+
+            SAPbouiCOM.Matrix oMatrixNWO = (SAPbouiCOM.Matrix)_FormWO.Items.Item("mtxRP").Specific;
+            SAPbouiCOM.EditText otxtIPR = (SAPbouiCOM.EditText)_FormWO.Items.Item("txtIPR").Specific;
+            SAPbouiCOM.EditText otxtQTY = (SAPbouiCOM.EditText)_FormWO.Items.Item("txtQTY").Specific;
+
+            SAPbouiCOM.DataTable oTablePR = _FormWO.DataSources.DataTables.Item("DTRP");
+
+            string stxtIPR = null;
+
+
+            #endregion
+
+            #region Consulta Ruta de produccion 
+
+
+            stxtIPR = otxtIPR.Value.ToString();
+
+            string sIRP = DllFunciones.GetStringXMLDocument(_oCompany, "BOProduction", "Production", "GetProductionRoute");
+            sIRP = sIRP.Replace("%ItemCode%", stxtIPR).Replace("%QTY%", otxtQTY.Value.ToString());
+
+            //oRIPR.DoQuery(sIRP);
+
+            oTablePR.ExecuteQuery(sIRP);
+
+            #endregion
+
+            #region  Carga informacion a la Matrix
+
+            if (oTablePR.Rows.Count > 0)
+            {
+                oMatrixNWO.Clear();
+
+                oMatrixNWO.Columns.Item("#").DataBind.Bind("DTRP", "#");
+                oMatrixNWO.Columns.Item("Col_0").DataBind.Bind("DTRP", "Posicion");
+                oMatrixNWO.Columns.Item("Col_1").DataBind.Bind("DTRP", "ItemCode");
+                oMatrixNWO.Columns.Item("Col_2").DataBind.Bind("DTRP", "ItemName");
+                oMatrixNWO.Columns.Item("Col_3").DataBind.Bind("DTRP", "Quantity");
+
+                oMatrixNWO.LoadFromDataSource();
+
+                oMatrixNWO.AutoResizeColumns();
+
+            }
+
+            #endregion
+
+            #region Liberar Objetos 
+
+            DllFunciones.liberarObjetos(oTablePR);
+
+            #endregion
+
         }
 
         public void LinkedButtonMatrixFormCOP(SAPbouiCOM.Application _sboapp, SAPbobsCOM.Company _oCompany, SAPbouiCOM.Form oFormCOP, ItemEvent pVal, string sColumna)
@@ -1430,7 +1665,7 @@ namespace BOProduccion
                 }
                 else
                 {
-                    _BubbleEvent = true;
+                    _BubbleEvent = false;
                     return _BubbleEvent;
 
                 }
@@ -1445,6 +1680,43 @@ namespace BOProduccion
                 return false;
             }
 
+        }
+
+        public void Right_Click(ref SAPbouiCOM.ContextMenuInfo _eventInfo, SAPbouiCOM.Application _sboapp)
+        {
+            SAPbouiCOM.MenuItem oMenuItem = null;
+            SAPbouiCOM.Menus oMenus = null;
+
+            try
+            {
+                #region Click derecho para adicionar linea en Matrix en Series numeracion
+
+                if (_sboapp.Menus.Exists("AddRowMtx"))
+                {
+
+                }
+                else
+                {
+                    SAPbouiCOM.MenuCreationParams oCreationPackage = null;
+                    oCreationPackage = ((SAPbouiCOM.MenuCreationParams)(_sboapp.CreateObject(SAPbouiCOM.BoCreatableObjectType.cot_MenuCreationParams)));
+
+                    oCreationPackage.Type = SAPbouiCOM.BoMenuType.mt_STRING;
+                    oCreationPackage.UniqueID = "AddRowMtx";
+                    oCreationPackage.String = "Añadir Serie Numeración";
+                    oCreationPackage.Enabled = true;
+
+                    oMenuItem = _sboapp.Menus.Item("1280"); // Data'
+                    oMenus = oMenuItem.SubMenus;
+                    oMenus.AddEx(oCreationPackage);
+
+                    #endregion
+
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.Message);
+            }
         }
 
         public string VersionDll()

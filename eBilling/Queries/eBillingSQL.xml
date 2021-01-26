@@ -378,4 +378,18 @@
     SELECT RIGHT('0000000000' + Ltrim(Rtrim(COUNT(CODE)+1)),10) AS 'ID' FROM [@BOEE]
   </SerachNextCode>
   
+  <GetPrefijoSeries>
+    SELECT U_BO_PREF AS 'Prefijo'
+    FROM [@BOSERNUM]
+    WHERE Code = '%Code%'
+  </GetPrefijoSeries>
+
+  <GetLlaveAndPassword>
+    
+    SELECT 
+    (SELECT TOP 1 "U_BO_LlE" FROM "@BOEBILLINGP" WHERE U_BO_Status = 'Y') AS "Llave",
+    (SELECT TOP 1 "U_BO_PwdE" FROM "@BOEBILLINGP" WHERE U_BO_Status = 'Y') AS "Password"
+
+  </GetLlaveAndPassword>
+  
 </Queries>

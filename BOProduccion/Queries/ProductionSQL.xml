@@ -2,42 +2,42 @@
 <Queries>
   <GetWorkOrder>
     SELECT TOP 1  DocEntry,
-			  DocNum,
-			  ItemCode,
-        (SELECT TOP 1 U_BO_SNPT FROM [@BOPRODP]) AS 'SNPT'
-    FROM OWOR 
+    DocNum,
+    ItemCode,
+    (SELECT TOP 1 U_BO_SNPT FROM [@BOPRODP]) AS 'SNPT'
+    FROM OWOR
     WHERE UserSign = '%UserSign%' AND U_BO_TO = 'T'
     ORDER BY DocEntry DESC
   </GetWorkOrder>
-  
+
   <GetWorkOrderLine>
     SELECT LineNum,
-		       VisOrder,
-		       ItemCode,
-		       PlannedQty,
-		       wareHouse,
-           (SELECT TOP 1 U_BO_SNPS FROM [@BOPRODP]) AS 'SNPS'
+    VisOrder,
+    ItemCode,
+    PlannedQty,
+    wareHouse,
+    (SELECT TOP 1 U_BO_SNPS FROM [@BOPRODP]) AS 'SNPS'
     FROM WOR1 WHERE DocEntry = '%DocEntry%'
   </GetWorkOrderLine>
-  
+
   <SearchBOM>
     SELECT Code FROM OITT WHERE Code = '%Item%'
   </SearchBOM>
 
   <GetNumberSerieActive>
-      SELECT TOP 1 T0.U_BO_SNPT AS 'Code_SNPT',
-			       T1.SeriesName AS 'Name_SNPT',
-			       T0.U_BO_SNPS AS 'Code_SNPS',
-			       T2.SeriesName AS 'Name_SNPS'
+    SELECT TOP 1 T0.U_BO_SNPT AS 'Code_SNPT',
+    T1.SeriesName AS 'Name_SNPT',
+    T0.U_BO_SNPS AS 'Code_SNPS',
+    T2.SeriesName AS 'Name_SNPS'
 
-      FROM [@BOPRODP] T0 LEFT JOIN NNM1 T1 ON T0.U_BO_SNPT=T1.Series AND  T1.ObjectCode = '202'
-				                 LEFT JOIN NNM1 T2 ON T0.U_BO_SNPS=T2.Series AND  T2.ObjectCode = '202'
+    FROM [@BOPRODP] T0 LEFT JOIN NNM1 T1 ON T0.U_BO_SNPT=T1.Series AND  T1.ObjectCode = '202'
+    LEFT JOIN NNM1 T2 ON T0.U_BO_SNPS=T2.Series AND  T2.ObjectCode = '202'
   </GetNumberSerieActive>
 
   <GetNumberSerieSAP>
     SELECT Series AS 'Code_SNPSAP',
-		       SeriesName AS 'Name_SNPSAP'
-	  FROM NNM1 WHERE ObjectCode = '202'
+    SeriesName AS 'Name_SNPSAP'
+    FROM NNM1 WHERE ObjectCode = '202'
   </GetNumberSerieSAP>
 
   <GetParametersProduction>
@@ -58,13 +58,13 @@
 
   <GetMPE>
     SELECT TOP 100 A.DocEntry,
-        (SELECT TOP 1 DocNum FROM OWOR WHERE DocEntry ='%DocEntryOPS%') AS 'OF',
-		    A.DocNum,
-		    A.DocDate,
-		    B.ItemCode,
-		    b.Dscription,
-		    B.Quantity,
-		    B.WhsCode
+    (SELECT TOP 1 DocNum FROM OWOR WHERE DocEntry ='%DocEntryOPS%') AS 'OF',
+    A.DocNum,
+    A.DocDate,
+    B.ItemCode,
+    b.Dscription,
+    B.Quantity,
+    B.WhsCode
     FROM OIGE A LEFT JOIN IGE1 B ON A.DocEntry=B.DocEntry --IGN1
     WHERE BaseRef = (SELECT TOP 1 DocNum FROM OWOR WHERE DocEntry ='%DocEntryOPS%')
   </GetMPE>
@@ -77,7 +77,7 @@
   </DeleteProcedure>
 
   <ProcedureWorkOrder>
-    
+
     CREATE PROCEDURE [dbo].[BO_OrdenesProduccion]
 
     AS
@@ -112,8 +112,8 @@
     ItemCodeOPT NVARCHAR(50),
     ItemNameOPT NVARCHAR(250),
     WarehouseOPT NVARCHAR(10),
-    PlannedQtyOPT DECIMAL(19,2),
-    ReceivedQtyOPT DECIMAL(19,2),
+    PlannedQtyOPT DECIMAL(19,3),
+    ReceivedQtyOPT DECIMAL(19,3),
     QuantityCOLOROPT NVARCHAR(10),
     --- Detalle -----------
     PosIdOPS NVARCHAR(5),
@@ -124,8 +124,8 @@
     ItemCodeOPS NVARCHAR(50),
     ItemNameOPS NVARCHAR(250),
     WarehouseOPS NVARCHAR(10),
-    PlannedQtyOPS DECIMAL(19,2),
-    ReceivedQtyOPS DECIMAL(19,2),
+    PlannedQtyOPS DECIMAL(19,3),
+    ReceivedQtyOPS DECIMAL(19,3),
     QuantityCOLOROPS NVARCHAR(10),
     imgMPDes NVARCHAR(254)
 
@@ -140,13 +140,9 @@
     ItemCodeOPT NVARCHAR(50),
     ItemNameOPT NVARCHAR(250),
     WarehouseOPT NVARCHAR(10),
-    PlannedQtyOPT DECIMAL(19,2),
-    ReceivedQtyOPT DECIMAL(19,2),
+    PlannedQtyOPT DECIMAL(19,3),
+    ReceivedQtyOPT DECIMAL(19,3),
     ItemCodeOPS NVARCHAR(50),
-	ItemNameOPS NVARCHAR(250),
-	WarehouseOPS NVARCHAR(10),
-    PlannedQtyOPS DECIMAL(19,2),
-    ReceivedQtyOPS DECIMAL(19,2),
     EtapaProduccion NVARCHAR(200),
     LineNum NVARCHAR(5)
     )
@@ -162,8 +158,8 @@
     ItemCodeOPS NVARCHAR(50),
     ItemNameOPS NVARCHAR(250),
     WarehouseOPS NVARCHAR(10),
-    PlannedQtyOPS DECIMAL(19,2),
-    ReceivedQtyOPS DECIMAL(19,2),
+    PlannedQtyOPS DECIMAL(19,3),
+    ReceivedQtyOPS DECIMAL(19,3),
     imgMPDes NVARCHAR(254)
     )
 
@@ -180,26 +176,22 @@
     WHEN A.[Status] = 'C' THEN 'Cancelado'
     ELSE '' END AS 'StatusOPT',
 
-    CASE WHEN A.[Status] = 'P' THEN 'C:\Users\administrador\Desktop\AddOn_BasisOne_SAP10\AddOn_BasisOne_SAP10\BasisOne\bin\x64\BOProduction\Images\imgPlanificado.bmp'
-    WHEN A.[Status] = 'R' THEN 'C:\Users\administrador\Desktop\AddOn_BasisOne_SAP10\AddOn_BasisOne_SAP10\BasisOne\bin\x64\BOProduction\Images\imgLiberado.bmp'
-    WHEN A.[Status] = 'L' THEN 'C:\Users\administrador\Desktop\AddOn_BasisOne_SAP10\AddOn_BasisOne_SAP10\BasisOne\bin\x64\BOProduction\Images\imgCerrado.bmp'
-    WHEN A.[Status] = 'C' THEN 'C:\Users\administrador\Desktop\AddOn_BasisOne_SAP10\AddOn_BasisOne_SAP10\BasisOne\bin\x64\BOProduction\Images\imgCancelado.bmp'
+    CASE WHEN A.[Status] = 'P' THEN '%sPath%imgPlanificado.bmp'
+    WHEN A.[Status] = 'R' THEN '%sPath%imgLiberado.bmp'
+    WHEN A.[Status] = 'L' THEN '%sPath%imgCerrado.bmp'
+    WHEN A.[Status] = 'C' THEN '%sPath%imgCancelado.bmp'
     ELSE '' END AS 'imgStatus',
 
     A.ItemCode AS 'ItemCodeOPT',
     B.ItemName AS 'ItemNameOPT',
     A.Warehouse AS 'WarehouseOPT',
-    CAST(A.PlannedQty AS DECIMAL(19,2)) AS 'PlannedQtyOPT',
+    A.PlannedQty AS 'PlannedQtyOPT',
 
-    (SELECT COALESCE(SUM(CAST(T0.Quantity AS DECIMAL(19,2))),0) FROM IGN1 T0 WHERE T0.BaseRef = A.DocNum AND T0.ItemCode=A.ItemCode AND T0.WhsCode = A.Warehouse ) AS 'ReceivedQtyOPT',
+    (SELECT COALESCE(SUM(T0.Quantity),0) FROM IGN1 T0 WHERE T0.BaseRef = A.DocNum AND T0.ItemCode=A.ItemCode AND T0.WhsCode = A.Warehouse ) AS 'ReceivedQtyOPT',
 
     ------------ Detalle -------------------------
     C.ItemCode AS 'ItemCodePS',
-	C.ItemName AS 'ItemNameOPS', 
-	C.wareHouse AS 'WarehouseOPS',
-	C.PlannedQty AS 'PlannedQtyOPS',
-	c.IssuedQty AS 'ReceivedQtyOPS',
-    c.VisOrder+1 AS 'EtapaProduccion',
+    D.Code AS 'EtapaProduccion',
     c.VisOrder AS 'LineNum'
 
     FROM OWOR A LEFT JOIN OITM B ON A.ItemCode=B.ItemCode
@@ -208,7 +200,7 @@
 
     WHERE A.U_BO_TO = 'T' AND A.Series = (SELECT TOP 1 U_BO_SNPT FROM [@BOPRODP])
 
-    group by  A.DocEntry, a.DocNum, A.[Status], A.ItemCode, B.ItemName,  A.Warehouse, A.PlannedQty, C.ItemCode, D.Code, C.VisOrder, C.ItemName, C.wareHouse, C.PlannedQty, C.IssuedQty
+    group by  A.DocEntry, a.DocNum, A.[Status], A.ItemCode, B.ItemName,  A.Warehouse, A.PlannedQty, C.ItemCode, D.Code, C.VisOrder
     order by DocEntry, LineNum
 
     ---------------------------------------- Busca las ordenes de produccion de Producto Semielaborado ---------------
@@ -226,10 +218,10 @@
     WHEN A.[Status] = 'C' THEN 'Cancelado'
     ELSE '' END AS 'StatusOPS',
 
-    CASE WHEN A.[Status] = 'P' THEN 'C:\Users\administrador\Desktop\AddOn_BasisOne_SAP10\AddOn_BasisOne_SAP10\BasisOne\bin\x64\BOProduction\Images\imgPlanificado.bmp'
-    WHEN A.[Status] = 'R' THEN 'C:\Users\administrador\Desktop\AddOn_BasisOne_SAP10\AddOn_BasisOne_SAP10\BasisOne\bin\x64\BOProduction\Images\imgLiberado.bmp'
-    WHEN A.[Status] = 'L' THEN 'C:\Users\administrador\Desktop\AddOn_BasisOne_SAP10\AddOn_BasisOne_SAP10\BasisOne\bin\x64\BOProduction\Images\imgCerrado.bmp'
-    WHEN A.[Status] = 'C' THEN 'C:\Users\administrador\Desktop\AddOn_BasisOne_SAP10\AddOn_BasisOne_SAP10\BasisOne\bin\x64\BOProduction\Images\imgCancelado.bmp'
+    CASE WHEN A.[Status] = 'P' THEN '%sPath%imgPlanificado.bmp'
+    WHEN A.[Status] = 'R' THEN '%sPath%imgLiberado.bmp'
+    WHEN A.[Status] = 'L' THEN '%sPath%imgCerrado.bmp'
+    WHEN A.[Status] = 'C' THEN '%sPath%imgCancelado.bmp'
     ELSE '' END AS 'imgStatus',
 
     A.ItemCode AS 'ItemCodeOPS',
@@ -238,7 +230,7 @@
     A.PlannedQty AS 'PlannedQtyOPS',
 
     (SELECT COALESCE(SUM(T0.Quantity),0) FROM IGN1 T0 WHERE T0.BaseRef = A.DocNum AND T0.ItemCode=A.ItemCode AND T0.WhsCode = A.Warehouse ) AS 'ReceivedQtyOPS',
-    'C:\Users\administrador\Desktop\AddOn_BasisOne_SAP10\AddOn_BasisOne_SAP10\BasisOne\bin\x64\BOProduction\Images\imgMPDes.bmp' AS 'imgMPDes'
+    '%sPath%imgMPDes.bmp' AS 'imgMPDes'
 
     FROM OWOR A LEFT JOIN OITM B ON A.ItemCode=B.ItemCode
 
@@ -258,7 +250,8 @@
     A.PlannedQtyOPT,
     A.ReceivedQtyOPT,
 
-    CASE WHEN (A.PlannedQtyOPT-A.ReceivedQtyOPT) = 0 THEN 'VERDE' ELSE 'AZUL' END AS 'QuantityPTE',
+    CASE WHEN (A.PlannedQtyOPT-A.ReceivedQtyOPT) = 0 THEN 'VERDE'
+    ELSE 'AZUL' END AS 'QuantityPTE',
 
     A.LineNum,
     A.EtapaProduccion,
@@ -266,14 +259,14 @@
     B.DocEntry,
     B.DocNumOPS,
     A.ItemCodeOPS,
-    CASE WHEN B.ItemNameOPS IS NULL THEN A.ItemNameOPS ELSE B.ItemNameOPS END AS 'ItemNameOPS' ,
-    CASE WHEN B.WarehouseOPS IS NULL THEN A.WarehouseOPS ELSE B.ItemNameOPS END AS 'WarehouseOPS',
-    CASE WHEN B.PlannedQtyOPS IS NULL THEN A.PlannedQtyOPS ELSE B.PlannedQtyOPS END AS 'PlannedQtyOPS' ,
-	CASE WHEN B.ReceivedQtyOPS IS NULL THEN A.ReceivedQtyOPS ELSE B.ReceivedQtyOPS END AS 'PlannedQtyOPS',
+    B.ItemNameOPS,
+    B.WarehouseOPS,
+    B.PlannedQtyOPS,
+    B.ReceivedQtyOPS,
 
     CASE WHEN ( B.PlannedQtyOPS-B.ReceivedQtyOPS) = 0 THEN 'VERDE'
     ELSE 'AZUL' END AS 'QuantityPTS',
-    CASE WHEN B.imgMPDes IS NULL THEN 'C:\Users\administrador\Desktop\AddOn_BasisOne_SAP10\AddOn_BasisOne_SAP10\BasisOne\bin\x64\BOProduction\Images\imgMPDes.bmp' ELSE B.imgMPDes END AS 'imgMPDesc'
+    B.imgMPDes AS 'imgMPDesc'
 
 
     FROM #OrdenesProduccionPT A LEFT JOIN #OrdenesProduccionPS B ON A.DocNumOPT=B.OPP AND A.ItemCodeOPS=B.ItemCodeOPS AND A.LineNum=B.PosId
@@ -292,21 +285,64 @@
 
 
     END
-  
-  
-
-    
   </ProcedureWorkOrder>
 
+  <GetProductionRoute>
+
+    DECLARE @iDocEntry NVARCHAR(100)
+
+    SET @iDocEntry = (SELECT TOP 1 DocEntry FROM [@BO_RP_ENC] WHERE U_BO_ItemCode = '%ItemCode%')
+
+    SELECT ROW_NUMBER() OVER(ORDER BY T0.U_BO_ItemCode ASC) AS '#',
+    'P. Terminado' AS 'Posicion',
+    T0.U_BO_ItemCode AS ItemCode,
+    T1.ItemName AS ItemName,
+    CAST(%QTY% AS DECIMAL(19,2))  AS 'Quantity'
+
+
+    FROM [@BO_RP_ENC] T0 LEFT JOIN OITM T1 ON T0.U_BO_ItemCode=t1.ItemCode
+    WHERE T0.DocEntry = @iDocEntry
+
+    UNION ALL
+
+    SELECT ROW_NUMBER() OVER(ORDER BY T0.U_BO_ItemCode ASC)+1 AS '#',
+    'P. Semielaborado' AS 'Posicion',
+    T0.U_BO_ItemCode AS ItemCode,
+    T1.ItemName AS ItemName,
+    CAST(%QTY% AS DECIMAL(19,2))  AS 'Quantity'
+
+    from [@BO_RP_DET] T0 LEFT JOIN OITM T1 ON T0.U_BO_ItemCode=t1.ItemCode
+    where t0.DocEntry = @iDocEntry
+
+
+  </GetProductionRoute>
+
+  <GetProductionRouteStructure>
+
+    SELECT T0.U_BO_ItemCode AS 'Producto terminado',
+    T1.U_BO_ItemCode AS 'Producto semielaborado',
+    T3.Code AS 'Materia Prima',
+    T3.ItemName AS 'Descripcion Materia',
+    CAST(T3.Quantity AS DECIMAL(19,2)) AS 'Cantidad',
+    T3.Warehouse AS 'Almacen'
+
+
+    FROM [dbo].[@BO_RP_ENC] T0 INNER JOIN [dbo].[@BO_RP_DET] T1 ON T0.DocEntry=T1.DocEntry
+    LEFT JOIN OITM T2 ON T1.U_BO_ItemCode=T2.ItemCode
+    INNER JOIN ITT1 T3 ON T1.U_BO_ItemCode=T3.Father
+
+
+  </GetProductionRouteStructure>
+
   <GetSNProduction>
-    
+
     (SELECT TOP 1 U_BO_SNPT AS SNPT, U_BO_SNPS AS SNPS FROM [@BOPRODP])
-    
+
   </GetSNProduction>
 
   <GetNextDocNum>
     SELECT ISNULL(MAX(DocNum),0)+1  AS Consecutivo FROM OWOR WHERE Series = (SELECT TOP 1 U_BO_SNPT FROM [@BOPRODP])
 
   </GetNextDocNum>
-  
+
 </Queries>

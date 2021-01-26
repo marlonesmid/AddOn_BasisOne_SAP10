@@ -2141,6 +2141,7 @@ IF (@ObjectIdLayout = '13' AND @TipoXML = 'Encabezado')
 
   <BO_FacturaXML_BO>
     
+        
      CREATE PROCEDURE [dbo].[BO_FacturaXML]
 
       @DocEntry AS INT,
@@ -2326,7 +2327,9 @@ IF (@ObjectIdLayout = '13' AND @TipoXML = 'Encabezado')
 					  CASE WHEN T11."ExtraDays" > '0' THEN '2'
 					  ELSE '1' END AS 'FormaPago',
 
-					  '01' AS 'numeroDeReferencia'
+					  '01' AS 'numeroDeReferencia', 
+
+					  'NO' AS 'FacturaTieneMuestras'
 
 		  FROM "OINV" T0 LEFT JOIN "INV12" T4 ON T0."DocEntry"=T4."DocEntry"
 					     LEFT JOIN "OCRD" T5 ON T0."CardCode" = T5."CardCode"
@@ -3378,6 +3381,8 @@ IF (@ObjectIdLayout = '13' AND @TipoXML = 'Encabezado')
 			  GROUP BY T1."PrctBsAmnt", T1."U_BO_Tipo"
 
 		  END
+    
+  
     
   </BO_FacturaXML_BO>
 

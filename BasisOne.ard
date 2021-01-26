@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<AddOnRegData xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema" SlientInstallation="No" SlientUpgrade="No" Partnernmsp="BasisOne" SchemaVersion="3.0" Type="" MultipleVersion="false" OnDemand="" OnPremise="" ExtName="Basis One 10.2.0.28" ExtVersion="10.2.0.28" Contdata="" Partner="Basis One" DBType="Both" ClientType="A">
+<AddOnRegData xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema" SlientInstallation="No" SlientUpgrade="No" Partnernmsp="BasisOne" SchemaVersion="3.0" Type="" MultipleVersion="false" OnDemand="" OnPremise="" ExtName="Basis One 10.2.0.35" ExtVersion="10.2.0.35" Contdata="" Partner="Basis One" DBType="Both" ClientType="A">
   <Validity>
     <SBOCompatibility>
       <Version From="100.000.00" To="100.999.99" />
@@ -132,6 +132,9 @@
             <File FileName="eBilling\Formularios\Parametros_iniciales_eBilling.srf">
               <Actions />
             </File>
+            <File FileName="eBilling\Formularios\Send_Mail.srf">
+              <Actions />
+            </File>
             <File FileName="eBilling\Formularios\Unidades_Medida.srf">
               <Actions />
             </File>
@@ -286,6 +289,9 @@
             <File FileName="eBilling\Formularios\Parametros_iniciales_eBilling.srf">
               <Actions />
             </File>
+            <File FileName="eBilling\Formularios\Send_Mail.srf">
+              <Actions />
+            </File>
             <File FileName="eBilling\Formularios\Unidades_Medida.srf">
               <Actions />
             </File>
@@ -397,6 +403,9 @@
             <File FileName="BOProduction\Formularios\Parameters_production.srf">
               <Actions />
             </File>
+            <File FileName="BOProduction\Formularios\Production_Route.srf">
+              <Actions />
+            </File>
             <File FileName="BOProduction\Images\imgCancelado.bmp">
               <Actions />
             </File>
@@ -458,6 +467,9 @@
               <Actions />
             </File>
             <File FileName="eBilling\Formularios\Parametros_iniciales_eBilling.srf">
+              <Actions />
+            </File>
+            <File FileName="eBilling\Formularios\Send_Mail.srf">
               <Actions />
             </File>
             <File FileName="eBilling\Formularios\Unidades_Medida.srf">
@@ -560,6 +572,9 @@
             <File FileName="BOProduction\Formularios\Parameters_production.srf">
               <Actions />
             </File>
+            <File FileName="BOProduction\Formularios\Production_Route.srf">
+              <Actions />
+            </File>
             <File FileName="BOProduction\Images\imgCancelado.bmp">
               <Actions />
             </File>
@@ -621,6 +636,9 @@
               <Actions />
             </File>
             <File FileName="eBilling\Formularios\Parametros_iniciales_eBilling.srf">
+              <Actions />
+            </File>
+            <File FileName="eBilling\Formularios\Send_Mail.srf">
               <Actions />
             </File>
             <File FileName="eBilling\Formularios\Unidades_Medida.srf">
