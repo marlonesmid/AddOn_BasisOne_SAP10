@@ -4122,6 +4122,11 @@ namespace eBilling
                 port.SendTimeout = TimeSpan.FromMinutes(2);
                 port.ReceiveTimeout = TimeSpan.FromMinutes(2);
 
+                if (sModo == "PRO")
+                {
+                    port.Security.Mode = BasicHttpSecurityMode.Transport;
+                }
+
                 //Especifica la dirección de conexion para Demo y Adjuntos para pruebas
                 EndpointAddress endPointEmision = new EndpointAddress(sURLEmision); //URL DEMO EMISION
 
@@ -5209,6 +5214,11 @@ namespace eBilling
                     port.ReaderQuotas.MaxStringContentLength = Int32.MaxValue;
                     port.SendTimeout = TimeSpan.FromMinutes(2);
                     port.ReceiveTimeout = TimeSpan.FromMinutes(2);
+
+                    if (sModo == "PRO")
+                    {
+                        port.Security.Mode = BasicHttpSecurityMode.Transport;
+                    }
 
                     //Especifica la dirección de conexion para Emision y Adjuntos 
                     EndpointAddress endPointEmision = new EndpointAddress(sURLEmision); //URL DEMO EMISION
@@ -6788,6 +6798,11 @@ namespace eBilling
                 port.SendTimeout = TimeSpan.FromMinutes(2);
                 port.ReceiveTimeout = TimeSpan.FromMinutes(2);
 
+                if (sModo == "PRO")
+                {
+                    port.Security.Mode = BasicHttpSecurityMode.Transport;
+                }
+
                 //Especifica la dirección de conexion para Emision y Adjuntos 
                 EndpointAddress endPointEmision = new EndpointAddress(sURLEmision); //URL DEMO EMISION
                 EndpointAddress endPointAdjuntos = new EndpointAddress(sURLAdjuntos); //URL DEMO ADJUNTOS          
@@ -7811,6 +7826,11 @@ namespace eBilling
                 port.SendTimeout = TimeSpan.FromMinutes(2);
                 port.ReceiveTimeout = TimeSpan.FromMinutes(2);
 
+                if (sModo == "PRO")
+                {
+                    port.Security.Mode = BasicHttpSecurityMode.Transport;
+                }
+
                 //Especifica la dirección de conexion para Demo y Adjuntos para pruebas
                 EndpointAddress endPointEmision = new EndpointAddress(sURLEmision); //URL DEMO EMISION
 
@@ -8281,265 +8301,290 @@ namespace eBilling
         {
             Funciones.Comunes DllFunciones = new Funciones.Comunes();
 
-            #region Consulta URL
-
-            string sGetModo = null;
-            string sURLEmision = null;
-            string sURLAdjuntos = null;
-            string sModo = null;
-
-            SAPbobsCOM.Recordset oConsultarGetModo = (SAPbobsCOM.Recordset)_oCompany.GetBusinessObject(SAPbobsCOM.BoObjectTypes.BoRecordset);
-
-            sGetModo = DllFunciones.GetStringXMLDocument(_oCompany, "eBilling", "eBilling", "GetModoandURL");
-
-            sGetModo = sGetModo.Replace("%Estado%", "\"U_BO_Status\" = 'Y'").Replace("%DocEntry%", " ");
-
-            oConsultarGetModo.DoQuery(sGetModo);
-
-            sURLEmision = Convert.ToString(oConsultarGetModo.Fields.Item("URLTFHKA").Value.ToString()) + "/ws/v1.0/Service.svc?wsdl";
-            sModo = Convert.ToString(oConsultarGetModo.Fields.Item("Modo").Value.ToString());
-
-            DllFunciones.liberarObjetos(oConsultarGetModo);
-
-            #endregion
-
-            #region Instanciacion parametros TFHKA
-
-            //Especifica el puerto (HTTP o HTTPS)
-            if (sModo == "PRU")
+            try
             {
-                BasicHttpBinding port = new BasicHttpBinding();
-            }
-            else if (sModo == "PRO")
-            {
-                BasicHttpsBinding port = new BasicHttpsBinding();
-            }
+                #region StatusBar Enviando correo
 
-            port.MaxBufferPoolSize = Int32.MaxValue;
-            port.MaxBufferSize = Int32.MaxValue;
-            port.MaxReceivedMessageSize = Int32.MaxValue;
-            port.ReaderQuotas.MaxStringContentLength = Int32.MaxValue;
-            port.SendTimeout = TimeSpan.FromMinutes(2);
-            port.ReceiveTimeout = TimeSpan.FromMinutes(2);
+                DllFunciones.sendStatusBarMsg(_sboapp, "Enviando correo electronico, por favor espere....", BoMessageTime.bmt_Short, false);
 
-            //Especifica la dirección de conexion para Emision y Adjuntos 
-            EndpointAddress endPointEmision = new EndpointAddress(sURLEmision); //URL DEMO EMISION      
+                #endregion
 
-            #endregion
+                #region Consulta URL
 
-            #region Variables
+                string sGetModo = null;
+                string sURLEmision = null;
+                string sURLAdjuntos = null;
+                string sModo = null;
 
-            serviceClient = new eBilling.ServicioEmisionFE.ServiceClient(port, endPointEmision);
+                SAPbobsCOM.Recordset oConsultarGetModo = (SAPbobsCOM.Recordset)_oCompany.GetBusinessObject(SAPbobsCOM.BoObjectTypes.BoRecordset);
 
-            string sCadenaCorreos = null;
-            string sCorreoPrefijo = null;
-            #endregion
+                sGetModo = DllFunciones.GetStringXMLDocument(_oCompany, "eBilling", "eBilling", "GetModoandURL");
 
-            #region obtiene formulario correo 
+                sGetModo = sGetModo.Replace("%Estado%", "\"U_BO_Status\" = 'Y'").Replace("%DocEntry%", " ");
 
-            SAPbouiCOM.Form oFormSM;
-            oFormSM = _sboapp.Forms.Item("BO_SM");
+                oConsultarGetModo.DoQuery(sGetModo);
 
-            #endregion
+                sURLEmision = Convert.ToString(oConsultarGetModo.Fields.Item("URLTFHKA").Value.ToString()) + "/ws/v1.0/Service.svc?wsdl";
+                sModo = Convert.ToString(oConsultarGetModo.Fields.Item("Modo").Value.ToString());
 
-            #region Consulta y obtinene y el password
+                DllFunciones.liberarObjetos(oConsultarGetModo);
 
-            SAPbobsCOM.Recordset oLlaveyPassword = (SAPbobsCOM.Recordset)_oCompany.GetBusinessObject(SAPbobsCOM.BoObjectTypes.BoRecordset);
+                #endregion
 
-            string sQueryDocEntryDocument = DllFunciones.GetStringXMLDocument(_oCompany, "eBilling", "eBilling", "GetLlaveAndPassword");
+                #region Instanciacion parametros TFHKA
 
-            oLlaveyPassword.DoQuery(sQueryDocEntryDocument);
-
-            #endregion
-
-            #region Consultar cantidad de correos 
-
-            string sQuantityEmails;
-            int iQuantityEmails;
-
-            SAPbobsCOM.Recordset oQuantityEmails = (SAPbobsCOM.Recordset)_oCompany.GetBusinessObject(SAPbobsCOM.BoObjectTypes.BoRecordset);
-
-            sQuantityEmails = DllFunciones.GetStringXMLDocument(_oCompany, "eBilling", "eBilling", "GetQuantityEmails");
-            oQuantityEmails.DoQuery(sQuantityEmails);
-
-            iQuantityEmails = Convert.ToInt32(oQuantityEmails.Fields.Item(0).Value.ToString());
-
-            DllFunciones.liberarObjetos(oQuantityEmails);
-
-            #endregion
-
-            #region Se obtiene el numero de documento
-
-            SAPbouiCOM.StaticText olblL1 = (SAPbouiCOM.StaticText)(oFormSM.Items.Item("lbl1").Specific);
-
-            #endregion
-
-            #region Envio del correo
-
-            if (iQuantityEmails == 2)
-            {
-                #region Obtiene la cadena de correos
-
-                SAPbouiCOM.EditText txtEmail1 = (SAPbouiCOM.EditText)(oFormSM.Items.Item("txtEmail1").Specific);
-                SAPbouiCOM.EditText txtEmail2 = (SAPbouiCOM.EditText)(oFormSM.Items.Item("txtEmail2").Specific);
-
-                sCadenaCorreos = txtEmail1.Value.ToString();
-
-                if (string.IsNullOrEmpty(txtEmail2.Value.ToString()))
+                //Especifica el puerto (HTTP o HTTPS)
+                if (sModo == "PRU")
                 {
+                    BasicHttpBinding port = new BasicHttpBinding();
+                }
+                else if (sModo == "PRO")
+                {
+                    BasicHttpsBinding port = new BasicHttpsBinding();
+                }
 
+                port.MaxBufferPoolSize = Int32.MaxValue;
+                port.MaxBufferSize = Int32.MaxValue;
+                port.MaxReceivedMessageSize = Int32.MaxValue;
+                port.ReaderQuotas.MaxStringContentLength = Int32.MaxValue;
+                port.SendTimeout = TimeSpan.FromMinutes(2);
+                port.ReceiveTimeout = TimeSpan.FromMinutes(2);
+
+                if (sModo == "PRO")
+                {
+                    port.Security.Mode = BasicHttpSecurityMode.Transport;
+                }
+
+                //Especifica la dirección de conexion para Emision y Adjuntos 
+                EndpointAddress endPointEmision = new EndpointAddress(sURLEmision); //URL DEMO EMISION      
+
+                #endregion
+
+                #region Variables
+
+                serviceClient = new eBilling.ServicioEmisionFE.ServiceClient(port, endPointEmision);
+
+                string sCadenaCorreos = null;
+                string sCorreoPrefijo = null;
+
+                #endregion
+
+                #region obtiene formulario correo 
+
+                SAPbouiCOM.Form oFormSM;
+                oFormSM = _sboapp.Forms.Item("BO_SM");
+
+                SAPbouiCOM.Button btnCancel = (SAPbouiCOM.Button)(oFormSM.Items.Item("btnClose").Specific);
+
+                #endregion
+
+                #region Consulta y obtinene y el password
+
+                SAPbobsCOM.Recordset oLlaveyPassword = (SAPbobsCOM.Recordset)_oCompany.GetBusinessObject(SAPbobsCOM.BoObjectTypes.BoRecordset);
+
+                string sQueryDocEntryDocument = DllFunciones.GetStringXMLDocument(_oCompany, "eBilling", "eBilling", "GetLlaveAndPassword");
+
+                oLlaveyPassword.DoQuery(sQueryDocEntryDocument);
+
+                #endregion
+
+                #region Consultar cantidad de correos 
+
+                string sQuantityEmails;
+                int iQuantityEmails;
+
+                SAPbobsCOM.Recordset oQuantityEmails = (SAPbobsCOM.Recordset)_oCompany.GetBusinessObject(SAPbobsCOM.BoObjectTypes.BoRecordset);
+
+                sQuantityEmails = DllFunciones.GetStringXMLDocument(_oCompany, "eBilling", "eBilling", "GetQuantityEmails");
+                oQuantityEmails.DoQuery(sQuantityEmails);
+
+                iQuantityEmails = Convert.ToInt32(oQuantityEmails.Fields.Item(0).Value.ToString());
+
+                DllFunciones.liberarObjetos(oQuantityEmails);
+
+                #endregion
+
+                #region Se obtiene el numero de documento
+
+                SAPbouiCOM.StaticText olblL1 = (SAPbouiCOM.StaticText)(oFormSM.Items.Item("lbl1").Specific);
+
+                #endregion
+
+                #region Envio del correo
+
+                if (iQuantityEmails == 2)
+                {
+                    #region Obtiene la cadena de correos
+
+                    SAPbouiCOM.EditText txtEmail1 = (SAPbouiCOM.EditText)(oFormSM.Items.Item("txtEmail1").Specific);
+                    SAPbouiCOM.EditText txtEmail2 = (SAPbouiCOM.EditText)(oFormSM.Items.Item("txtEmail2").Specific);
+
+                    sCadenaCorreos = txtEmail1.Value.ToString();
+
+                    if (string.IsNullOrEmpty(txtEmail2.Value.ToString()))
+                    {
+
+                    }
+                    else
+                    {
+                        sCadenaCorreos = sCadenaCorreos + ";" + txtEmail2.Value.ToString();
+
+                    }
+
+                    DllFunciones.liberarObjetos(txtEmail1);
+                    DllFunciones.liberarObjetos(txtEmail2);
+
+                    #endregion
+                }
+                else if (iQuantityEmails == 3)
+                {
+                    #region Obtiene la cadena de correos
+
+                    SAPbouiCOM.EditText txtEmail1 = (SAPbouiCOM.EditText)(oFormSM.Items.Item("txtEmail1").Specific);
+                    SAPbouiCOM.EditText txtEmail2 = (SAPbouiCOM.EditText)(oFormSM.Items.Item("txtEmail2").Specific);
+                    SAPbouiCOM.EditText txtEmail3 = (SAPbouiCOM.EditText)(oFormSM.Items.Item("txtEmail2").Specific);
+
+                    sCadenaCorreos = txtEmail1.Value.ToString();
+
+                    if (string.IsNullOrEmpty(txtEmail2.Value.ToString()))
+                    {
+
+                    }
+                    else
+                    {
+                        sCadenaCorreos = sCadenaCorreos + ";" + txtEmail2.Value.ToString();
+
+                    }
+
+                    if (string.IsNullOrEmpty(txtEmail3.Value.ToString()))
+                    {
+
+                    }
+                    else
+                    {
+                        sCadenaCorreos = sCadenaCorreos + ";" + txtEmail3.Value.ToString();
+
+                    }
+
+                    #endregion
+                }
+                else if (iQuantityEmails == 4)
+                {
+                    #region Obtiene la cadena de correos
+
+                    SAPbouiCOM.EditText txtEmail1 = (SAPbouiCOM.EditText)(oFormSM.Items.Item("txtEmail1").Specific);
+                    SAPbouiCOM.EditText txtEmail2 = (SAPbouiCOM.EditText)(oFormSM.Items.Item("txtEmail2").Specific);
+                    SAPbouiCOM.EditText txtEmail3 = (SAPbouiCOM.EditText)(oFormSM.Items.Item("txtEmail3").Specific);
+                    SAPbouiCOM.EditText txtEmail4 = (SAPbouiCOM.EditText)(oFormSM.Items.Item("txtEmail4").Specific);
+
+                    sCadenaCorreos = txtEmail1.Value.ToString();
+
+                    if (string.IsNullOrEmpty(txtEmail2.Value.ToString()))
+                    {
+
+                    }
+                    else
+                    {
+                        sCadenaCorreos = sCadenaCorreos + ";" + txtEmail2.Value.ToString();
+
+                    }
+
+                    if (string.IsNullOrEmpty(txtEmail3.Value.ToString()))
+                    {
+
+                    }
+                    else
+                    {
+                        sCadenaCorreos = sCadenaCorreos + ";" + txtEmail3.Value.ToString();
+
+                    }
+
+                    if (string.IsNullOrEmpty(txtEmail4.Value.ToString()))
+                    {
+
+                    }
+                    else
+                    {
+                        sCadenaCorreos = sCadenaCorreos + ";" + txtEmail4.Value.ToString();
+
+                    }
+
+                    #endregion
+                }
+                else if (iQuantityEmails == 5)
+                {
+                    #region Obtiene la cadena de correos
+                    SAPbouiCOM.EditText txtEmail1 = (SAPbouiCOM.EditText)(oFormSM.Items.Item("txtEmail1").Specific);
+                    SAPbouiCOM.EditText txtEmail2 = (SAPbouiCOM.EditText)(oFormSM.Items.Item("txtEmail2").Specific);
+                    SAPbouiCOM.EditText txtEmail3 = (SAPbouiCOM.EditText)(oFormSM.Items.Item("txtEmail3").Specific);
+                    SAPbouiCOM.EditText txtEmail4 = (SAPbouiCOM.EditText)(oFormSM.Items.Item("txtEmail4").Specific);
+                    SAPbouiCOM.EditText txtEmail5 = (SAPbouiCOM.EditText)(oFormSM.Items.Item("txtEmail5").Specific);
+
+                    sCadenaCorreos = txtEmail1.Value.ToString();
+
+                    if (string.IsNullOrEmpty(txtEmail2.Value.ToString()))
+                    {
+
+                    }
+                    else
+                    {
+                        sCadenaCorreos = sCadenaCorreos + ";" + txtEmail2.Value.ToString();
+
+                    }
+
+                    if (string.IsNullOrEmpty(txtEmail3.Value.ToString()))
+                    {
+
+                    }
+                    else
+                    {
+                        sCadenaCorreos = sCadenaCorreos + ";" + txtEmail3.Value.ToString();
+
+                    }
+
+                    if (string.IsNullOrEmpty(txtEmail4.Value.ToString()))
+                    {
+
+                    }
+                    else
+                    {
+                        sCadenaCorreos = sCadenaCorreos + ";" + txtEmail4.Value.ToString();
+
+                    }
+
+                    if (string.IsNullOrEmpty(txtEmail5.Value.ToString()))
+                    {
+
+                    }
+                    else
+                    {
+                        sCadenaCorreos = sCadenaCorreos + ";" + txtEmail5.Value.ToString();
+
+                    }
+                    #endregion
+                }
+
+                SendEmailResponse RespuestaEnvioCorreo = serviceClient.EnvioCorreo(Convert.ToString(oLlaveyPassword.Fields.Item("Llave").Value.ToString()), Convert.ToString(oLlaveyPassword.Fields.Item("Password").Value.ToString()), olblL1.Caption.ToString(), sCadenaCorreos, null);
+
+                if (RespuestaEnvioCorreo.codigo == 200)
+                {
+                    DllFunciones.sendMessageBox(_sboapp, RespuestaEnvioCorreo.mensaje);
+                    btnCancel.Item.Click();
                 }
                 else
                 {
-                    sCadenaCorreos = sCadenaCorreos + ";" + txtEmail2.Value.ToString();
-
+                    DllFunciones.sendMessageBox(_sboapp, RespuestaEnvioCorreo.mensaje);
                 }
-
-                DllFunciones.liberarObjetos(txtEmail1);
-                DllFunciones.liberarObjetos(txtEmail2);
 
                 #endregion
             }
-            else if (iQuantityEmails == 3)
+            catch (Exception ex)
             {
-                #region Obtiene la cadena de correos
 
-                SAPbouiCOM.EditText txtEmail1 = (SAPbouiCOM.EditText)(oFormSM.Items.Item("txtEmail1").Specific);
-                SAPbouiCOM.EditText txtEmail2 = (SAPbouiCOM.EditText)(oFormSM.Items.Item("txtEmail2").Specific);
-                SAPbouiCOM.EditText txtEmail3 = (SAPbouiCOM.EditText)(oFormSM.Items.Item("txtEmail2").Specific);
-
-                sCadenaCorreos = txtEmail1.Value.ToString();
-
-                if (string.IsNullOrEmpty(txtEmail2.Value.ToString()))
-                {
-
-                }
-                else
-                {
-                    sCadenaCorreos = sCadenaCorreos + ";" + txtEmail2.Value.ToString();
-
-                }
-
-                if (string.IsNullOrEmpty(txtEmail3.Value.ToString()))
-                {
-
-                }
-                else
-                {
-                    sCadenaCorreos = sCadenaCorreos + ";" + txtEmail3.Value.ToString();
-
-                }
-
-                #endregion
-            }
-            else if (iQuantityEmails == 4)
-            {
-                #region Obtiene la cadena de correos
-
-                SAPbouiCOM.EditText txtEmail1 = (SAPbouiCOM.EditText)(oFormSM.Items.Item("txtEmail1").Specific);
-                SAPbouiCOM.EditText txtEmail2 = (SAPbouiCOM.EditText)(oFormSM.Items.Item("txtEmail2").Specific);
-                SAPbouiCOM.EditText txtEmail3 = (SAPbouiCOM.EditText)(oFormSM.Items.Item("txtEmail3").Specific);
-                SAPbouiCOM.EditText txtEmail4 = (SAPbouiCOM.EditText)(oFormSM.Items.Item("txtEmail4").Specific);
-
-                sCadenaCorreos = txtEmail1.Value.ToString();
-
-                if (string.IsNullOrEmpty(txtEmail2.Value.ToString()))
-                {
-
-                }
-                else
-                {
-                    sCadenaCorreos = sCadenaCorreos + ";" + txtEmail2.Value.ToString();
-
-                }
-
-                if (string.IsNullOrEmpty(txtEmail3.Value.ToString()))
-                {
-
-                }
-                else
-                {
-                    sCadenaCorreos = sCadenaCorreos + ";" + txtEmail3.Value.ToString();
-
-                }
-
-                if (string.IsNullOrEmpty(txtEmail4.Value.ToString()))
-                {
-
-                }
-                else
-                {
-                    sCadenaCorreos = sCadenaCorreos + ";" + txtEmail4.Value.ToString();
-
-                }
-
-                #endregion
-            }
-            else if (iQuantityEmails == 5)
-            {
-                #region Obtiene la cadena de correos
-                SAPbouiCOM.EditText txtEmail1 = (SAPbouiCOM.EditText)(oFormSM.Items.Item("txtEmail1").Specific);
-                SAPbouiCOM.EditText txtEmail2 = (SAPbouiCOM.EditText)(oFormSM.Items.Item("txtEmail2").Specific);
-                SAPbouiCOM.EditText txtEmail3 = (SAPbouiCOM.EditText)(oFormSM.Items.Item("txtEmail3").Specific);
-                SAPbouiCOM.EditText txtEmail4 = (SAPbouiCOM.EditText)(oFormSM.Items.Item("txtEmail4").Specific);
-                SAPbouiCOM.EditText txtEmail5 = (SAPbouiCOM.EditText)(oFormSM.Items.Item("txtEmail5").Specific);
-
-                sCadenaCorreos = txtEmail1.Value.ToString();
-
-                if (string.IsNullOrEmpty(txtEmail2.Value.ToString()))
-                {
-
-                }
-                else
-                {
-                    sCadenaCorreos = sCadenaCorreos + ";" + txtEmail2.Value.ToString();
-
-                }
-
-                if (string.IsNullOrEmpty(txtEmail3.Value.ToString()))
-                {
-
-                }
-                else
-                {
-                    sCadenaCorreos = sCadenaCorreos + ";" + txtEmail3.Value.ToString();
-
-                }
-
-                if (string.IsNullOrEmpty(txtEmail4.Value.ToString()))
-                {
-
-                }
-                else
-                {
-                    sCadenaCorreos = sCadenaCorreos + ";" + txtEmail4.Value.ToString();
-
-                }
-
-                if (string.IsNullOrEmpty(txtEmail5.Value.ToString()))
-                {
-
-                }
-                else
-                {
-                    sCadenaCorreos = sCadenaCorreos + ";" + txtEmail5.Value.ToString();
-
-                }
-                #endregion
+                DllFunciones.sendMessageBox(sboapp, ex.ToString());
             }
 
-            SendEmailResponse RespuestaEnvioCorreo = serviceClient.EnvioCorreo(Convert.ToString(oLlaveyPassword.Fields.Item("Llave").Value.ToString()), Convert.ToString(oLlaveyPassword.Fields.Item("Password").Value.ToString()), olblL1.Caption.ToString(), sCadenaCorreos, null);
 
-            if (RespuestaEnvioCorreo.codigo == 200)
-            {
-                DllFunciones.sendMessageBox(_sboapp, RespuestaEnvioCorreo.mensaje);
-            }
-            else
-            {
-                DllFunciones.sendMessageBox(_sboapp, RespuestaEnvioCorreo.mensaje);
-            }
-
-            #endregion
 
         }
 

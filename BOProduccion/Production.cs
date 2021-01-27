@@ -317,63 +317,63 @@ namespace BOProduccion
 
             #region Creacion de tablas
 
-            DllFunciones.ProgressBar(oCompany, sboapp, 16, 1, "Creando Tabla - Parametros Produccion Avanzada, por favor espere...");
+            DllFunciones.ProgressBar(oCompany, sboapp, 19, 1, "Creando Tabla - Parametros Produccion Avanzada, por favor espere...");
             DllFunciones.crearTabla(oCompany, sboapp, "BOPRODP", "BO-Param. Produc. Avan.", SAPbobsCOM.BoUTBTableType.bott_NoObject);
 
-            DllFunciones.ProgressBar(oCompany, sboapp, 16, 1, "Creando Tabla - BORTDC - BO Registro de tiempo detallado , por favor espere...");
+            DllFunciones.ProgressBar(oCompany, sboapp, 19, 1, "Creando Tabla - BORTDC - BO Registro de tiempo detallado , por favor espere...");
             DllFunciones.crearTabla(oCompany, sboapp, "BORTDC", "BO-Reg.Tiem.Deta.Ca", SAPbobsCOM.BoUTBTableType.bott_Document);
 
-            DllFunciones.ProgressBar(oCompany, sboapp, 16, 1, "Creando Tabla - BORTDD - BO Registro de tiempo detallado , por favor espere...");
+            DllFunciones.ProgressBar(oCompany, sboapp, 19, 1, "Creando Tabla - BORTDD - BO Registro de tiempo detallado , por favor espere...");
             DllFunciones.crearTabla(oCompany, sboapp, "BORTDD", "BO-Reg.Tiem.Deta.De", SAPbobsCOM.BoUTBTableType.bott_DocumentLines);
 
             #endregion
 
             #region Creacion de Campos
 
-            DllFunciones.ProgressBar(oCompany, sboapp, 16, 1, "Creando Campo - OWOR - Tipo de Orden ...");
+            DllFunciones.ProgressBar(oCompany, sboapp, 19, 1, "Creando Campo - OWOR - Tipo de Orden ...");
             string[] ValidValuesFields1 = { "T", "Prodcuto Terminado", "S", "Producto Semielaborado" };
             DllFunciones.CreaCamposUsr(oCompany, sboapp, BoFieldTypes.db_Alpha, BoFldSubTypes.st_None, 1, "", BoYesNoEnum.tNO, ValidValuesFields1, "OWOR", "BO_TO", "Tipo Orden");
 
-            DllFunciones.ProgressBar(oCompany, sboapp, 16, 1, "Creando Campo - OWOR - OP Principal.. ");
+            DllFunciones.ProgressBar(oCompany, sboapp, 19, 1, "Creando Campo - OWOR - OP Principal.. ");
             DllFunciones.CreaCamposUsr(oCompany, sboapp, BoFieldTypes.db_Alpha, BoFldSubTypes.st_None, 30, "", BoYesNoEnum.tNO, null, "OWOR", "BO_OPP", "OP Principal");
 
-            DllFunciones.ProgressBar(oCompany, sboapp, 16, 1, "Creando Campo - OWOR - Posicion Articulo.. ");
+            DllFunciones.ProgressBar(oCompany, sboapp, 19, 1, "Creando Campo - OWOR - Posicion Articulo.. ");
             DllFunciones.CreaCamposUsr(oCompany, sboapp, BoFieldTypes.db_Alpha, BoFldSubTypes.st_None, 30, "", BoYesNoEnum.tNO, null, "OWOR", "BO_PosId", "Posicion OP");
 
-            //DllFunciones.ProgressBar(oCompany, sboapp, 16, 1, "Creando Campo - WOR1 - Registro detallado de tiempo.. ");
+            //DllFunciones.ProgressBar(oCompany,sboapp, 19,  1, "Creando Campo - WOR1 - Registro detallado de tiempo.. ");
             //DllFunciones.CreaCamposUsr(oCompany, sboapp, BoFieldTypes.db_Alpha, BoFldSubTypes.st_None, 10, "", BoYesNoEnum.tNO, null, "WOR1", "BO_RTD", "Res. Tiem. Deta");
 
-            DllFunciones.ProgressBar(oCompany, sboapp, 16, 1, "Creando Campo - BOPRODP - Serie numeracion Produc. Terminado... ");
+            DllFunciones.ProgressBar(oCompany, sboapp, 19, 1, "Creando Campo - BOPRODP - Serie numeracion Produc. Terminado... ");
             DllFunciones.CreaCamposUsr(oCompany, sboapp, BoFieldTypes.db_Alpha, BoFldSubTypes.st_None, 30, "", BoYesNoEnum.tNO, null, "@BOPRODP", "BO_SNPT", "Ser.Num.PP");
 
-            DllFunciones.ProgressBar(oCompany, sboapp, 16, 1, "Creando Campo - BOPRODP - Serie numeracion Produc. Semielaborado... ");
+            DllFunciones.ProgressBar(oCompany, sboapp, 19, 1, "Creando Campo - BOPRODP - Serie numeracion Produc. Semielaborado... ");
             DllFunciones.CreaCamposUsr(oCompany, sboapp, BoFieldTypes.db_Alpha, BoFldSubTypes.st_None, 30, "", BoYesNoEnum.tNO, null, "@BOPRODP", "BO_SNPS", "Ser.Num.PS");
 
-            DllFunciones.ProgressBar(oCompany, sboapp, 16, 1, "Creando Campo - BOPRODP - Ruta Imagenes ... ");
+            DllFunciones.ProgressBar(oCompany, sboapp, 19, 1, "Creando Campo - BOPRODP - Ruta Imagenes ... ");
             DllFunciones.CreaCamposUsr(oCompany, sboapp, BoFieldTypes.db_Alpha, BoFldSubTypes.st_None, 254, "", BoYesNoEnum.tNO, null, "@BOPRODP", "BO_RIMG", "Ruta Imagenes");
 
-            DllFunciones.ProgressBar(oCompany, sboapp, 16, 1, "Creando Campo - BORTDD - Persona  ... ");
+            DllFunciones.ProgressBar(oCompany, sboapp, 19, 1, "Creando Campo - BORTDD - Persona  ... ");
             DllFunciones.CreaCamposUsr(oCompany, sboapp, BoFieldTypes.db_Alpha, BoFldSubTypes.st_None, 100, "", BoYesNoEnum.tNO, null, "@BORTDD", "BO_P", "Persona");
 
-            DllFunciones.ProgressBar(oCompany, sboapp, 16, 1, "Creando Campo - BORTDD - Nombre Persona  ... ");
+            DllFunciones.ProgressBar(oCompany, sboapp, 19, 1, "Creando Campo - BORTDD - Nombre Persona  ... ");
             DllFunciones.CreaCamposUsr(oCompany, sboapp, BoFieldTypes.db_Alpha, BoFldSubTypes.st_None, 254, "", BoYesNoEnum.tNO, null, "@BORTDD", "BO_NP", "Nombre Persona");
 
-            DllFunciones.ProgressBar(oCompany, sboapp, 16, 1, "Creando Campo - BORTDD - Fecha Registro... ");
+            DllFunciones.ProgressBar(oCompany, sboapp, 19, 1, "Creando Campo - BORTDD - Fecha Registro... ");
             DllFunciones.CreaCamposUsr(oCompany, sboapp, BoFieldTypes.db_Date, BoFldSubTypes.st_None, 254, "", BoYesNoEnum.tNO, null, "@BORTDD", "BO_FR", "Fecha Registro");
 
-            DllFunciones.ProgressBar(oCompany, sboapp, 16, 1, "Creando Campo - BORTDD - Hora desde ... ");
+            DllFunciones.ProgressBar(oCompany, sboapp, 19, 1, "Creando Campo - BORTDD - Hora desde ... ");
             DllFunciones.CreaCamposUsr(oCompany, sboapp, BoFieldTypes.db_Date, BoFldSubTypes.st_Time, 254, "", BoYesNoEnum.tNO, null, "@BORTDD", "BO_TI", "Hora desde");
 
-            DllFunciones.ProgressBar(oCompany, sboapp, 16, 1, "Creando Campo - BORTDD - Hora Hasta ... ");
+            DllFunciones.ProgressBar(oCompany, sboapp, 19, 1, "Creando Campo - BORTDD - Hora Hasta ... ");
             DllFunciones.CreaCamposUsr(oCompany, sboapp, BoFieldTypes.db_Date, BoFldSubTypes.st_Time, 254, "", BoYesNoEnum.tNO, null, "@BORTDD", "BO_TF", "Hora hasta");
 
-            DllFunciones.ProgressBar(oCompany, sboapp, 16, 1, "Creando Campo - BONOPD - Codigo Articulo ... ");
+            DllFunciones.ProgressBar(oCompany, sboapp, 19, 1, "Creando Campo - BONOPD - Codigo Articulo ... ");
             DllFunciones.CreaCamposUsr(oCompany, sboapp, BoFieldTypes.db_Date, BoFldSubTypes.st_Time, 254, "", BoYesNoEnum.tNO, null, "@BONOPD", "BO_ItemCode", "Codigo articulo");
 
-            DllFunciones.ProgressBar(oCompany, sboapp, 16, 1, "Creando Campo - BONOPD - Descripción ... ");
+            DllFunciones.ProgressBar(oCompany, sboapp, 19, 1, "Creando Campo - BONOPD - Descripción ... ");
             DllFunciones.CreaCamposUsr(oCompany, sboapp, BoFieldTypes.db_Date, BoFldSubTypes.st_Time, 254, "", BoYesNoEnum.tNO, null, "@BONOPD", "BO_Description", "Descripcion");
 
-            DllFunciones.ProgressBar(oCompany, sboapp, 16, 1, "Creando Campo - BONOPD - Cantidad ... ");
+            DllFunciones.ProgressBar(oCompany, sboapp, 19, 1, "Creando Campo - BONOPD - Cantidad ... ");
             DllFunciones.CreaCamposUsr(oCompany, sboapp, BoFieldTypes.db_Date, BoFldSubTypes.st_Time, 254, "", BoYesNoEnum.tNO, null, "@BONOPD", "BO_Quantity", "Cantidad");
 
 
@@ -382,7 +382,7 @@ namespace BOProduccion
 
             #region Creacion de UDOS 
 
-            DllFunciones.ProgressBar(oCompany, sboapp, 16, 1, "Creando UDO - Registro de tiempo detallado..");
+            DllFunciones.ProgressBar(oCompany, sboapp, 19, 1, "Creando UDO - Registro de tiempo detallado..");
             string[] TablaseBilling = { "BORTDC", "BORTDD" };
             DllFunciones.CrearUDO(oCompany, sboapp, "BORTD", "BO Registro Tiempos", BoUDOObjType.boud_Document, TablaseBilling, BoYesNoEnum.tNO, BoYesNoEnum.tYES, null, BoYesNoEnum.tNO, BoYesNoEnum.tNO, BoYesNoEnum.tNO, BoYesNoEnum.tNO, BoYesNoEnum.tNO, BoYesNoEnum.tNO, BoYesNoEnum.tNO, BoYesNoEnum.tNO, 0, 1, BoYesNoEnum.tYES, "BO_BORTD_Log");
 
@@ -390,7 +390,7 @@ namespace BOProduccion
 
             #region Creacion de procedimientos almacenados
 
-            DllFunciones.ProgressBar(oCompany, sboapp, 16, 1, "Creando Procedimientos almacenados , por favor espere...");
+            DllFunciones.ProgressBar(oCompany, sboapp, 19, 1, "Creando Procedimientos almacenados , por favor espere...");
             SAPbobsCOM.Recordset oProcedures = (SAPbobsCOM.Recordset)oCompany.GetBusinessObject(SAPbobsCOM.BoObjectTypes.BoRecordset);
 
             #region Consulta si el procedure Existe
