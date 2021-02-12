@@ -1,111 +1,112 @@
 ﻿<?xml version="1.0" encoding="utf-8" ?>
 <Queries>
-  
+
   <GetLastRecord>
     SELECT (IFNULL(MAX("DocEntry"),0))+1 AS "Code" FROM "%sNameDB%"."@BOEBILLINGP"
   </GetLastRecord>
 
   <GetInvoices>
     SELECT ROW_NUMBER() OVER(ORDER BY A."DocNum" ASC) AS "#",
-          CASE A."U_BO_S" WHEN '0' THEN 'A la espera'
-          WHEN '1' THEN 'Aceptada'
-          WHEN '2' THEN 'Rechaza'
-          WHEN '3' THEN 'En validación'
-          ELSE 'A la espera' END AS "Estado",
-          A."DocNum" AS "No_Factura",
-          A."CardCode" AS "Codigo_cliente",
-          A."CardName" AS "Nombre_cliente",
-          A."DocDate" AS "Fecha_Documento",
-          A."DocDueDate" AS "Fecha_vencimiento",
-          		  CASE WHEN A."U_BO_EE" = 'Y' THEN 'SI'
-			   WHEN A."U_BO_EE" = 'N' THEN 'NO'
-			   ELSE '' END  AS 'Email_Enviado',
-		   B."U_BO_Email1" AS 'Correo1',
-		   B."U_BO_Email2" AS 'Correo2',
-		   B."U_BO_Email3" AS 'Correo3',
-		   B."U_BO_Email4" AS 'Correo4',
-		   B."U_BO_Email5" AS 'Correo5',
-          A."DocTotal" AS "Total_documento",
-          CASE WHEN A."U_BO_MRWS" IS NULL THEN 'No Enviado'
-               ELSE A."U_BO_MRWS" END AS "Respuesta_TFHKA",
-          A."DocEntry" AS "DocEntry"
+    CASE A."U_BO_S" WHEN '0' THEN 'A la espera'
+    WHEN '1' THEN 'Aceptada'
+    WHEN '2' THEN 'Rechaza'
+    WHEN '3' THEN 'En validación'
+    ELSE 'A la espera' END AS "Estado",
+    A."DocNum" AS "No_Factura",
+    A."CardCode" AS "Codigo_cliente",
+    A."CardName" AS "Nombre_cliente",
+    A."DocDate" AS "Fecha_Documento",
+    A."DocDueDate" AS "Fecha_vencimiento",
+    CASE WHEN A."U_BO_EE" = 'Y' THEN 'SI'
+    WHEN A."U_BO_EE" = 'N' THEN 'NO'
+    ELSE '' END  AS "Enviar_Email",
+    CASE WHEN B."U_BO_StatusEmail" = '200' THEN 'Enviado' ELSE 'Pendiente' END AS "Estado_Correo",
+    B."U_BO_Email1" AS "Correo1",
+    B."U_BO_Email2" AS "Correo2",
+    B."U_BO_Email3" AS "Correo3",
+    B."U_BO_Email4" AS "Correo4",
+    B."U_BO_Email5" AS "Correo5",
+    A."DocTotal" AS "Total_documento",
+    CASE WHEN A."U_BO_MRWS" IS NULL THEN 'No Enviado'
+    ELSE A."U_BO_MRWS" END AS "Respuesta_TFHKA",
+    A."DocEntry" AS "DocEntry"
     FROM "%sNameDB%"."OINV" A LEFT JOIN "%sNameDB%"."@BOEE" B ON A."DocEntry"=B."U_BO_DocEntry" AND B."U_BO_ObjecType" = '13'
-    WHERE "DocDate" BETWEEN '%FI%' AND '%FF%' 
-    %EstadoDocumento% 
-    AND "Series" IN (SELECT "U_BO_SN" FROM "%sNameDB%"."@BOSERNUM" WHERE "U_BO_TD" = 'FVC') 
+    WHERE "DocDate" BETWEEN '%FI%' AND '%FF%'
+    %EstadoDocumento%
+    AND "Series" IN (SELECT "U_BO_SN" FROM "%sNameDB%"."@BOSERNUM" WHERE "U_BO_TD" = 'FVC')
     AND "DocSubType"= '--'
-    ***SN*** 
+    ***SN***
     ***DocNum***
   </GetInvoices>
 
   <GetCreditMemo>
     SELECT ROW_NUMBER() OVER(ORDER BY A."DocNum" ASC) AS "#",
-          CASE A."U_BO_S" WHEN '0' THEN 'A la espera'
-          WHEN '1' THEN 'Aceptada'
-          WHEN '2' THEN 'Rechaza'
-          WHEN '3' THEN 'En validación'
-          ELSE 'A la espera' END AS "Estado",
-          A."DocNum" AS "No_Factura",
-          A."CardCode" AS "Codigo_cliente",
-          A."CardName" AS "Nombre_cliente",
-          A."DocDate" AS "Fecha_Documento",
-          A."DocDueDate" AS "Fecha_vencimiento",
-          		  
-                CASE WHEN A."U_BO_EE" = 'Y' THEN 'SI'
-			   WHEN A."U_BO_EE" = 'N' THEN 'NO'
-			   ELSE '' END  AS 'Email_Enviado',
-		  
-		  B."U_BO_Email1" AS 'Correo1',
-		  B."U_BO_Email2" AS 'Correo2',
-		  B."U_BO_Email3" AS 'Correo3',
-		  B."U_BO_Email4" AS 'Correo4',
-		  B."U_BO_Email5" AS 'Correo5',
-          
-          A."DocTotal" AS "Total_documento",
-          CASE WHEN A."U_BO_MRWS" IS NULL THEN 'No Enviado'
-               ELSE A."U_BO_MRWS" END AS "Respuesta_TFHKA",
-          A."DocEntry" AS "DocEntry"
+    CASE A."U_BO_S" WHEN '0' THEN 'A la espera'
+    WHEN '1' THEN 'Aceptada'
+    WHEN '2' THEN 'Rechaza'
+    WHEN '3' THEN 'En validación'
+    ELSE 'A la espera' END AS "Estado",
+    A."DocNum" AS "No_Factura",
+    A."CardCode" AS "Codigo_cliente",
+    A."CardName" AS "Nombre_cliente",
+    A."DocDate" AS "Fecha_Documento",
+    A."DocDueDate" AS "Fecha_vencimiento",
+
+    CASE WHEN A."U_BO_EE" = 'Y' THEN 'SI'
+    WHEN A."U_BO_EE" = 'N' THEN 'NO'
+    ELSE '' END  AS "Enviar_Email",
+    CASE WHEN B."U_BO_StatusEmail" = '200' THEN 'Enviado' ELSE 'Pendiente' END AS "Estado_Correo",
+    B."U_BO_Email1" AS "Correo1",
+    B."U_BO_Email2" AS "Correo2",
+    B."U_BO_Email3" AS "Correo3",
+    B."U_BO_Email4" AS "Correo4",
+    B."U_BO_Email5" AS "Correo5",
+
+    A."DocTotal" AS "Total_documento",
+    CASE WHEN A."U_BO_MRWS" IS NULL THEN 'No Enviado'
+    ELSE A."U_BO_MRWS" END AS "Respuesta_TFHKA",
+    A."DocEntry" AS "DocEntry"
     FROM "%sNameDB%"."ORIN" A LEFT JOIN "%sNameDB%"."@BOEE" B ON A."DocEntry"=B."U_BO_DocEntry" AND B."U_BO_ObjecType" = '14'
-    WHERE "DocDate" BETWEEN '%FI%' 
-    AND '%FF%' 
-    %EstadoDocumento% 
+    WHERE "DocDate" BETWEEN '%FI%'
+    AND '%FF%'
+    %EstadoDocumento%
     AND "Series" IN (SELECT "U_BO_SN" FROM "%sNameDB%"."@BOSERNUM" WHERE "U_BO_TD" = 'NCC')
-    ***SN*** 
+    ***SN***
     ***DocNum***
   </GetCreditMemo>
 
   <GetDebitMemo>
     SELECT ROW_NUMBER() OVER(ORDER BY A."DocNum" ASC) AS "#",
-          CASE A."U_BO_S" WHEN '0' THEN 'A la espera'
-          WHEN '1' THEN 'Aceptada'
-          WHEN '2' THEN 'Rechaza'
-          WHEN '3' THEN 'En validación'
-          ELSE 'A la espera' END AS "Estado",
-          A."DocNum" AS "No_Factura",
-          A."CardCode" AS "Codigo_cliente",
-          A."CardName" AS "Nombre_cliente",
-          A."DocDate" AS "Fecha_Documento",
-          A."DocDueDate" AS "Fecha_vencimiento",
-                          CASE WHEN A."U_BO_EE" = 'Y' THEN 'SI'
-			   WHEN A."U_BO_EE" = 'N' THEN 'NO'
-			   ELSE '' END  AS 'Email_Enviado',
-		  
-		  B."U_BO_Email1" AS 'Correo1',
-		  B."U_BO_Email1" AS 'Correo2',
-		  B."U_BO_Email1" AS 'Correo3',
-		  B."U_BO_Email1" AS 'Correo4',
-		  B."U_BO_Email1" AS 'Correo5',
-          
-          A."DocTotal" AS "Total_documento",
-          CASE WHEN A."U_BO_MRWS" IS NULL THEN 'No Enviado'
-               ELSE A."U_BO_MRWS" END AS "Respuesta_TFHKA",
-          A."DocEntry" AS "DocEntry"
+    CASE A."U_BO_S" WHEN '0' THEN 'A la espera'
+    WHEN '1' THEN 'Aceptada'
+    WHEN '2' THEN 'Rechaza'
+    WHEN '3' THEN 'En validación'
+    ELSE 'A la espera' END AS "Estado",
+    A."DocNum" AS "No_Factura",
+    A."CardCode" AS "Codigo_cliente",
+    A."CardName" AS "Nombre_cliente",
+    A."DocDate" AS "Fecha_Documento",
+    A."DocDueDate" AS "Fecha_vencimiento",
+    CASE WHEN A."U_BO_EE" = 'Y' THEN 'SI'
+    WHEN A."U_BO_EE" = 'N' THEN 'NO'
+    ELSE '' END  AS "Enviar_Email",
+    CASE WHEN B."U_BO_StatusEmail" = '200' THEN 'Enviado' ELSE 'Pendiente' END AS "Estado_Correo",
+    B."U_BO_Email1" AS "Correo1",
+    B."U_BO_Email1" AS "Correo2",
+    B."U_BO_Email1" AS "Correo3",
+    B."U_BO_Email1" AS "Correo4",
+    B."U_BO_Email1" AS "Correo5",
+
+    A."DocTotal" AS "Total_documento",
+    CASE WHEN A."U_BO_MRWS" IS NULL THEN 'No Enviado'
+    ELSE A."U_BO_MRWS" END AS "Respuesta_TFHKA",
+    A."DocEntry" AS "DocEntry"
     FROM "%sNameDB%"."OINV" A LEFT JOIN "%sNameDB%"."@BOEE" B ON A."DocEntry"=B."U_BO_DocEntry" AND B."U_BO_ObjecType" = '13'
-    WHERE "DocDate" BETWEEN '%FI%' AND '%FF%' 
-    %EstadoDocumento% 
+    WHERE "DocDate" BETWEEN '%FI%' AND '%FF%'
+    %EstadoDocumento%
     AND "Series" IN (SELECT "U_BO_SN" FROM "%sNameDB%"."@BOSERNUM" WHERE "U_BO_TD" = 'NDC')
     AND "DocSubType"= 'DN'
-    ***SN*** 
+    ***SN***
     ***DocNum***
   </GetDebitMemo>
 
@@ -125,7 +126,7 @@
   </GetSeriesNumberDebitMemo>
 
   <GetSeriesNumberActive>
-    SELECT (SELECT TOP 1 "U_BO_SN" FROM "%sNameDB%"."@BOSERNUM" WHERE "U_BO_TD" = 'FVC') AS "FVC", (SELECT TOP 1 "U_BO_SN" FROM "%sNameDB%"."@BOSERNUM" WHERE "U_BO_TD" = 'NCC') AS "NCC" , (SELECT TOP 1 "U_BO_SN" FROM "%sNameDB%"."@BOSERNUM" WHERE "U_BO_TD" = 'NDC') AS "NDC" FROM DUMMY ; 
+    SELECT (SELECT TOP 1 "U_BO_SN" FROM "%sNameDB%"."@BOSERNUM" WHERE "U_BO_TD" = 'FVC') AS "FVC", (SELECT TOP 1 "U_BO_SN" FROM "%sNameDB%"."@BOSERNUM" WHERE "U_BO_TD" = 'NCC') AS "NCC" , (SELECT TOP 1 "U_BO_SN" FROM "%sNameDB%"."@BOSERNUM" WHERE "U_BO_TD" = 'NDC') AS "NDC" FROM DUMMY ;
   </GetSeriesNumberActive>
 
   <GetTiposOperacion>
@@ -215,44 +216,44 @@
   <GetDocEntryAndParameters>
 
     SELECT TOP 1 T0."DocEntry",
-    	     T0."Series",
-		       (SELECT TOP 1 "U_BO_L" FROM "%sNameDB%"."@BOEBILLINGP") AS "Localizacion",
-		       T0."U_BO_CRWS" AS "CRWS",
-		       IFNULL((SELECT TOP 1 "U_BO_FormE" FROM "%sNameDB%"."@BOEBILLINGP"),0) AS "FormaEnvio",
-		       (SELECT TOP 1 "U_BO_LlE" FROM "%sNameDB%"."@BOEBILLINGP" WHERE "U_BO_Status" = 'Y') AS "Llave",
-		       (SELECT TOP 1 "U_BO_PwdE" FROM "%sNameDB%"."@BOEBILLINGP"  WHERE "U_BO_Status" = 'Y') AS "Password",
-		       (SELECT TOP 1 "U_BO_UserDB" FROM "%sNameDB%"."@BOEBILLINGP") AS "UserDB",
-		       (SELECT TOP 1 "U_BO_PassDB" FROM "%sNameDB%"."@BOEBILLINGP") AS "PassDB",
-		       (SELECT TOP 1 A."U_BO_RutaPDF" FROM "%sNameDB%"."@BOEBILLINGP" A) AS "RutaPDF",
-		       (SELECT TOP 1 A."U_BO_RutaXML" FROM "%sNameDB%"."@BOEBILLINGP" A) AS "RutaXML",
-		       (SELECT TOP 1 A."U_BO_RutaCRL" FROM "%sNameDB%"."@BOEBILLINGP" A) AS "RutaCR",
-		       (SELECT TOP 1 COALESCE(A."U_BO_GXP",'N') FROM "%sNameDB%"."@BOEBILLINGP" A) AS "GeneraXMLP",
-           T1."U_BO_PREF" AS "PrefijoDes"
+    T0."Series",
+    (SELECT TOP 1 "U_BO_L" FROM "%sNameDB%"."@BOEBILLINGP") AS "Localizacion",
+    T0."U_BO_CRWS" AS "CRWS",
+    IFNULL((SELECT TOP 1 "U_BO_FormE" FROM "%sNameDB%"."@BOEBILLINGP"),0) AS "FormaEnvio",
+    (SELECT TOP 1 "U_BO_LlE" FROM "%sNameDB%"."@BOEBILLINGP" WHERE "U_BO_Status" = 'Y') AS "Llave",
+    (SELECT TOP 1 "U_BO_PwdE" FROM "%sNameDB%"."@BOEBILLINGP"  WHERE "U_BO_Status" = 'Y') AS "Password",
+    (SELECT TOP 1 "U_BO_UserDB" FROM "%sNameDB%"."@BOEBILLINGP") AS "UserDB",
+    (SELECT TOP 1 "U_BO_PassDB" FROM "%sNameDB%"."@BOEBILLINGP") AS "PassDB",
+    (SELECT TOP 1 A."U_BO_RutaPDF" FROM "%sNameDB%"."@BOEBILLINGP" A) AS "RutaPDF",
+    (SELECT TOP 1 A."U_BO_RutaXML" FROM "%sNameDB%"."@BOEBILLINGP" A) AS "RutaXML",
+    (SELECT TOP 1 A."U_BO_RutaCRL" FROM "%sNameDB%"."@BOEBILLINGP" A) AS "RutaCR",
+    (SELECT TOP 1 COALESCE(A."U_BO_GXP",'N') FROM "%sNameDB%"."@BOEBILLINGP" A) AS "GeneraXMLP",
+    T1."U_BO_PREF" AS "PrefijoDes"
     FROM "%sNameDB%"."%Tabla%" T0 LEFT JOIN "%sNameDB%"."@BOSERNUM" T1 ON T0."Series"=T1."Code"
     WHERE T0."DocNum" = '%sDocNumInvoice%' AND T0."Series" = '%sSerieNumeracion%' AND T0."DocSubType" = '%DocSubType%'
 
   </GetDocEntryAndParameters>
-  
-      <GetDocEntryAndParametersService>
-      
-      SELECT TOP 1 T0."DocEntry",
-              T0."DocNum",
-			        T0."Series",
-			        (SELECT TOP 1 "U_BO_L" FROM "%sNameDB%"."@BOEBILLINGP") AS "Localizacion",
-			        T0."U_BO_CRWS" AS "CRWS",
-			        COALESCE((SELECT TOP 1 "U_BO_FormE" FROM "%sNameDB%"."@BOEBILLINGP"),0) AS "FormaEnvio",
-			        (SELECT TOP 1 "U_BO_LlE" FROM "%sNameDB%"."@BOEBILLINGP" WHERE U_BO_Status = 'Y') AS "Llave",
-			        (SELECT TOP 1 "U_BO_PwdE" FROM "%sNameDB%"."@BOEBILLINGP" WHERE U_BO_Status = 'Y') AS "Password",
-			        (SELECT TOP 1 "U_BO_UserDB" FROM "%sNameDB%"."@BOEBILLINGP") AS "UserDB",
-			        (SELECT TOP 1 "U_BO_PassDB" FROM "%sNameDB%"."@BOEBILLINGP") AS "PassDB",
-			        (SELECT TOP 1 A."U_BO_RutaPDF" FROM "%sNameDB%"."@BOEBILLINGP" A) AS "RutaPDF",
-			        (SELECT TOP 1 "U_BO_RutaXML" FROM "%sNameDB%"."@BOEBILLINGP") AS "RutaXML",
-			        (SELECT TOP 1 A."U_BO_RutaCRL" FROM "%sNameDB%"."@BOEBILLINGP" A) AS "RutaCR",
-			        (SELECT TOP 1 A."U_BO_GXP" FROM "%sNameDB%"."@BOEBILLINGP" A) AS "GeneraXMLP",
-			        T1."U_BO_PREF" AS "PrefijoDes"
+
+  <GetDocEntryAndParametersService>
+
+    SELECT TOP 1 T0."DocEntry",
+    T0."DocNum",
+    T0."Series",
+    (SELECT TOP 1 "U_BO_L" FROM "%sNameDB%"."@BOEBILLINGP") AS "Localizacion",
+    T0."U_BO_CRWS" AS "CRWS",
+    COALESCE((SELECT TOP 1 "U_BO_FormE" FROM "%sNameDB%"."@BOEBILLINGP"),0) AS "FormaEnvio",
+    (SELECT TOP 1 "U_BO_LlE" FROM "%sNameDB%"."@BOEBILLINGP" WHERE U_BO_Status = 'Y') AS "Llave",
+    (SELECT TOP 1 "U_BO_PwdE" FROM "%sNameDB%"."@BOEBILLINGP" WHERE U_BO_Status = 'Y') AS "Password",
+    (SELECT TOP 1 "U_BO_UserDB" FROM "%sNameDB%"."@BOEBILLINGP") AS "UserDB",
+    (SELECT TOP 1 "U_BO_PassDB" FROM "%sNameDB%"."@BOEBILLINGP") AS "PassDB",
+    (SELECT TOP 1 A."U_BO_RutaPDF" FROM "%sNameDB%"."@BOEBILLINGP" A) AS "RutaPDF",
+    (SELECT TOP 1 "U_BO_RutaXML" FROM "%sNameDB%"."@BOEBILLINGP") AS "RutaXML",
+    (SELECT TOP 1 A."U_BO_RutaCRL" FROM "%sNameDB%"."@BOEBILLINGP" A) AS "RutaCR",
+    (SELECT TOP 1 A."U_BO_GXP" FROM "%sNameDB%"."@BOEBILLINGP" A) AS "GeneraXMLP",
+    T1."U_BO_PREF" AS "PrefijoDes"
 
     FROM "%sNameDB%"."%Tabla%" T0 LEFT JOIN "%sNameDB%"."@BOSERNUM" T1 ON T0."Series"=T1."Code"
-    WHERE T0."DocEntry" = '%sDocEntry%' 
+    WHERE T0."DocEntry" = '%sDocEntry%'
 
   </GetDocEntryAndParametersService>
 
@@ -272,31 +273,31 @@
   </GetSearchRuta>
 
   <GetRPTDoc>
-    
+
     SELECT T0."CODE" AS "TipoDoc",
-           T0."DEFLT_REP" AS "ID_Layout",
-           T1."DocName" AS "NombreFormato",
-		       (SELECT TOP 1 A."U_BO_RutaCRL" FROM "%sNameDB%"."@BOEBILLINGP" A) AS "RutaCRL"
+    T0."DEFLT_REP" AS "ID_Layout",
+    T1."DocName" AS "NombreFormato",
+    (SELECT TOP 1 A."U_BO_RutaCRL" FROM "%sNameDB%"."@BOEBILLINGP" A) AS "RutaCRL"
     FROM "%sNameDB%"."RTYP" T0 LEFT JOIN "%sNameDB%"."RDOC" T1 ON T0."DEFLT_REP"="DocCode"
-    WHERE T0."CODE" = '%TypeDoc%'  
-  
+    WHERE T0."CODE" = '%TypeDoc%'
+
   </GetRPTDoc>
-  
+
   <GetRPTDocUser>
-	  SELECT TOP 1 "DoumntDode" AS "TipoDoc", 
-			         T0."DfltReport" AS "ID_Layout",
-				       T1."DocName" AS "NombreFormato",
-				       (SELECT TOP 1 A."U_BO_RutaCRL" FROM "%sNameDB%"."@BOEBILLINGP" A) AS "RutaPDFyXML"
-	  FROM "%sNameDB%"."RDFL" T0 INNER JOIN "%sNameDB%"."RDOC" T1 ON T0."DfltReport" =  T1."DocCode"
-	  WHERE "DoumntDode" = '%TypeDoc%' AND T0."UserId" = '%UserId%'
+    SELECT TOP 1 "DoumntDode" AS "TipoDoc",
+    T0."DfltReport" AS "ID_Layout",
+    T1."DocName" AS "NombreFormato",
+    (SELECT TOP 1 A."U_BO_RutaCRL" FROM "%sNameDB%"."@BOEBILLINGP" A) AS "RutaPDFyXML"
+    FROM "%sNameDB%"."RDFL" T0 INNER JOIN "%sNameDB%"."RDOC" T1 ON T0."DfltReport" =  T1."DocCode"
+    WHERE "DoumntDode" = '%TypeDoc%' AND T0."UserId" = '%UserId%'
   </GetRPTDocUser>
 
   <GetCUFEInvoice>
-   SELECT TOP 1 T0."U_BO_CUFE" AS "CUFE", 	    
-    	  CASE WHEN (SELECT TOP 1 "U_BO_Pref" FROM "%sNameDB%"."@BOEBILLINGP") = 'Y' THEN (T2."BeginStr"||CAST(T0."DocNum" AS NVARCHAR(20)))
-    		   ELSE CAST(T0."DocNum" AS NVARCHAR(20))END 
-    		   AS "consecutivoDocumento",		
-    	  TO_VARCHAR(T0."DocDate", 'YYYY-MM-DD') AS "fechaEmision"
+    SELECT TOP 1 T0."U_BO_CUFE" AS "CUFE",
+    CASE WHEN (SELECT TOP 1 "U_BO_Pref" FROM "%sNameDB%"."@BOEBILLINGP") = 'Y' THEN (T2."BeginStr"||CAST(T0."DocNum" AS NVARCHAR(20)))
+    ELSE CAST(T0."DocNum" AS NVARCHAR(20))END
+    AS "consecutivoDocumento",
+    TO_VARCHAR(T0."DocDate", 'YYYY-MM-DD') AS "fechaEmision"
 
     FROM "%sNameDB%"."OINV" T0 LEFT JOIN "%sNameDB%"."NNM1" T2 ON T0."Series"=T2."Series" AND T2."ObjectCode" = '13'
 
@@ -305,30 +306,30 @@
 
   <GetCUFEDebitNote>
     SELECT TOP 1 T0."U_BO_CUFE" AS "CUFE",
-		   
-		        CASE WHEN (SELECT TOP 1 "U_BO_Pref" FROM "%sNameDB%"."@BOEBILLINGP") = 'Y' THEN (T2."U_BO_PREF"||CAST(T0."DocNum" AS NVARCHAR(20)))
-		        ELSE CAST(T0."DocNum" AS NVARCHAR(20))END
-			      AS "consecutivoDocumento",
 
-		        TO_VARCHAR(T0."DocDate", 'YYYY-MM-DD') AS "fechaEmision"
+    CASE WHEN (SELECT TOP 1 "U_BO_Pref" FROM "%sNameDB%"."@BOEBILLINGP") = 'Y' THEN (T2."U_BO_PREF"||CAST(T0."DocNum" AS NVARCHAR(20)))
+    ELSE CAST(T0."DocNum" AS NVARCHAR(20))END
+    AS "consecutivoDocumento",
 
-	  FROM "%sNameDB%"."OINV" T0 LEFT JOIN "%sNameDB%"."@BOSERNUM" T2 ON T0."Series"=T2."Code"
+    TO_VARCHAR(T0."DocDate", 'YYYY-MM-DD') AS "fechaEmision"
+
+    FROM "%sNameDB%"."OINV" T0 LEFT JOIN "%sNameDB%"."@BOSERNUM" T2 ON T0."Series"=T2."Code"
     WHERE T0."DocNum" = '%DocNum%' AND "DocSubType" = '--'
-    
+
   </GetCUFEDebitNote>
 
   <GetInvoiceandPrefijo>
     SELECT TOP 1 CONCAT(T1."BeginStr",CAST(T0."DocNum" AS NVARCHAR(20))) AS "PrefWithDoc",
-       (SELECT TOP 1 "U_BO_LlE" FROM "%sNameDB%"."@BOEBILLINGP") AS "TokenEmpresa",
-       (SELECT TOP 1 "U_BO_PwdE" FROM "%sNameDB%"."@BOEBILLINGP") AS "TokenPassword"
+    (SELECT TOP 1 "U_BO_LlE" FROM "%sNameDB%"."@BOEBILLINGP") AS "TokenEmpresa",
+    (SELECT TOP 1 "U_BO_PwdE" FROM "%sNameDB%"."@BOEBILLINGP") AS "TokenPassword"
     FROM "%sNameDB%"."OINV" T0 LEFT JOIN "%sNameDB%"."NNM1" T1 ON T0."Series"=T1."Series" AND T1."ObjectCode" = '13'
     WHERE T0."DocNum" = '%NoDoc%' AND T0."DocSubType" != 'DN'
   </GetInvoiceandPrefijo>
 
   <GetModoandURL>
     SELECT TOP 1 CASE WHEN "U_BO_Mdo" = 'PRU' THEN "U_BO_URLWSPRU"
-			 ELSE "U_BO_URLWSPRD" END AS "URLTFHKA",
-			 "U_BO_Mdo" AS "Modo"
+    ELSE "U_BO_URLWSPRD" END AS "URLTFHKA",
+    "U_BO_Mdo" AS "Modo"
     FROM "%sNameDB%"."@BOEBILLINGP"
     WHERE %Estado% %DocEntry%
   </GetModoandURL>
@@ -347,10 +348,10 @@
   </GetActiveConfig>
 
   <DecimalQuantity>
-    SELECT CASE B."Decimals" WHEN '-1' THEN (SELECT TOP 1 "QueryDec" FROM "%sNameDB%"."OADM") 
-           ELSE B."Decimals" END AS "CantidadDecimales"
-    FROM "%sNameDB%"."OCRN" B 
-    WHERE B."CurrCode" = (SELECT "MainCurncy" FROM "%sNameDB%"."OADM") 
+    SELECT CASE B."Decimals" WHEN '-1' THEN (SELECT TOP 1 "QueryDec" FROM "%sNameDB%"."OADM")
+    ELSE B."Decimals" END AS "CantidadDecimales"
+    FROM "%sNameDB%"."OCRN" B
+    WHERE B."CurrCode" = (SELECT "MainCurncy" FROM "%sNameDB%"."OADM")
   </DecimalQuantity>
 
   <CountsEmails>
@@ -364,4 +365,19 @@
   <SerachNextCode>
     SELECT CAST(RIGHT('0000000000' || Ltrim(Rtrim(COUNT("Code")+1)),10) AS NVARCHAR(100)) AS "ID"  FROM "%sNameDB%"."@BOEE"
   </SerachNextCode>
+
+  <GetPrefijoSeries>
+    SELECT "U_BO_PREF" AS "Prefijo"
+    FROM "%sNameDB%"."@BOSERNUM"
+    WHERE "Code" = '%Code%'
+  </GetPrefijoSeries>
+
+  <GetLlaveAndPassword>
+
+    SELECT (SELECT TOP 1 "U_BO_LlE" FROM "%sNameDB%"."@BOEBILLINGP" WHERE "U_BO_Status" = 'Y') AS "Llave",
+    (SELECT TOP 1 "U_BO_PwdE" FROM "%sNameDB%"."@BOEBILLINGP" WHERE "U_BO_Status" = 'Y') AS "Password"
+    FROM DUMMY
+
+  </GetLlaveAndPassword>
+
 </Queries>

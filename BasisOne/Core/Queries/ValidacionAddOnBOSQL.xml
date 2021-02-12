@@ -36,4 +36,11 @@
   <AddInsActive>
     SELECT Code FROM [@BOADMINADDON] WHERE  "U_Status" ='A'
   </AddInsActive>
+
+  <GetSepartorDecimal>
+    
+    SELECT "DecSep","ThousSep" FROM OADM 
+  
+  </GetSepartorDecimal>
+
 </Queries>

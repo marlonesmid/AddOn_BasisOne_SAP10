@@ -1564,5 +1564,31 @@ namespace Funciones
             }
             r.Close();
         }
+
+        public string GetSeparatorMachine()
+        {
+            string SeparatorMachine = System.Globalization.CultureInfo.CurrentCulture.NumberFormat.CurrencyDecimalSeparator;
+
+            return SeparatorMachine;
+
+        }
+
+        public string GetSeparatorSAP(SAPbobsCOM.Company _oCompany)
+        {
+            string sSeparador = GetStringXMLDocument(_oCompany, "Core", "ValidacionAddOnBO", "GetSepartorDecimal");
+
+            SAPbobsCOM.Recordset oRSepDec = (SAPbobsCOM.Recordset)_oCompany.GetBusinessObject(SAPbobsCOM.BoObjectTypes.BoRecordset);
+
+            oRSepDec.DoQuery(sSeparador);
+
+            string SeparatorSAP = Convert.ToString(oRSepDec.Fields.Item("DecSep").Value.ToString());
+
+            liberarObjetos(oRSepDec);
+
+            return SeparatorSAP;
+
+        }
+
+
     }
 }

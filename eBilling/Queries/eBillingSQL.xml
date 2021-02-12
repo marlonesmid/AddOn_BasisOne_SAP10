@@ -20,7 +20,8 @@
 		   A."DocDueDate" AS 'Fecha_vencimiento',
 		  CASE WHEN A."U_BO_EE" = 'Y' THEN 'SI'
 			   WHEN A."U_BO_EE" = 'N' THEN 'NO'
-			   ELSE '' END  AS 'Email_Enviado',
+			   ELSE '' END  AS 'Enviar_Email',
+       CASE WHEN B.U_BO_StatusEmail = '200' THEN 'Enviado' ELSE 'Pendiente' END AS 'Estado_Correo',
 		   B.U_BO_Email1 AS 'Correo1',
 		   B.U_BO_Email2 AS 'Correo2',
 		   B.U_BO_Email3 AS 'Correo3',
@@ -56,7 +57,8 @@
           A."DocDueDate" AS 'Fecha_vencimiento',
 		  CASE WHEN A."U_BO_EE" = 'Y' THEN 'SI'
 			   WHEN A."U_BO_EE" = 'N' THEN 'NO'
-			   ELSE '' END  AS 'Email_Enviado',
+			   ELSE '' END  AS 'Enviar_Email',
+         CASE WHEN B.U_BO_StatusEmail = '200' THEN 'Enviado' ELSE 'Pendiente' END AS 'Estado_Correo',
 		  B.U_BO_Email1 AS 'Correo1',
 		  B.U_BO_Email2 AS 'Correo2',
 		  B.U_BO_Email3 AS 'Correo3',
@@ -89,7 +91,8 @@
           A."DocDueDate" AS 'Fecha_vencimiento',
 		  CASE WHEN A."U_BO_EE" = 'Y' THEN 'SI'
 			   WHEN A."U_BO_EE" = 'N' THEN 'NO'
-			   ELSE '' END  AS 'Email_Enviado',
+			   ELSE '' END  AS 'Enviar_Email',
+         CASE WHEN B.U_BO_StatusEmail = '200' THEN 'Enviado' ELSE 'Pendiente' END AS 'Estado_Correo',
 		  B.U_BO_Email1 AS 'Correo1',
 		  B.U_BO_Email2 AS 'Correo2',
 		  B.U_BO_Email3 AS 'Correo3',
