@@ -1307,6 +1307,11 @@ namespace BOProduccion
             }
         }
 
+        public void FormPO(SAPbouiCOM.Form _oFormPO)
+        {
+            _oFormPO.Title = "Servicio Externo";
+        }
+
         public void ChangePaneFolderWorkOrder(SAPbouiCOM.Form oFormWorkOrder)
         {
             SAPbouiCOM.Form _oFormWorkOrder;
@@ -3568,11 +3573,11 @@ namespace BOProduccion
 
             try
             {
-                #region Click derecho para adicionar linea en Matrix en Series numeracion
+                #region Click derecho para adicionar Servicio de teñido
 
-                if (_sboapp.Menus.Exists("AddRowMtx"))
+                if (_sboapp.Menus.Exists("AddOSM"))
                 {
-
+                   // _sboapp.Menus.RemoveEx("AddOSM");
                 }
                 else
                 {
@@ -3580,9 +3585,10 @@ namespace BOProduccion
                     oCreationPackage = ((SAPbouiCOM.MenuCreationParams)(_sboapp.CreateObject(SAPbouiCOM.BoCreatableObjectType.cot_MenuCreationParams)));
 
                     oCreationPackage.Type = SAPbouiCOM.BoMenuType.mt_STRING;
-                    oCreationPackage.UniqueID = "AddRowMtx";
-                    oCreationPackage.String = "Añadir Serie Numeración";
+                    oCreationPackage.UniqueID = "AddOSM";
+                    oCreationPackage.String = "Crear OS Maquila";
                     oCreationPackage.Enabled = true;
+                    oCreationPackage.Image = (Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().Location) + "\\BOProduction\\Images\\UpArrow.bmp");
 
                     oMenuItem = _sboapp.Menus.Item("1280"); // Data'
                     oMenus = oMenuItem.SubMenus;

@@ -104,6 +104,8 @@
 
   <ProcedureWorkOrder>
 
+
+
     CREATE PROCEDURE [dbo].[BO_OrdenesProduccion] 
 	(
 		@DocNumOPT AS NVARCHAR(100)
@@ -398,6 +400,8 @@
 			END
 
     END
+  
+  
   
   </ProcedureWorkOrder>
 

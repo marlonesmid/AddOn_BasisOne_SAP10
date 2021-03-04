@@ -231,23 +231,32 @@
 
   <GetDocEntryAndParameters>
     SELECT TOP 1 T0."DocEntry",
-            T0."Series",
-            (SELECT TOP 1 "U_BO_L" FROM "@BOEBILLINGP") AS "Localizacion",
-            T0."U_BO_CRWS" AS "CRWS",
-            COALESCE((SELECT TOP 1 "U_BO_FormE" FROM [@BOEBILLINGP]),0) AS "FormaEnvio",
-            (SELECT TOP 1 "U_BO_LlE" FROM "@BOEBILLINGP" WHERE U_BO_Status = 'Y') AS "Llave",
-            (SELECT TOP 1 "U_BO_PwdE" FROM "@BOEBILLINGP" WHERE U_BO_Status = 'Y') AS "Password",
-            (SELECT TOP 1 "U_BO_UserDB" FROM "@BOEBILLINGP") AS "UserDB",
-            (SELECT TOP 1 "U_BO_PassDB" FROM "@BOEBILLINGP") AS "PassDB",
-            (SELECT TOP 1 A."U_BO_RutaPDF" FROM "@BOEBILLINGP" A) AS "RutaPDF",
-            (SELECT TOP 1 "U_BO_RutaXML" FROM "@BOEBILLINGP") AS "RutaXML",
-            (SELECT TOP 1 A."U_BO_RutaCRL" FROM "@BOEBILLINGP" A) AS "RutaCR",
-            (SELECT TOP 1 A."U_BO_GXP" FROM "@BOEBILLINGP" A) AS "GeneraXMLP",
-            T1."U_BO_PREF" AS "PrefijoDes"
+    T0."Series",
+    (SELECT TOP 1 "U_BO_L" FROM "@BOEBILLINGP") AS "Localizacion",
+    T0."U_BO_CRWS" AS "CRWS",
+    COALESCE((SELECT TOP 1 "U_BO_FormE" FROM [@BOEBILLINGP]),0) AS "FormaEnvio",
+    (SELECT TOP 1 "U_BO_LlE" FROM "@BOEBILLINGP" WHERE U_BO_Status = 'Y') AS "Llave",
+    (SELECT TOP 1 "U_BO_PwdE" FROM "@BOEBILLINGP" WHERE U_BO_Status = 'Y') AS "Password",
+    (SELECT TOP 1 "U_BO_UserDB" FROM "@BOEBILLINGP" WHERE U_BO_Status = 'Y') AS "UserDB",
+    (SELECT TOP 1 "U_BO_PassDB" FROM "@BOEBILLINGP" WHERE U_BO_Status = 'Y') AS "PassDB",
+    (SELECT TOP 1 A."U_BO_RutaPDF" FROM "@BOEBILLINGP" A WHERE A.U_BO_Status = 'Y') AS "RutaPDF",
+    (SELECT TOP 1 "U_BO_RutaXML" FROM "@BOEBILLINGP" WHERE U_BO_Status = 'Y') AS "RutaXML",
+    (SELECT TOP 1 A."U_BO_RutaCRL" FROM "@BOEBILLINGP" A WHERE A.U_BO_Status = 'Y') AS "RutaCR",
+    (SELECT TOP 1 A."U_BO_GXP" FROM "@BOEBILLINGP" A WHERE A.U_BO_Status = 'Y') AS "GeneraXMLP",
+    T1."U_BO_PREF" AS "PrefijoDes"
 
     FROM "%Tabla%" T0 LEFT JOIN "@BOSERNUM" T1 ON T0."Series"=T1."Code"
     WHERE T0."DocNum" = '%sDocNumInvoice%' AND T0."Series" = '%sSerieNumeracion%' AND T0."DocSubType" = '%DocSubType%'
   </GetDocEntryAndParameters>
+
+  <GetDocNumAndSeries>
+    
+    SELECT "DocNum" AS "DocNum",
+           "Series" AS "Series"
+    FROM "%Table%" 
+    WHERE "DocEntry" = '%NewObjectKey%'
+    
+  </GetDocNumAndSeries>
 
   <GetDocEntryAndParametersService>
       
@@ -343,8 +352,10 @@
 
   <GetModoandURL>
     SELECT TOP 1 CASE WHEN U_BO_Mdo = 'PRU' THEN U_BO_URLWSPRU
-		   ELSE U_BO_URLWSPRD END AS 'URLTFHKA',
-		   U_BO_Mdo AS 'Modo'
+		                  ELSE U_BO_URLWSPRD END AS 'URLTFHKA',
+		                  U_BO_Mdo AS 'Modo',
+                      U_BO_MI AS 'ModoIntegracion',
+                      U_BO_PC AS 'ProtocoloComunicacion'
     FROM "@BOEBILLINGP"
     WHERE %Estado% %DocEntry%
   </GetModoandURL>

@@ -872,7 +872,7 @@ namespace BasisOne
                                 SAPbouiCOM.Form oFormInvoice;
 
                                 oFormInvoice = sboapp.Forms.GetFormByTypeAndCount(pVal.FormType, pVal.FormTypeCount);
-                                DlleBilling.EnviarDocumentoTFHKA(sboapp, _company, oFormInvoice, "FacturaDeClientes", "A");
+                                DlleBilling.EnviarDocumentoTFHKA(sboapp, _company, oFormInvoice, null, "FacturaDeClientes", "A", "ItemEvent");
 
                             }
                             else if (pVal.FormType == 133 && pVal.ItemUID == "BtnSM" && pVal.Before_Action == true)
@@ -971,8 +971,60 @@ namespace BasisOne
                                 SAPbouiCOM.Form oFormReserveInvoice;
 
                                 oFormReserveInvoice = sboapp.Forms.GetFormByTypeAndCount(pVal.FormType, pVal.FormTypeCount);
-                                DlleBilling.EnviarDocumentoTFHKA(sboapp, _company, oFormReserveInvoice, "FacturaDeClientes", "A");
+                                DlleBilling.EnviarDocumentoTFHKA(sboapp, _company, oFormReserveInvoice, null, "FacturaDeClientes", "A", "ItemEvent");
 
+                            }
+                            else if (pVal.FormType == 60091 && pVal.ItemUID == "BtnSM" && pVal.Before_Action == true)
+                            {
+                                SAPbouiCOM.Form oFormInvoice = sboapp.Forms.GetFormByTypeAndCount(pVal.FormType, pVal.FormTypeCount);
+
+                                if (oFormInvoice.Mode == BoFormMode.fm_OK_MODE)
+                                {
+
+                                    #region Consulta de documento en la base de datos
+
+                                    string sDocNumInvoice = ((SAPbouiCOM.EditText)(oFormInvoice.Items.Item("8").Specific)).Value.ToString();
+                                    SAPbouiCOM.ComboBox cbSerieNumeracion = (SAPbouiCOM.ComboBox)(oFormInvoice.Items.Item("88").Specific);
+                                    string sSerieNumeracion = cbSerieNumeracion.Selected.Value;
+
+                                    SAPbobsCOM.Recordset oConsultaDocEntry = (SAPbobsCOM.Recordset)_company.GetBusinessObject(SAPbobsCOM.BoObjectTypes.BoRecordset);
+
+                                    string sQueryDocEntryDocument = DllFunciones.GetStringXMLDocument(_company, "eBilling", "eBilling", "GetPrefijoSeries");
+                                    sQueryDocEntryDocument = sQueryDocEntryDocument.Replace("%Code%", sSerieNumeracion);
+
+                                    oConsultaDocEntry.DoQuery(sQueryDocEntryDocument);
+
+                                    sPrefijoDocNumSM = Convert.ToString(oConsultaDocEntry.Fields.Item("Prefijo").Value.ToString()) + sDocNumInvoice;
+
+                                    DllFunciones.liberarObjetos(oConsultaDocEntry);
+                                    DllFunciones.liberarObjetos(oFormInvoice);
+
+                                    #endregion
+
+                                    #region Abre Formulario enviar correo
+
+                                    try
+                                    {
+                                        string ArchivoSRF = "Send_Mail.srf";
+
+                                        DllFunciones.LoadFromXML(sboapp, "eBilling", ref ArchivoSRF);
+
+                                        SAPbouiCOM.Form oFormSM;
+                                        oFormSM = sboapp.Forms.Item("BO_SM");
+
+                                        DlleBilling.LoadFormSendMail(_company, sboapp, oFormSM, sMotor, sPrefijoDocNumSM);
+
+                                    }
+                                    catch (Exception e)
+                                    {
+
+                                        DllFunciones.sendErrorMessage(sboapp, e);
+                                    }
+
+                                    #endregion
+
+                                    DllFunciones.liberarObjetos(oFormInvoice);
+                                }
                             }
 
                             #endregion
@@ -992,7 +1044,7 @@ namespace BasisOne
                                 SAPbouiCOM.Form oFormPaymentandInvoice;
 
                                 oFormPaymentandInvoice = sboapp.Forms.GetFormByTypeAndCount(pVal.FormType, pVal.FormTypeCount);
-                                DlleBilling.EnviarDocumentoTFHKA(sboapp, _company, oFormPaymentandInvoice, "FacturaDeClientes", "A");
+                                DlleBilling.EnviarDocumentoTFHKA(sboapp, _company, oFormPaymentandInvoice, null, "FacturaDeClientes", "A", "ItemEvent");
 
                             }
 
@@ -1036,7 +1088,7 @@ namespace BasisOne
                                 SAPbouiCOM.Form oFormCreditNote;
 
                                 oFormCreditNote = sboapp.Forms.GetFormByTypeAndCount(pVal.FormType, pVal.FormTypeCount);
-                                DlleBilling.EnviarDocumentoTFHKA(sboapp, _company, oFormCreditNote, "NotaCreditoClientes", "A");
+                                DlleBilling.EnviarDocumentoTFHKA(sboapp, _company, oFormCreditNote, null, "NotaCreditoClientes", "A", "ItemEvent");
 
                             }
 
@@ -1057,7 +1109,7 @@ namespace BasisOne
                                 SAPbouiCOM.Form oFormInvoice;
 
                                 oFormInvoice = sboapp.Forms.GetFormByTypeAndCount(pVal.FormType, pVal.FormTypeCount);
-                                DlleBilling.EnviarDocumentoTFHKA(sboapp, _company, oFormInvoice, "NotaDebitoClientes", "A");
+                                DlleBilling.EnviarDocumentoTFHKA(sboapp, _company, oFormInvoice, null,  "NotaDebitoClientes", "A", "ItemEvent");
 
                             }
 
@@ -1529,6 +1581,18 @@ namespace BasisOne
                                     DllProduction.AddItemsToWorkOrder(oFormWorkOrder);
                                 }
                             }
+                            else if (pVal.FormType == 142 && pVal.EventType == SAPbouiCOM.BoEventTypes.et_FORM_LOAD && pVal.Before_Action == true)
+                            {
+                                SAPbouiCOM.Form oFormPO;
+
+                                oFormPO = sboapp.Forms.GetFormByTypeAndCount(pVal.FormType, pVal.FormTypeCount);
+
+                                DllProduction.FormPO(oFormPO);
+
+
+
+
+                            }
 
                             #endregion
                         }
@@ -1967,6 +2031,13 @@ namespace BasisOne
 
                     break;
 
+                case "AddOSM":
+
+                    sboapp.Menus.Item("2305").Activate();
+
+
+                    break;
+
                 case "mnuBO_PP":
 
                     #region Eventos en el Menu Produccion Avanzada
@@ -2103,36 +2174,46 @@ namespace BasisOne
         {
             BubbleEvent = true;
 
+            #region Eliminacion de Menus
+
+            if (sboapp.Menus.Exists("AddRowMtx"))
+            {
+                sboapp.Menus.RemoveEx("AddRowMtx");
+            }
+
+            if (sboapp.Menus.Exists("AddSM"))
+            {
+                sboapp.Menus.RemoveEx("AddSM");
+            } 
+
+            if (sboapp.Menus.Exists("AddOSM"))
+            {
+                sboapp.Menus.RemoveEx("AddOSM");
+            }
+
+            #endregion
+            
             try
             {
                 SAPbouiCOM.Form oFormActive = sboapp.Forms.ActiveForm;
 
                 if (oFormActive.UniqueID == "BO_eBillingP" && eventInfo.BeforeAction == true && oFormActive.Mode == SAPbouiCOM.BoFormMode.fm_OK_MODE)
                 {
-                    #region Eliminar menus existentes
-
-                    if (sboapp.Menus.Exists("AddRowMtx"))
-                    {
-                        sboapp.Menus.RemoveEx("AddRowMtx");
-                    }
-
-                    #endregion
-
                     DlleBilling.Right_Click(ref eventInfo, sboapp, "1");
                 }
                 else if (oFormActive.TypeEx == "133" && eventInfo.BeforeAction == true && oFormActive.Mode == SAPbouiCOM.BoFormMode.fm_OK_MODE)
-                {
-                    #region Eliminar menus existentes
-
-                    if (sboapp.Menus.Exists("AddSM"))
-                    {
-                        sboapp.Menus.RemoveEx("AddSM");
-                    }
-
-                    #endregion
-
+                { 
                     DlleBilling.Right_Click(ref eventInfo, sboapp, "2");
                 }
+
+                else if (oFormActive.TypeEx == "65211" && eventInfo.BeforeAction == true && oFormActive.Mode == SAPbouiCOM.BoFormMode.fm_OK_MODE)
+                {
+
+                    DllProduction.Right_Click(ref eventInfo, sboapp);
+                    
+                }
+
+
             }
             catch (Exception)
             {
@@ -2145,13 +2226,40 @@ namespace BasisOne
         {
             BubbleEvent = true;
 
-            if (ByRef.EventType == SAPbouiCOM.BoEventTypes.et_FORM_DATA_LOAD && ByRef.ActionSuccess == true && ByRef.FormTypeEx == "133")
+            if (TieneLicenciaeBilling == true)
             {
-                SAPbouiCOM.Form frm = sboapp.Forms.Item(ByRef.FormUID);
+                if (ByRef.EventType == SAPbouiCOM.BoEventTypes.et_FORM_DATA_LOAD && ByRef.ActionSuccess == true && ByRef.FormTypeEx == "133")
+                {
+                    SAPbouiCOM.Form frm = sboapp.Forms.Item(ByRef.FormUID);
 
-                DlleBilling.ItemsLabelStatusDIAN(frm, "DataEvent");
+                    DlleBilling.ItemsLabelStatusDIAN(frm, "DataEvent");
+                }
+                else if (ByRef.EventType == SAPbouiCOM.BoEventTypes.et_FORM_DATA_ADD && ByRef.ActionSuccess == true && ByRef.FormTypeEx == "133")
+                {
+                    SAPbouiCOM.Form frm = null;
+
+                    DlleBilling.EnviarDocumentoTFHKA(sboapp, _company, frm, ByRef,  "FacturaDeClientes", "A", "DataEvent");
+
+                }
+
+
+                else if (ByRef.EventType == SAPbouiCOM.BoEventTypes.et_FORM_DATA_LOAD && ByRef.ActionSuccess == true && ByRef.FormTypeEx == "60090")
+                {
+                    SAPbouiCOM.Form frm = sboapp.Forms.Item(ByRef.FormUID);
+
+                    DlleBilling.ItemsLabelStatusDIAN(frm, "DataEvent");
+                }
+
+                else if (ByRef.EventType == SAPbouiCOM.BoEventTypes.et_FORM_DATA_ADD && ByRef.ActionSuccess == true && ByRef.FormTypeEx == "60090")
+                {
+                    SAPbouiCOM.Form frm = null;
+
+                    DlleBilling.EnviarDocumentoTFHKA(sboapp, _company, frm, ByRef, "FacturaDeClientes", "A", "DataEvent");
+
+                }
+
+
             }
-
         }
 
 
